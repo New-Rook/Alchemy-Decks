@@ -1,0 +1,280 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* .drop-card {
+
+} */
+
+/* button {
+  padding: 0;
+  border-radius: 0;
+} */
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #5edc6f;
+  /* border-color: #646cff; */
+}
+
+/* button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+} */
+
+input[type='text'] {
+  width: 8em;
+  height: 1.5em;
+  font-size: 2em;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-gap {
+  gap: 1em;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.labelled-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.deck-preview {
+  padding: 1em;
+  border: 1px solid black;
+  border-radius: 1em;
+  width: clamp(120px, 25vw, 600px);
+  /* height: clamp(84px, 17.5vw, 420px); */
+  aspect-ratio: calc(1 / 0.7);
+}
+
+/* Layout */
+
+.top-bar {
+  background-color: rgb(54, 127, 68);
+  height: 5vh;
+  margin-bottom: 1em;
+  display: flex;
+  align-items: center;
+  padding: 1em;
+  gap: 1em;
+}
+
+.deck {
+  display: flex;
+  gap: 1em;
+  border: 2px solid black;
+  height: 800px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Deck card */
+
+.deck-card {
+  position: relative;
+  width: clamp(120px, 20vw, 600px);
+  scale: 1;
+  transition:
+    scale 0.1s,
+    position 0.5s;
+}
+
+.drag-card {
+  position: absolute;
+}
+
+.deck-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.deck-card:hover {
+  scale: 1.5;
+  z-index: 1;
+  /* width: 120%;
+  height: 120%;
+  object-fit: contain;
+  transition: scale 0.1s; */
+}
+
+.deck-card:active {
+  scale: 1;
+  z-index: 1;
+  /* width: 120%;
+  height: 120%;
+  object-fit: contain;
+  transition: scale 0.1s; */
+}
+
+
+/* .deck-card-hover {
+  scale: 1.5;
+  z-index: 1;
+} */
+
+.card-count {
+  position: absolute;
+  right: 8%;
+  top: 12%;
+  background-color: #f9f9f9;
+  font-size: 2.5em;
+  width: 1.3em;
+  height: 1.3em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card search */
+
+.card-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.card-search-result {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  height: 8vh;
+}
+
+.card-search-result-image {
+  height: 100%;
+  object-fit: contain;
+}
+
+.card-search-window {
+  --margin: 2em;
+  position: absolute;
+  z-index: 1;
+  margin: var(--margin) auto;
+  display: flex;
+  gap: 1em;
+  border: 2px solid black;
+  flex-direction: column;
+  /* width: calc(100% - calc(2 * var(--margin))); */
+  width: 95vw;
+  height: calc(100vh - calc(2 * var(--margin)));
+  align-items: center;
+  /* flex-wrap: wrap; */
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+}
+
+.search-symbol {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-width: 0;
+  background-color: transparent;
+}
+
+.search-symbol:hover {
+  background-color: transparent;
+}
+
+.search-symbol {
+  background-color: transparent;
+}
+
+.search-symbol-inactive {
+  /* filter: grayscale(100%); */
+  opacity: 50%;
+}
+
+.search-symbol>img {
+  width: 100%;
+  height: 100%;
+}
+
+.card-search-window-results {
+  display: flex;
+  gap: 1em;
+  padding: 0 2em;
+  /* height: 800px; */
+  align-items: flex-start;
+  flex-wrap: wrap;
+  overflow-y: scroll;
+}
+
+.card-count-edit-row {
+  display: flex;
+  gap: 0.5em;
+  justify-content: center;
+}
+
+.card-count-edit-row>button {
+  width: 25%;
+}
+
+.card-count-edit-row>input {
+  width: 8em;
+  height: 1.5em;
+  font-size: 2em;
+  max-width: 50%;
+  padding: 0;
+}
+
+.right-placed-item {
+  margin-left: auto;
+}
