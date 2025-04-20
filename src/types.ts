@@ -28,6 +28,8 @@ export interface BaseCardData {
   colors: Color[];
   image_uris: CardDataImageURIs;
   name: string
+  oracle_text: string
+  type_line: string
 }
 
 export interface CardData extends BaseCardData {
@@ -36,7 +38,6 @@ export interface CardData extends BaseCardData {
   id: string
   lang: string
   layout: string
-  type_line: string
   digital: boolean
   cmc: number
   color_identity: Color[]
@@ -94,6 +95,6 @@ export type Format =
   "predh"
 
 export type SortType = 'name' | 'mana-value' | 'type' | 'price-eur' | 'price-usd'
-export type CardSorter = (cardA: CardData, cardB: CardData) => number
+export type CardSorter = (cardA: CardData, cardB: CardData, invert: boolean) => number
 
 export type CurrencyType = 'eur' | 'usd'

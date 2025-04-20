@@ -3,23 +3,21 @@ import './App.css'
 import React from 'react'
 import { AppContext } from './AppContext'
 import { useBooleanState } from './useBooleanState'
-import { BaseCardData, CardData, Color, CurrencyType, Format, SortType } from './types'
-import { validateNumberWithRange } from './utilities/general'
-import { ALL_COLOR_KEYS, ALL_COLORS, COLOR_DATA, FORMATS, SORT_TYPES } from './data'
-import { CARD_SORTERS, getCardImages } from './utilities/card'
+import { CardData, Deck } from './types'
+import { getCardImages } from './utilities/card'
 import { AuthenticationForm } from './AuthenticationForm'
 import { AuthContext } from './AuthContext'
-import { setDataToDatabase } from './api/common/database'
-import { useQuery } from '@tanstack/react-query'
-import { getDecks } from './api/deck'
+import { getDataFromDatabase, setDataToDatabase } from './api/common/database'
 import { SearchWindow } from './SearchWindow'
 
+const basicLandRegex = /Basic Land/
 
 export const HomePage = () => {
     const [deckName, setDeckName] = useState('')
     const [deckCreationPopupVisible, showDeckCreationPopup, hideDeckCreationPopup] = useBooleanState()
 
-    const { decks, createDeck } = useContext(AppContext)
+    // const { decks, createDeck } = useContext(AppContext)
+    const { cardDictionary } = useContext(AppContext)
 
     const { user } = useContext(AuthContext)
 
@@ -28,11 +26,11 @@ export const HomePage = () => {
     const [currentCardOffset, setCurrentCardOffset] = React.useState([0, 0])
     const [currentCard, setCurrentCard] = React.useState('')
     const [deckCards, setDeckCards] = React.useState<Record<string, number>>({})
-    const [deckCardData, setDeckCardData] = React.useState<Record<string, CardData>>({})
+    // const [deckCardData, setDeckCardData] = React.useState<Record<string, CardData>>({})
     const [cardSearchTerm, setCardSearchTerm] = React.useState('')
     const [cardSearchResults, setCardSearchResults] = React.useState<CardData[]>([])
 
-    console.log({ currentCard })
+    // console.log({ currentCard })
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
 
@@ -75,6 +73,45 @@ export const HomePage = () => {
     //     const frontFace = cardData.card_faces[0]
     //     return frontFace
     // }
+
+    const deckStats = React.useMemo(() => {
+        let numberOfCards = 0
+        let price = 0
+        const legalities: Record<string, boolean> = {}
+
+        Object.keys(deckCards).forEach((cardName) => {
+            const cardQuantity = deckCards[cardName]
+            numberOfCards += cardQuantity
+            price += cardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
+            if (!basicLandRegex.test(cardDictionary[cardName].type_line)) {
+                Object.keys(cardDictionary[cardName].legalities).forEach(format => {
+                    if (legalities[format] === false) {
+                        return
+                    }
+
+                    const legality = cardDictionary[cardName].legalities[format]
+                    if (legality === 'legal' && ((format === 'commander' && cardQuantity <= 1) || cardQuantity <= 4)) {
+                        legalities[format] = true
+                    }
+                    else if (legality === 'restricted' && cardQuantity <= 1) {
+                        legalities[format] = true
+                    }
+                    else {
+                        legalities[format] = false
+                    }
+                })
+            }
+        })
+
+        const formats = Object.keys(legalities)
+        formats.forEach((format) => {
+            if (!legalities[format]) {
+                delete legalities[format]
+            }
+        })
+
+        return { numberOfCards, price, legalities }
+    }, [deckCards, cardDictionary])
 
     const searchCard = async () => {
         try {
@@ -142,6 +179,10 @@ export const HomePage = () => {
     }
 
     React.useEffect(() => {
+        if (searchWindowVisible) {
+            return
+        }
+
         if (!cardSearchTerm) {
             setCardSearchResults([])
             return
@@ -150,7 +191,7 @@ export const HomePage = () => {
         const timeoutID = setTimeout(searchCard, 1000)
 
         return () => clearTimeout(timeoutID)
-    }, [cardSearchTerm])
+    }, [searchWindowVisible, cardSearchTerm])
 
     const getRandomCard = async () => {
         try {
@@ -167,26 +208,37 @@ export const HomePage = () => {
             const cardData = result
             // setCardImages(prevImages => [...prevImages, cardData['image_uris'].normal])
             setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
-            setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
+            // setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
         }
         catch {
             console.log('error: no random card')
         }
     }
 
-    const save = () => {
-        setDataToDatabase('decks', 'first', {
+    const copyDeckListToClipboard = async () => {
+        const decklistString = Object.keys(deckCards).reduce(
+            (decklist, cardName) => `${decklist}${decklist === '' ? '' : '\n'}${deckCards[cardName]} ${cardName}`
+            , '')
+        await navigator.clipboard.writeText(decklistString)
+    }
+
+    const save = async () => {
+        await setDataToDatabase('decks', 'first', {
             name: deckName,
             cards: deckCards
         })
     }
 
-    const load = () => {
-
+    const load = async () => {
+        const deckData = await getDataFromDatabase('decks', 'first') as Deck
+        if (!deckData) {
+            return
+        }
+        setDeckCards(deckData.cards)
     }
 
     const confirmDeckCreation = () => {
-        createDeck(deckName)
+        // createDeck(deckName)
         hideDeckCreation()
     }
 
@@ -197,8 +249,8 @@ export const HomePage = () => {
 
     const addFromQuickSearch = (cardData: CardData) => {
         // setCardImages(prevImages => [...prevImages, cardData['image_uris'].normal])
-        setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
-        setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
+        // setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
+        // setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
         setCardSearchTerm('')
     }
 
@@ -206,9 +258,9 @@ export const HomePage = () => {
         // setCardImages(prevImages => [...prevImages, cardData['image_uris'].normal])
         if (quantity > 0) {
             setDeckCards(prev => ({ ...prev, [cardData.name]: quantity }))
-            if (!deckCardData[cardData.name]) {
-                setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
-            }
+            // if (!cardDictionary[cardData.name]) {
+            //     setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
+            // }
         } else {
             if (deckCards[cardData.name]) {
                 const newDeckCards = { ...deckCards }
@@ -216,10 +268,10 @@ export const HomePage = () => {
                 setDeckCards(newDeckCards)
             }
 
-            if (deckCardData[cardData.name]) {
-                const newDeckCardData = { ...deckCardData }
+            if (cardDictionary[cardData.name]) {
+                const newDeckCardData = { ...cardDictionary }
                 delete newDeckCardData[cardData.name]
-                setDeckCardData(newDeckCardData)
+                // setDeckCardData(newDeckCardData)
             }
         }
     }
@@ -258,7 +310,7 @@ export const HomePage = () => {
 
             // setCardImages(prevImages => [...prevImages, cardData['image_uris'].normal])
             setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
-            setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
+            // setDeckCardData(prev => ({ ...prev, [cardData.name]: cardData }))
         }
 
         if (marketPlaceMatch) {
@@ -273,7 +325,7 @@ export const HomePage = () => {
             if (!cardMarketCardData.status) {
                 // setCardImages(prevImages => [...prevImages, cardMarketCardData['image_uris'].normal])
                 setDeckCards(prev => ({ ...prev, [cardMarketCardData.name]: (deckCards[cardMarketCardData.name] ?? 0) + 1 }))
-                setDeckCardData(prev => ({ ...prev, [cardMarketCardData.name]: cardMarketCardData }))
+                // setDeckCardData(prev => ({ ...prev, [cardMarketCardData.name]: cardMarketCardData }))
                 return
             }
 
@@ -284,7 +336,7 @@ export const HomePage = () => {
             if (!tcgPlayerCardData.status) {
                 // setCardImages(prevImages => [...prevImages, tcgPlayerCardData['image_uris'].normal])
                 setDeckCards(prev => ({ ...prev, [tcgPlayerCardData.name]: (deckCards[tcgPlayerCardData.name] ?? 0) + 1 }))
-                setDeckCardData(prev => ({ ...prev, [tcgPlayerCardData.name]: tcgPlayerCardData }))
+                // setDeckCardData(prev => ({ ...prev, [tcgPlayerCardData.name]: tcgPlayerCardData }))
                 return
             }
         }
@@ -296,6 +348,7 @@ export const HomePage = () => {
             <div className='top-bar'>
                 <button onClick={showDeckCreationPopup}>+ New Deck</button>
                 <button onClick={getRandomCard}>Random card</button>
+                <button className='right-placed-item' onClick={copyDeckListToClipboard}>Copy deck list</button>
                 <button className='right-placed-item' onClick={save}>Save</button>
                 <button onClick={load}>Load</button>
                 {/* <button onClick={getBulkData}>Get bulk data</button> */}
@@ -318,27 +371,34 @@ export const HomePage = () => {
             </div>}
 
             <div className='card-search'>
-                <div>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        size={10}
-                        value={cardSearchTerm}
-                        onChange={onChangeSearchTerm}
-                    />
-                    <button onClick={showSearchWindow}>Full search</button>
+                <div className='stat-row'>
+                    <div className='flex-row'>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            size={10}
+                            value={cardSearchTerm}
+                            onChange={onChangeSearchTerm}
+                        />
+                        <button onClick={showSearchWindow}>Full search</button>
+                    </div>
+                    <div className='flex-row flex-gap'>
+                        <div>{Object.keys(deckStats.legalities).map(format => <div>{format}</div>)}</div>
+                        <div>{deckStats.numberOfCards}</div>
+                        <div>€{deckStats.price.toFixed(2)}</div>
+                    </div>
                 </div>
                 {cardSearchResults.slice(0, 5).map(cardData => <button key={cardData.name} className='card-search-result' onClick={() => addFromQuickSearch(cardData)}>
                     <img src={getCardImages(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
                 </button>)}
             </div>
-
+            {/* 
             <div>
                 {Object.entries(decks).map(([id, deck]) =>
                     <div className='deck-preview'>{deck.name}</div>
                 )}
-            </div>
+            </div> */}
 
             {searchWindowVisible && <SearchWindow searchTerm={cardSearchTerm} onChangeSearchTerm={setCardSearchTerm} back={hideSearchWindowAndCleanup} onChangeCardCount={onChangeCardCount} deckCards={deckCards} />}
 
@@ -348,27 +408,38 @@ export const HomePage = () => {
                     e.preventDefault()
                 }}
             >
-                {Object.keys(deckCards).map(cardName => <div className={`deck-card ${currentCard === cardName ? 'drag-card' : ''}`} style={currentCard === cardName ? { left: currentCardPosition[0] - currentCardOffset[0], top: currentCardPosition[1] - currentCardOffset[1] } : {}} key={cardName}
-                    onMouseDown={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect()
-                        const x = e.clientX - rect.left
-                        const y = e.clientY - rect.top
-                        // console.log(e.currentTarget.getBoundingClientRect())
-                        setCurrentCardOffset([x, y])
-                        console.log(x, y)
-                        setCurrentCard(cardName)
-                    }}
-                    onMouseUp={(() => setCurrentCard(''))}
-                    onDrag={(e) => {
-                        // console.log(e.screenX)
-                        setCurrentCardPosition([e.screenX, e.screenY])
-                    }}>
-                    <img src={getCardImages(deckCardData[cardName])?.normal} className='deck-card-image' />
-                    <div className='card-count'>x{deckCards[cardName]}</div>
+                {Object.keys(deckCards).map(cardName => <div
+                    // className={`deck-card ${currentCard === cardName ? 'drag-card' : ''}`}
+                    className={`deck-card`}
+                    // style={currentCard === cardName ? { left: currentCardPosition[0] - currentCardOffset[0], top: currentCardPosition[1] - currentCardOffset[1] } : {}} 
+                    key={cardName}
+                // onMouseDown={(e) => {
+                //     const rect = e.currentTarget.getBoundingClientRect()
+                //     const x = e.clientX - rect.left
+                //     const y = e.clientY - rect.top
+                //     // console.log(e.currentTarget.getBoundingClientRect())
+                //     setCurrentCardOffset([x, y])
+                //     console.log(x, y)
+                //     setCurrentCard(cardName)
+                // }}
+                // onMouseUp={(() => setCurrentCard(''))}
+                // onDrag={(e) => {
+                //     // console.log(e.screenX)
+                //     setCurrentCardPosition([e.screenX, e.screenY])
+                // }}
+                >
+                    <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' />
+                    <div className='card-count-container flex-column'>
+                        <div className='card-count'>x{deckCards[cardName]}</div>
+                        <div className='flex-row'>
+                            <button className='flex-button' onClick={() => onChangeCardCount(cardDictionary[cardName], (deckCards[cardName] ?? 0) - 1)}>-</button>
+                            <button className='flex-button' onClick={() => onChangeCardCount(cardDictionary[cardName], (deckCards[cardName] ?? 0) + 1)}>+</button>
+                        </div>
+                    </div>
                 </div>)}
             </div>
 
-
+            {/* <div className='bottom-bar'>€{totalPrice.toFixed(2)}</div> */}
         </div>
     )
 }
