@@ -1,5 +1,6 @@
 import React from "react"
-import { createAccount, signIn } from "./api/common/auth"
+import { createAccount, signIn } from "../api/common/auth"
+import { TextInput } from "../components/TextInput"
 
 type AuthScreen = 'login' | 'register' | 'forgot-password'
 
@@ -23,45 +24,29 @@ export const AuthenticationForm = () => {
             <button onClick={() => setExpanded(prev => !prev)}>Account</button>
             {expanded && <div>
                 {screen === 'login' && <div>
-                    <label htmlFor="name">Email</label>
-                    <input
-                        type="text"
-                        // id="email"
-                        name="email"
-                        size={10}
+                    <TextInput
+                        label="Email"
                         value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        onChangeText={setEmail}
                     />
-                    <label htmlFor="name">Password</label>
-                    <input
-                        type="text"
-                        // id="password"
-                        name="password"
-                        size={10}
+                    <TextInput
+                        label="Password"
                         value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        onChangeText={setPassword}
                     />
                     <button onClick={login}>Log in</button>
                     <button onClick={() => setScreen('register')}>Register instead</button>
                 </div>}
                 {screen === 'register' && <div>
-                    <label htmlFor="name">Email</label>
-                    <input
-                        type="text"
-                        // id="email"
-                        name="email"
-                        size={10}
+                    <TextInput
+                        label="Email"
                         value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        onChangeText={setEmail}
                     />
-                    <label htmlFor="name">Password</label>
-                    <input
-                        type="text"
-                        // id="password"
-                        name="password"
-                        size={10}
+                    <TextInput
+                        label="Password"
                         value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        onChangeText={setPassword}
                     />
                     <button onClick={register}>Register</button>
                     <button onClick={() => setScreen('login')}>Login instead</button>

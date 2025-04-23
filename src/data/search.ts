@@ -1,4 +1,4 @@
-import { Color, ColorData, Format, SortType } from "./types";
+import { Color, ColorData, Format, SortType } from "../types";
 
 export const COLOR_DATA: Record<Color, ColorData> = {
     W: {

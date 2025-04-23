@@ -20,7 +20,6 @@ export const TextInput = ({ label, value, onChangeText, validator }: Props) => {
         <input
             type="text"
             id="name"
-            name="name"
             size={10}
             value={value}
             onChange={onChange}

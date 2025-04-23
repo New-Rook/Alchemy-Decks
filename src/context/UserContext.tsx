@@ -1,11 +1,11 @@
 import React, { createContext } from "react";
-import { BaseCardData, CardData, Deck, DeckCards, Decks, Format } from "./types";
+import { BaseCardData, CardData, Deck, DeckCards, Decks, Format } from "../types";
 import { doc, getDoc, query, collection, where, getDocs } from "firebase/firestore";
-import { firestore } from "./api/common/firebase";
+import { firestore } from "../api/common/firebase";
 import { AuthContext } from "./AuthContext";
 import { useMutation, UseMutationResult, useQuery } from "@tanstack/react-query";
-import { queryClient } from "./setup";
-import { setDataToDatabase } from "./api/common/database";
+import { queryClient } from "../setup";
+import { setDataToDatabase } from "../api/common/database";
 
 type UserContextType = {
     decks: Decks
@@ -72,10 +72,6 @@ export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
 
         return fetchedDecks
     }
-
-    // React.useEffect(() => {
-
-    // }, [])
 
     return <UserContext.Provider value={{ decks, createDeck, deckMutator }}>
         {children}

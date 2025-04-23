@@ -1,8 +1,6 @@
-import './App.css'
-
-import { HomePage } from './HomePage'
-import { AppContextProvider } from './AppContext'
-import { AuthContextProvider } from './AuthContext'
+import { HomePage } from './screens/HomePage'
+import { AppContextProvider } from './context/AppContext'
+import { AuthContextProvider } from './context/AuthContext'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './setup'
 

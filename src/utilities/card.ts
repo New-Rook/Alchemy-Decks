@@ -44,7 +44,6 @@ export const sortCardsByManaValue = (cardA: CardData, cardB: CardData, invert: b
 }
 
 export const sortCardsByType = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    // const cardTypes = cardA.type_line.replace(/basic|legendary/ig, '').split(' ')
     const cardATypesMatch = cardA.type_line.match(/[\w ]+(?=—{0,1})/)
     const cardATypeLine = cardATypesMatch ? cardATypesMatch[0] : ''
     const cardATypes = cardATypeLine.split(' ')
@@ -65,7 +64,6 @@ export const sortCardsByType = (cardA: CardData, cardB: CardData, invert: boolea
 }
 
 export const sortCardsByCreatureType = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    // const cardTypes = cardA.type_line.replace(/basic|legendary/ig, '').split(' ')
     const cardACreatureTypes = cardA.type_line.split(' ')
     const lastCardAType = cardACreatureTypes[cardACreatureTypes.length - 1]
 
@@ -82,9 +80,6 @@ export const sortCardsByCreatureType = (cardA: CardData, cardB: CardData, invert
 }
 
 export const sortCardsByPriceEUR = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    // const cardAPrice = parseFloat(cardA.prices.eur ?? cardA.prices.eur_foil ?? (invert ? Infinity : 0))
-    // const cardBPrice = parseFloat(cardB.prices.eur ?? cardB.prices.eur_foil ?? (invert ? Infinity : 0))
-
     const cardAPrice = parseFloat(cardA.prices.eur) || parseFloat(cardA.prices.eur_foil) || 0
     const cardBPrice = parseFloat(cardB.prices.eur) || parseFloat(cardB.prices.eur_foil) || 0
 
@@ -98,12 +93,6 @@ export const sortCardsByPriceEUR = (cardA: CardData, cardB: CardData, invert: bo
 }
 
 export const sortCardsByPriceUSD = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    // const comparison = parseFloat(cardA.prices.usd) - parseFloat(cardB.prices.usd)
-    // return invert ? -comparison : comparison
-
-    // const cardAPrice = parseFloat(cardA.prices.usd ?? cardA.prices.usd_foil ?? (invert ? Infinity : 0))
-    // const cardBPrice = parseFloat(cardA.prices.usd ?? cardA.prices.usd_foil ?? (invert ? Infinity : 0))
-
     const cardAPrice = parseFloat(cardA.prices.usd) || parseFloat(cardA.prices.usd_foil) || 0
     const cardBPrice = parseFloat(cardB.prices.usd) || parseFloat(cardB.prices.usd_foil) || 0
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { auth } from "./api/common/firebase";
+import { auth } from "../api/common/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 
 type AuthContextType = {

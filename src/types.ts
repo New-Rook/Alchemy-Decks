@@ -19,9 +19,6 @@ export type DeckCards = Record<string, number>
 
 export type DeckVisibility = 'private' | 'link-only' | 'public'
 
-type MTGSet = {
-  name: string
-}
 export type Decks = Record<string, Deck>
 
 export interface BaseCardData {

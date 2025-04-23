@@ -1,20 +1,17 @@
 import { useContext } from 'react'
-import './App.css'
 import React from 'react'
-import { AppContext } from './AppContext'
-import { CardData, Color, CurrencyType, Format, SortType } from './types'
-import { SORT_TYPES, ALL_COLOR_KEYS, COLOR_DATA, FORMATS } from './data'
-import { CARD_SORTERS, getCardAllCardName, getCardAllOracleText, getCardImages } from './utilities/card'
-import { TextInput } from './TextInput'
-import { stringStartsAndEndsWith } from './utilities/general'
-import { useAdvancedState } from './useAdvancedState'
+import { AppContext } from '../context/AppContext'
+import { CardData, Color, CurrencyType, Format, SortType } from '../types'
+import { SORT_TYPES, ALL_COLOR_KEYS, COLOR_DATA, FORMATS } from '../data/search'
+import { CARD_SORTERS, getCardAllCardName, getCardAllOracleText, getCardImages } from '../utilities/card'
+import { TextInput } from '../components/TextInput'
+import { stringStartsAndEndsWith } from '../utilities/general'
+import { useAdvancedState } from '../hooks/useAdvancedState'
 
 type Props = {
     back: () => void
     deckCards: Record<string, number>
     onChangeCardCount: (cardData: CardData, quantity: number) => void
-    // searchTerm: string
-    // onChangeSearchTerm: (text: string) => void
 }
 
 const PAGINATION_LIMIT = 100
@@ -33,7 +30,6 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
     const [sortType, setSortType] = useAdvancedState<SortType>('mana-value', resetPageIndex)
     const [sortAscending, setSortAscending] = useAdvancedState(true, resetPageIndex)
     const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
-    // const [colorFilters, setColorFilters] = React.useState<Color[]>([])
     const [colorFilters, setColorFilters] = useAdvancedState<Color[]>([], resetPageIndex)
     const [oracleTextSearchTerm, setOracleTextSearchTerm] = useAdvancedState('', resetPageIndex)
     const [nameSearchTerm, setNameSearchTerm] = useAdvancedState('', resetPageIndex)
@@ -78,11 +74,7 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
     }, [cardDictionary, format])
 
     const searchTermNameFilteredCards = React.useMemo(() => {
-        // const trimmedSearchTerm = searchTerm.trim()
         const searchTerms = nameSearchTerm.match(searchRegex)
-        // console.log(searchTerms)
-        // console.log(results)
-        // console.log(results?.map((res) => stringStartsAndEndsWith(res, '"')))
         if (!searchTerms) {
             return legalCards
         }
@@ -95,20 +87,8 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
         })
     }, [legalCards, nameSearchTerm])
 
-    // const searchTermOracleTextFilteredCards = React.useMemo(() => {
-    //     const trimmedSearchTerm = oracleTextSearchTerm.trim()
-    //     if (!trimmedSearchTerm) {
-    //         return searchTermNameFilteredCards
-    //     }
-    //     const regex = new RegExp(trimmedSearchTerm.toLocaleLowerCase())
-    //     return searchTermNameFilteredCards.filter(card => regex.test(getCardAllOracleText(card).toLocaleLowerCase()))
-    // }, [searchTermNameFilteredCards, oracleTextSearchTerm])
-
     const searchTermOracleTextFilteredCards = React.useMemo(() => {
         const searchTerms = oracleTextSearchTerm.match(searchRegex)
-        // console.log(searchTerms)
-        // console.log(results)
-        // console.log(results?.map((res) => stringStartsAndEndsWith(res, '"')))
         if (!searchTerms) {
             return searchTermNameFilteredCards
         }
@@ -127,18 +107,8 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
 
     const sortedCards = React.useMemo(() => {
         const sorted = colorFilteredCards.toSorted((cardA, cardB) => CARD_SORTERS[sortType](cardA, cardB, !sortAscending))
-        // const sorted = colorFilteredCards.toSorted(CARD_SORTERS[sortType])
-        // return sortAscending ? sorted : sorted.toReversed()
         return sorted
     }, [colorFilteredCards, sortType, sortAscending])
-
-    // React.useEffect(() => {
-    //     return () => setSearchWindowPageIndex(0)
-    // }, [format, sortType, sortAscending, colorFilters, oracleTextSearchTerm, searchTerm])
-
-    // React.useEffect(() => {
-    //     return () => setSearchWindowPageIndex(0)
-    // }, [searchTerm])
 
     const paginatedCards = React.useMemo(() => {
         const minIndex = PAGINATION_LIMIT * searchWindowPageIndex
@@ -202,15 +172,9 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
             </div>
             <div className='card-search-window-results'>
                 {paginatedCards.map(cardData => {
-                    // console.log(cardData.prices.eur)
                     return <div className='deck-card' key={cardData.name} onClick={() => onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) + 1)} onContextMenu={(e) => { e.preventDefault(); onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) - 1) }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
                         {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name]}</div>}
-                        {/* <div className='card-count'>{cardData.prices.eur === '0.00'
-                            ? cardData.prices.eur_foil === '0.00'
-                                ? '---'
-                                : `€${cardData.prices.eur_foil}`
-                            : `€${cardData.prices.eur}`}</div> */}
                         <div className='card-count'>{getCardPriceDisplay(cardData)}</div>
                     </div>
                 }
