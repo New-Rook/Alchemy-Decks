@@ -7,28 +7,57 @@ import { SORT_TYPES, ALL_COLOR_KEYS, COLOR_DATA, FORMATS } from './data'
 import { CARD_SORTERS, getCardAllCardName, getCardAllOracleText, getCardImages } from './utilities/card'
 import { TextInput } from './TextInput'
 import { stringStartsAndEndsWith } from './utilities/general'
+import { useAdvancedState } from './useAdvancedState'
 
 type Props = {
     back: () => void
     deckCards: Record<string, number>
     onChangeCardCount: (cardData: CardData, quantity: number) => void
-    searchTerm: string
-    onChangeSearchTerm: (text: string) => void
+    // searchTerm: string
+    // onChangeSearchTerm: (text: string) => void
 }
 
 const PAGINATION_LIMIT = 100
 const searchRegex = /\w+|"[\w ]+"/g
 
-export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, onChangeSearchTerm }: Props) => {
+export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
     const { currentDeckID, cardDictionary } = useContext(AppContext)
 
     const [searchWindowPageIndex, setSearchWindowPageIndex] = React.useState(0)
-    const [format, setFormat] = React.useState<Format>('standard')
-    const [sortType, setSortType] = React.useState<SortType>('mana-value')
-    const [sortAscending, setSortAscending] = React.useState(true)
+
+    const resetPageIndex = React.useCallback(() => {
+        setSearchWindowPageIndex(0)
+    }, [])
+
+    const [format, setFormat] = useAdvancedState<Format>('standard', resetPageIndex)
+    const [sortType, setSortType] = useAdvancedState<SortType>('mana-value', resetPageIndex)
+    const [sortAscending, setSortAscending] = useAdvancedState(true, resetPageIndex)
     const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
-    const [colorFilters, setColorFilters] = React.useState<Color[]>([])
-    const [oracleTextSearchTerm, setOracleTextSearchTerm] = React.useState('')
+    // const [colorFilters, setColorFilters] = React.useState<Color[]>([])
+    const [colorFilters, setColorFilters] = useAdvancedState<Color[]>([], resetPageIndex)
+    const [oracleTextSearchTerm, setOracleTextSearchTerm] = useAdvancedState('', resetPageIndex)
+    const [nameSearchTerm, setNameSearchTerm] = useAdvancedState('', resetPageIndex)
+
+    const getCardPriceDisplay = React.useCallback((cardData: CardData) => {
+        if (currencyType === 'eur') {
+            if (cardData.prices.eur !== '0.00') {
+                return `€${cardData.prices.eur}`
+            }
+            if (cardData.prices.eur_foil !== '0.00') {
+                return `€${cardData.prices.eur_foil}`
+            }
+        }
+        else {
+            if (cardData.prices.usd !== '0.00') {
+                return `$${cardData.prices.usd}`
+            }
+            if (cardData.prices.usd_foil !== '0.00') {
+                return `$${cardData.prices.usd_foil}`
+            }
+        }
+
+        return '---'
+    }, [currencyType])
 
     const availableSortTypes = React.useMemo(() => {
         return SORT_TYPES.filter(sort => {
@@ -50,7 +79,7 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, o
 
     const searchTermNameFilteredCards = React.useMemo(() => {
         // const trimmedSearchTerm = searchTerm.trim()
-        const searchTerms = searchTerm.match(searchRegex)
+        const searchTerms = nameSearchTerm.match(searchRegex)
         // console.log(searchTerms)
         // console.log(results)
         // console.log(results?.map((res) => stringStartsAndEndsWith(res, '"')))
@@ -64,7 +93,7 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, o
                 return regex.test(cardNames)
             })
         })
-    }, [legalCards, searchTerm])
+    }, [legalCards, nameSearchTerm])
 
     // const searchTermOracleTextFilteredCards = React.useMemo(() => {
     //     const trimmedSearchTerm = oracleTextSearchTerm.trim()
@@ -103,6 +132,14 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, o
         return sorted
     }, [colorFilteredCards, sortType, sortAscending])
 
+    // React.useEffect(() => {
+    //     return () => setSearchWindowPageIndex(0)
+    // }, [format, sortType, sortAscending, colorFilters, oracleTextSearchTerm, searchTerm])
+
+    // React.useEffect(() => {
+    //     return () => setSearchWindowPageIndex(0)
+    // }, [searchTerm])
+
     const paginatedCards = React.useMemo(() => {
         const minIndex = PAGINATION_LIMIT * searchWindowPageIndex
         return sortedCards.slice(minIndex, minIndex + PAGINATION_LIMIT)
@@ -128,8 +165,8 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, o
                     id="name"
                     name="name"
                     size={10}
-                    value={searchTerm}
-                    onChangeText={onChangeSearchTerm}
+                    value={nameSearchTerm}
+                    onChangeText={setNameSearchTerm}
                 />
                 <TextInput
                     label={'Card text'}
@@ -169,7 +206,12 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, o
                     return <div className='deck-card' key={cardData.name} onClick={() => onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) + 1)} onContextMenu={(e) => { e.preventDefault(); onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) - 1) }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
                         {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name]}</div>}
-                        <div className='card-count'>€{cardData.prices.eur}</div>
+                        {/* <div className='card-count'>{cardData.prices.eur === '0.00'
+                            ? cardData.prices.eur_foil === '0.00'
+                                ? '---'
+                                : `€${cardData.prices.eur_foil}`
+                            : `€${cardData.prices.eur}`}</div> */}
+                        <div className='card-count'>{getCardPriceDisplay(cardData)}</div>
                     </div>
                 }
                 )}
@@ -177,3 +219,4 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount, searchTerm, o
         </div>
     )
 }
+

@@ -82,8 +82,11 @@ export const sortCardsByCreatureType = (cardA: CardData, cardB: CardData, invert
 }
 
 export const sortCardsByPriceEUR = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    const cardAPrice = parseFloat(cardA.prices.eur ?? cardA.prices.eur_foil ?? (invert ? Infinity : 0))
-    const cardBPrice = parseFloat(cardB.prices.eur ?? cardB.prices.eur_foil ?? (invert ? Infinity : 0))
+    // const cardAPrice = parseFloat(cardA.prices.eur ?? cardA.prices.eur_foil ?? (invert ? Infinity : 0))
+    // const cardBPrice = parseFloat(cardB.prices.eur ?? cardB.prices.eur_foil ?? (invert ? Infinity : 0))
+
+    const cardAPrice = parseFloat(cardA.prices.eur) || parseFloat(cardA.prices.eur_foil) || 0
+    const cardBPrice = parseFloat(cardB.prices.eur) || parseFloat(cardB.prices.eur_foil) || 0
 
     if (cardAPrice === cardBPrice) {
         return sortCardsByManaValue(cardA, cardB, false)
@@ -98,8 +101,11 @@ export const sortCardsByPriceUSD = (cardA: CardData, cardB: CardData, invert: bo
     // const comparison = parseFloat(cardA.prices.usd) - parseFloat(cardB.prices.usd)
     // return invert ? -comparison : comparison
 
-    const cardAPrice = parseFloat(cardA.prices.usd ?? cardA.prices.usd_foil ?? (invert ? Infinity : 0))
-    const cardBPrice = parseFloat(cardA.prices.usd ?? cardA.prices.usd_foil ?? (invert ? Infinity : 0))
+    // const cardAPrice = parseFloat(cardA.prices.usd ?? cardA.prices.usd_foil ?? (invert ? Infinity : 0))
+    // const cardBPrice = parseFloat(cardA.prices.usd ?? cardA.prices.usd_foil ?? (invert ? Infinity : 0))
+
+    const cardAPrice = parseFloat(cardA.prices.usd) || parseFloat(cardA.prices.usd_foil) || 0
+    const cardBPrice = parseFloat(cardB.prices.usd) || parseFloat(cardB.prices.usd_foil) || 0
 
     if (cardAPrice === cardBPrice) {
         return sortCardsByManaValue(cardA, cardB, false)

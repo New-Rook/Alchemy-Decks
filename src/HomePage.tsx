@@ -384,7 +384,7 @@ export const HomePage = () => {
                         <button onClick={showSearchWindow}>Full search</button>
                     </div>
                     <div className='flex-row flex-gap'>
-                        <div>{Object.keys(deckStats.legalities).map(format => <div>{format}</div>)}</div>
+                        <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div>
                         <div>{deckStats.numberOfCards}</div>
                         <div>€{deckStats.price.toFixed(2)}</div>
                     </div>
@@ -400,7 +400,7 @@ export const HomePage = () => {
                 )}
             </div> */}
 
-            {searchWindowVisible && <SearchWindow searchTerm={cardSearchTerm} onChangeSearchTerm={setCardSearchTerm} back={hideSearchWindowAndCleanup} onChangeCardCount={onChangeCardCount} deckCards={deckCards} />}
+            {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} onChangeCardCount={onChangeCardCount} deckCards={deckCards} />}
 
             <div className='deck'
                 onDrop={dropCardFromOutside}

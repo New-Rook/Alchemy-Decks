@@ -49,6 +49,7 @@ export interface CardData extends BaseCardData {
     usd_foil: string
     usd_etched: string
   }
+  released_at: string
 }
 
 type Legality = 'legal' | 'restricted' | 'not_legal'
