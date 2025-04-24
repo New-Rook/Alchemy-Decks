@@ -175,10 +175,9 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
                     return <div className='deck-card' key={cardData.name} onClick={() => onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) + 1)} onContextMenu={(e) => { e.preventDefault(); onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) - 1) }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
                         {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name]}</div>}
-                        <div className='card-count'>{getCardPriceDisplay(cardData)}</div>
+                        {/* <div className='card-count'>{getCardPriceDisplay(cardData)}</div> */}
                     </div>
-                }
-                )}
+                })}
             </div>
         </div>
     )

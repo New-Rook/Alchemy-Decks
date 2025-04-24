@@ -2,9 +2,10 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
     onChangeText: (text: string) => void
     validator?: (text: string) => boolean
+    password?: boolean
 }
 
-export const TextInput = ({ label, value, onChangeText, validator }: Props) => {
+export const TextInput = ({ label, onChangeText, validator, password, ...props }: Props) => {
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const text = e.target.value
 
@@ -18,10 +19,10 @@ export const TextInput = ({ label, value, onChangeText, validator }: Props) => {
     return <div className="flex-column">
         {label}
         <input
-            type="text"
+            {...props}
+            type={password ? 'password' : 'text'}
             id="name"
             size={10}
-            value={value}
             onChange={onChange}
         />
     </div>

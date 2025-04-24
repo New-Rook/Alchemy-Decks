@@ -50,6 +50,12 @@ input[type='text'] {
   font-size: 2em;
 }
 
+input[type='password'] {
+  width: 8em;
+  height: 1.5em;
+  font-size: 2em;
+}
+
 .layout {
   display: flex;
   flex-direction: column;
