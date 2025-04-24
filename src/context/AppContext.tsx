@@ -52,7 +52,7 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
             setCardDictionary(cardDict)
         }
 
-        getBulkData()
+        setTimeout(getBulkData, 1000)
     }, [])
 
     return <AppContext.Provider value={{ currentDeckID, cardDictionary }}>
