@@ -4,7 +4,10 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { createAccount, sendForgotPasswordEmail, signIn } from "../api/common/auth";
 import { useNavigate } from "react-router";
 
+type AuthStatus = 'pending' | 'guest' | 'authenticated'
+
 type AuthContextType = {
+    authStatus: AuthStatus
     user: User | null
     login: (email: string, password: string) => Promise<{ message?: string }>
     register: (email: string, password: string) => Promise<{ message?: string }>
@@ -21,13 +24,16 @@ const REGISTER_INVALID_CREDENTIALS_MESSAGE = 'Please enter a valid email address
 
 export const AuthContextProvider = ({ children }: React.PropsWithChildren) => {
     const [user, setUser] = React.useState<User | null>(null)
+    const [authStatus, setAuthStatus] = React.useState<AuthStatus>('pending')
     const navigate = useNavigate()
 
     React.useEffect(() => {
         const unsubscribeObserver = onAuthStateChanged(auth, (userData) => {
             if (!userData) {
+                setAuthStatus('guest')
                 console.log('signed out')
             } else {
+                setAuthStatus('authenticated')
                 console.log('signed in')
             }
             setUser(userData)
@@ -98,7 +104,7 @@ export const AuthContextProvider = ({ children }: React.PropsWithChildren) => {
         return { message: undefined }
     }
 
-    return <AuthContext.Provider value={{ user, login, register, forgotPassword }}>
+    return <AuthContext.Provider value={{ authStatus, user, login, register, forgotPassword }}>
         {children}
     </AuthContext.Provider>
 }

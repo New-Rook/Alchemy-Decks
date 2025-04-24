@@ -21,7 +21,6 @@ export const TextInput = ({ label, onChangeText, validator, password, ...props }
         <input
             {...props}
             type={password ? 'password' : 'text'}
-            id="name"
             size={10}
             onChange={onChange}
         />
