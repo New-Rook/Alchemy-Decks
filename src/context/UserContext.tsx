@@ -1,57 +1,76 @@
 import React, { createContext } from "react";
-import { BaseCardData, CardData, Deck, DeckCards, Decks, Format } from "../types";
+import { BaseCardData, CardData, Deck, DeckCards, Decks, Format, UserData } from "../types";
 import { doc, getDoc, query, collection, where, getDocs } from "firebase/firestore";
 import { firestore } from "../api/common/firebase";
 import { AuthContext } from "./AuthContext";
 import { useMutation, UseMutationResult, useQuery } from "@tanstack/react-query";
 import { queryClient } from "../setup";
 import { setDataToDatabase } from "../api/common/database";
+import { getInitialUserData } from "../data/user";
 
 type UserContextType = {
-    decks: Decks
-    createDeck: (name: string, format: Format) => void
-    deckMutator: UseMutationResult<Record<string, Deck>, Error, void, unknown>
+    userData: UserData | null
+    // decks: Decks
+    // createDeck: (name: string, format: Format) => void
+    // deckMutator: UseMutationResult<Record<string, Deck>, Error, void, unknown>
 }
 
 export const UserContext = createContext<UserContextType>({} as UserContextType)
 
 export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
-    // const [decks, setDecks] = React.useState<Decks>(new Map())
-    const { user } = React.useContext(AuthContext)
+    const { authStatus, user } = React.useContext(AuthContext)
+    const [userData, setUserData] = React.useState<UserContextType['userData']>(null)
 
-    const { data: decks, status, isFetching } = useQuery({
-        queryKey: ['decks'],
-        queryFn: () => getDecks(),
-        initialData: {}
-    })
-
-    const saveDeck = async (id: string, name: string, format: Format, deckCards: DeckCards) => {
-        await setDataToDatabase('decks', id, {
-            name,
-            cards: deckCards,
-            format
-        })
-
-        return true
-    }
-
-    const deckMutator = useMutation({
-        mutationFn: saveDeck,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['decks'] })
+    const getUserData = React.useCallback(async () => {
+        console.log('hi get', user)
+        if (!user) {
+            console.log('what')
+            return null
         }
-    })
 
-    const createDeck = (name: string, format: Format, deckCards: DeckCards) => {
-        const id = crypto.randomUUID()
-        saveDeck(id, name, format, deckCards)
-    }
+        console.log('here 0')
+        const docRef = doc(firestore, "users", user.uid)
+        const docSnap = await getDoc(docRef);
+        console.log('here 1')
+        if (docSnap.exists()) {
+            console.log('here 2')
+            console.log("Document data:", docSnap.data());
+            const data = docSnap.data() as UserData
+            return data
+        } else {
+            console.log('here 3')
+            console.log("User data not found, setting initial data");
+            const initialData = getInitialUserData(user.uid)
+            await setDataToDatabase('users', user.uid, initialData)
+            return null
+        }
+    }, [user])
 
+    // const { data: userData, status, isFetching, refetch: refetchUserData } = useQuery({
+    //     queryKey: ['user'],
+    //     queryFn: getUserData,
+    //     initialData: null,
+    //     enabled: false
+    // })
 
+    React.useEffect(() => {
+        console.log('hi a')
+        if (authStatus !== 'authenticated') {
+            return
+        }
+        console.log('hi true')
+
+        const userData = getUserData().then((data) => {
+            setUserData(data)
+        }).catch(() => {
+            console.log('error fetching user data')
+        })
+        // refetchUserData()
+    }, [authStatus])
 
     const getDecks = async () => {
-        const docRef = doc(firestore, "decks", "")
-        const docSnap = await getDoc(docRef);
+        // const docRef = doc(firestore, "decks", "")
+        // const docSnap = await getDoc(docRef);
         const q = query(collection(firestore, 'decks'), where('ownerID', '==', ''))
 
         const querySnapshot = await getDocs(q);
@@ -64,16 +83,31 @@ export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
             fetchedDecks[doc.id] = doc.data() as Deck
         })
 
-        if (docSnap.exists()) {
-            console.log("Document data:", docSnap.data());
-        } else {
-            console.log("No such document!");
-        }
+        // if (docSnap.exists()) {
+        //     console.log("Document data:", docSnap.data());
+        // } else {
+        //     console.log("No such document!");
+        // }
 
         return fetchedDecks
     }
 
-    return <UserContext.Provider value={{ decks, createDeck, deckMutator }}>
+    const createDeck = (name: string, format: Format, deckCards: DeckCards) => {
+        const id = crypto.randomUUID()
+        saveDeck(id, name, format, deckCards)
+    }
+
+    const saveDeck = async (id: string, name: string, format: Format, deckCards: DeckCards) => {
+        await setDataToDatabase('decks', id, {
+            name,
+            cards: deckCards,
+            format
+        })
+
+        return true
+    }
+
+    return <UserContext.Provider value={{ userData }}>
         {children}
     </UserContext.Provider>
 }

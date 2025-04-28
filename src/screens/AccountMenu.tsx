@@ -33,6 +33,6 @@ export const AccountMenu = () => {
         return <NavButton to={'/login'} className="right-nav">Login</NavButton>
     }
 
-    return <LoadingWheel />
+    return <LoadingWheel className="right-nav" />
 
 }

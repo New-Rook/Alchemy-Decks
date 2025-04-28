@@ -1,20 +1,33 @@
-export type Deck = {
-  name: string
-  cards: DeckCards
-  format: Format
+export type UserData = {
+  id: string
+  settings: {}
 }
 
 // export type Deck = {
 //   name: string
-//   cards: {
-//     mainboard: DeckCards
-//     sideboard: DeckCards
-//     considering: DeckCards
-//   }
+//   cards: DeckCards
 //   format: Format
-//   visibility: DeckVisibility
 // }
 
+export type Deck = {
+  authorID: string
+  name: string
+  cards: DeckCards
+  // cards: {
+  //   mainboard: DeckCards
+  //   sideboard: DeckCards
+  //   considering: DeckCards
+  // }
+  format: Format
+  visibility: DeckVisibility
+}
+
+export type DeckCard = {
+  quantity: number
+  categories: string[] // Empty array means untagged
+  set?: string // Set name
+  useFromCollection?: boolean
+}
 export type DeckCards = Record<string, number>
 
 export type DeckVisibility = 'private' | 'link-only' | 'public'
@@ -96,3 +109,6 @@ export type SortType = 'name' | 'mana-value' | 'type' | 'price-eur' | 'price-usd
 export type CardSorter = (cardA: CardData, cardB: CardData, invert: boolean) => number
 
 export type CurrencyType = 'eur' | 'usd'
+
+export type GroupBy = 'mana-value' | 'type' | 'sub-type' | 'color'
+export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'

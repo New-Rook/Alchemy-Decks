@@ -2,12 +2,12 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { CardData, Deck } from '../types'
+import { CardData, Deck, GroupBy, ViewType } from '../types'
 import { getCardImages } from '../utilities/card'
-import { LoginPage } from './LoginPage'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
 import { SearchWindow } from './SearchWindow'
+import { DeckPageTopBar } from './DeckPage/DeckPageTopBar'
 
 const basicLandRegex = /Basic Land/
 
@@ -25,6 +25,9 @@ export const DeckPage = () => {
     const [currentCardOffset, setCurrentCardOffset] = React.useState([0, 0])
     const [currentCard, setCurrentCard] = React.useState('')
     const [deckCards, setDeckCards] = React.useState<Record<string, number>>({})
+    const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
+    const [viewType, setViewType] = React.useState<ViewType>('grid')
+    const [topBarPinned, setTopBarPinned] = React.useState(false)
     const [cardSearchTerm, setCardSearchTerm] = React.useState('')
     const [cardSearchResults, setCardSearchResults] = React.useState<CardData[]>([])
 
@@ -79,40 +82,6 @@ export const DeckPage = () => {
         return { numberOfCards, price, legalities }
     }, [deckCards, cardDictionary])
 
-    const searchCard = async () => {
-        try {
-            const params = new URLSearchParams([['q', cardSearchTerm]]);
-            const requestResult = await fetch(`https://api.scryfall.com/cards/search?${params}`)
-            const result = await requestResult.json()
-            const cards: CardData[] = result.data
-            const data = cards.filter(cardData => !cardData.digital)
-            console.log(data)
-            setCardSearchResults(data)
-        }
-        catch (err) {
-            console.log('error: no results')
-        }
-    }
-
-    const onChangeSearchTerm = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCardSearchTerm(e.target.value)
-    }
-
-    React.useEffect(() => {
-        if (searchWindowVisible) {
-            return
-        }
-
-        if (!cardSearchTerm) {
-            setCardSearchResults([])
-            return
-        }
-
-        const timeoutID = setTimeout(searchCard, 1000)
-
-        return () => clearTimeout(timeoutID)
-    }, [searchWindowVisible, cardSearchTerm])
-
     const getRandomCard = async () => {
         try {
             const params = new URLSearchParams([['q', 'niv mizzet']]);
@@ -128,6 +97,40 @@ export const DeckPage = () => {
             console.log('error: no random card')
         }
     }
+
+    const searchCard = async () => {
+        try {
+            const params = new URLSearchParams([['q', cardSearchTerm]]);
+            const requestResult = await fetch(`https://api.scryfall.com/cards/search?${params}`)
+            const result = await requestResult.json()
+            const cards: CardData[] = result.data
+            const data = cards.filter(cardData => !cardData.digital)
+            console.log(data)
+            setCardSearchResults(data)
+        }
+        catch (err) {
+            console.log('error: no results')
+        }
+    }
+
+    // const onChangeSearchTerm = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     setCardSearchTerm(e.target.value)
+    // }
+
+    React.useEffect(() => {
+        if (searchWindowVisible) {
+            return
+        }
+
+        if (!cardSearchTerm) {
+            setCardSearchResults([])
+            return
+        }
+
+        const timeoutID = setTimeout(searchCard, 1000)
+
+        return () => clearTimeout(timeoutID)
+    }, [searchWindowVisible, cardSearchTerm])
 
     const copyDeckListToClipboard = async () => {
         const decklistString = Object.keys(deckCards).reduce(
@@ -255,29 +258,16 @@ export const DeckPage = () => {
                 <button onClick={confirmDeckCreation}>Confirm</button>
             </div>}
 
-            <div className='card-search'>
-                <div className='stat-row'>
-                    <div className='flex-row'>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            size={10}
-                            value={cardSearchTerm}
-                            onChange={onChangeSearchTerm}
-                        />
-                        <button onClick={showSearchWindow}>Full search</button>
-                    </div>
-                    <div className='flex-row flex-gap'>
-                        <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div>
-                        <div>{deckStats.numberOfCards}</div>
-                        <div>€{deckStats.price.toFixed(2)}</div>
-                    </div>
-                </div>
-                {cardSearchResults.slice(0, 5).map(cardData => <button key={cardData.name} className='card-search-result' onClick={() => addFromQuickSearch(cardData)}>
-                    <img src={getCardImages(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
-                </button>)}
-            </div>
+            <DeckPageTopBar
+                cardSearchTerm={cardSearchTerm}
+                setCardSearchTerm={setCardSearchTerm}
+                cardSearchResults={cardSearchResults}
+                showSearchWindow={showSearchWindow}
+                deckStats={deckStats}
+                addFromQuickSearch={addFromQuickSearch}
+                pinned={topBarPinned}
+                setPinned={setTopBarPinned}
+            />
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} onChangeCardCount={onChangeCardCount} deckCards={deckCards} />}
 

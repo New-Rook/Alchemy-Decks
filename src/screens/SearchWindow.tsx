@@ -14,7 +14,7 @@ type Props = {
     onChangeCardCount: (cardData: CardData, quantity: number) => void
 }
 
-const PAGINATION_LIMIT = 100
+const PAGINATION_LIMIT = 40
 const searchRegex = /\w+|"[\w ]+"/g
 
 export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
@@ -171,11 +171,11 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex + 1)} disabled={searchWindowPageIndex === maxPaginationIndex}>{'>'}</button>
             </div>
             <div className='card-search-window-results'>
-                {paginatedCards.map(cardData => {
-                    return <div className='deck-card' key={cardData.name} onClick={() => onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) + 1)} onContextMenu={(e) => { e.preventDefault(); onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) - 1) }}>
+                {paginatedCards.map((cardData, index) => {
+                    return <div className='deck-card' key={index} onClick={() => onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) + 1)} onContextMenu={(e) => { e.preventDefault(); onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) - 1) }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
                         {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name]}</div>}
-                        {/* <div className='card-count'>{getCardPriceDisplay(cardData)}</div> */}
+                        <div className='card-count'>{getCardPriceDisplay(cardData)}</div>
                     </div>
                 })}
             </div>

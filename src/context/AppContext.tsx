@@ -30,7 +30,7 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
             const downloadRequest = await fetch(result.download_uri)
             const cardData: CardData[] = await downloadRequest.json()
 
-            console.log(cardData.length)
+            console.log('Fetched cards data')
 
             const cardDict = cardData.reduce<Record<string, CardData>>((dict, card) => {
                 if (Object.values(card.legalities).every(legality => legality === 'not_legal')) {

@@ -209,6 +209,13 @@ input[type='password'] {
   gap: 0.5em;
 }
 
+.top-bar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white
+}
+
 .card-search-result {
   display: flex;
   align-items: center;
