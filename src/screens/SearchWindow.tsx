@@ -1,23 +1,24 @@
 import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
-import { CardData, Color, CurrencyType, Format, SortType } from '../types'
+import { CardData, Color, CurrencyType, DeckCards, Format, SortType } from '../types'
 import { SORT_TYPES, ALL_COLOR_KEYS, COLOR_DATA, FORMATS } from '../data/search'
-import { CARD_SORTERS, getCardAllCardName, getCardAllOracleText, getCardImages } from '../utilities/card'
+import { getCardAllCardName, getCardAllOracleText, getCardImages } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
 import { stringStartsAndEndsWith } from '../utilities/general'
 import { useAdvancedState } from '../hooks/useAdvancedState'
+import { CARD_SORTERS } from '../utilities/sorters'
 
 type Props = {
     back: () => void
-    deckCards: Record<string, number>
-    onChangeCardCount: (cardData: CardData, quantity: number) => void
+    deckCards: DeckCards
+    addDeckCardQuantity: (cardName: string, quantity: number) => void
 }
 
 const PAGINATION_LIMIT = 40
 const searchRegex = /\w+|"[\w ]+"/g
 
-export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
+export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) => {
     const { currentDeckID, cardDictionary } = useContext(AppContext)
 
     const [searchWindowPageIndex, setSearchWindowPageIndex] = React.useState(0)
@@ -172,9 +173,11 @@ export const SearchWindow = ({ back, deckCards, onChangeCardCount }: Props) => {
             </div>
             <div className='card-search-window-results'>
                 {paginatedCards.map((cardData, index) => {
-                    return <div className='deck-card' key={index} onClick={() => onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) + 1)} onContextMenu={(e) => { e.preventDefault(); onChangeCardCount(cardData, (deckCards[cardData.name] ?? 0) - 1) }}>
+                    return <div className='deck-card' key={index}
+                        onClick={() => addDeckCardQuantity(cardData.name, 1)}
+                        onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1) }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
-                        {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name]}</div>}
+                        {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].quantity}</div>}
                         <div className='card-count'>{getCardPriceDisplay(cardData)}</div>
                     </div>
                 })}

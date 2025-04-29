@@ -2,12 +2,14 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { CardData, Deck, GroupBy, ViewType } from '../types'
+import { CardData, Deck, DeckCard, GroupBy, ViewType } from '../types'
 import { getCardImages } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
 import { SearchWindow } from './SearchWindow'
 import { DeckPageTopBar } from './DeckPage/DeckPageTopBar'
+import { useObjectRecordState } from '../hooks/useObjectRecordState'
+import { CardGroup } from './DeckPage/CardGroup'
 
 const basicLandRegex = /Basic Land/
 
@@ -24,7 +26,14 @@ export const DeckPage = () => {
     const [currentCardPosition, setCurrentCardPosition] = React.useState([0, 0])
     const [currentCardOffset, setCurrentCardOffset] = React.useState([0, 0])
     const [currentCard, setCurrentCard] = React.useState('')
-    const [deckCards, setDeckCards] = React.useState<Record<string, number>>({})
+    // const [deckCards, setDeckCards] = React.useState<Record<string, DeckCard>>({})
+    // const [deckCards, setDeckCards, updateDeckCard, deleteDeckCard] = useObjectRecordState<string, DeckCard>({})
+    const {
+        objectRecord: deckCards,
+        setObjectRecord: setDeckCards,
+        updateObjectProperty: updateDeckCard,
+        deleteObject: deleteDeckCard
+    } = useObjectRecordState<string, DeckCard>({})
     const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
     const [viewType, setViewType] = React.useState<ViewType>('grid')
     const [topBarPinned, setTopBarPinned] = React.useState(false)
@@ -49,7 +58,7 @@ export const DeckPage = () => {
         const legalities: Record<string, boolean> = {}
 
         Object.keys(deckCards).forEach((cardName) => {
-            const cardQuantity = deckCards[cardName]
+            const cardQuantity = deckCards[cardName].quantity
             numberOfCards += cardQuantity
             price += cardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
             if (!basicLandRegex.test(cardDictionary[cardName].type_line)) {
@@ -82,6 +91,17 @@ export const DeckPage = () => {
         return { numberOfCards, price, legalities }
     }, [deckCards, cardDictionary])
 
+    const addDeckCardQuantity = React.useCallback((cardName: string, quantity: number) => {
+        const newQuantity = Math.max((deckCards[cardName]?.quantity ?? 0) + quantity, 0)
+
+        if (newQuantity === 0) {
+            deleteDeckCard(cardName)
+        }
+        else {
+            updateDeckCard(cardName, 'quantity', newQuantity)
+        }
+    }, [deckCards, updateDeckCard, deleteDeckCard])
+
     const getRandomCard = async () => {
         try {
             const params = new URLSearchParams([['q', 'niv mizzet']]);
@@ -91,7 +111,14 @@ export const DeckPage = () => {
                 return
             }
             const cardData = result
-            setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
+            addDeckCardQuantity(cardData.name, 1)
+            // setDeckCards(prev => ({
+            //     ...prev, [cardData.name]:
+            //     {
+            //         ...deckCards[cardData.name],
+            //         quantity: (deckCards[cardData.name].quantity ?? 0) + 1
+            //     }
+            // }))
         }
         catch {
             console.log('error: no random card')
@@ -132,13 +159,6 @@ export const DeckPage = () => {
         return () => clearTimeout(timeoutID)
     }, [searchWindowVisible, cardSearchTerm])
 
-    const copyDeckListToClipboard = async () => {
-        const decklistString = Object.keys(deckCards).reduce(
-            (decklist, cardName) => `${decklist}${decklist === '' ? '' : '\n'}${deckCards[cardName]} ${cardName}`
-            , '')
-        await navigator.clipboard.writeText(decklistString)
-    }
-
     const save = async () => {
         await setDataToDatabase('decks', 'first', {
             name: deckName,
@@ -165,19 +185,19 @@ export const DeckPage = () => {
     }
 
     const addFromQuickSearch = (cardData: CardData) => {
-        setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
+        addDeckCardQuantity(cardData.name, 1)
         setCardSearchTerm('')
     }
 
-    const onChangeCardCount = (cardData: CardData, quantity: number) => {
-        if (quantity > 0) {
-            setDeckCards(prev => ({ ...prev, [cardData.name]: quantity }))
-        } else if (deckCards[cardData.name]) {
-            const newDeckCards = { ...deckCards }
-            delete newDeckCards[cardData.name]
-            setDeckCards(newDeckCards)
-        }
-    }
+    // const onChangeCardCount = (cardData: CardData, quantity: number) => {
+    //     if (quantity > 0) {
+    //         setDeckCards(prev => ({ ...prev, [cardData.name]: quantity }))
+    //     } else if (deckCards[cardData.name]) {
+    //         const newDeckCards = { ...deckCards }
+    //         delete newDeckCards[cardData.name]
+    //         setDeckCards(newDeckCards)
+    //     }
+    // }
 
     const dropCardFromOutside = async (e: React.DragEvent<HTMLDivElement>) => {
         setCardSearchTerm('')
@@ -207,7 +227,8 @@ export const DeckPage = () => {
                 return
             }
 
-            setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
+            // setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
+            addDeckCardQuantity(cardData.name, 1)
         }
 
         if (marketPlaceMatch) {
@@ -218,7 +239,8 @@ export const DeckPage = () => {
             const cardMarketResult = await cardMarketRequestResult.json()
             const cardMarketCardData = cardMarketResult
             if (!cardMarketCardData.status) {
-                setDeckCards(prev => ({ ...prev, [cardMarketCardData.name]: (deckCards[cardMarketCardData.name] ?? 0) + 1 }))
+                // setDeckCards(prev => ({ ...prev, [cardMarketCardData.name]: (deckCards[cardMarketCardData.name] ?? 0) + 1 }))
+                addDeckCardQuantity(cardMarketCardData.name, 1)
                 return
             }
 
@@ -226,23 +248,46 @@ export const DeckPage = () => {
             const tcgPlayerResult = await tcgPlayerRequestResult.json()
             const tcgPlayerCardData = tcgPlayerResult
             if (!tcgPlayerCardData.status) {
-                setDeckCards(prev => ({ ...prev, [tcgPlayerCardData.name]: (deckCards[tcgPlayerCardData.name] ?? 0) + 1 }))
+                // setDeckCards(prev => ({ ...prev, [tcgPlayerCardData.name]: (deckCards[tcgPlayerCardData.name] ?? 0) + 1 }))
+                addDeckCardQuantity(tcgPlayerCardData.name, 1)
                 return
             }
         }
     }
 
+    const cardGroups = React.useMemo(() => {
+        if (!groupBy) {
+            return { 'All cards': Object.keys(deckCards) }
+        }
+
+        const groups: Record<string, string[]> = {}
+
+        if (groupBy === 'category') {
+            // const categoryGroups: Record<string, string[]> = {}
+            Object.keys(deckCards).forEach(cardName => {
+                deckCards[cardName].categories.forEach(category => {
+                    if (!groups[category]) {
+                        groups[category] = []
+                    }
+                    groups[category].push(cardName)
+                })
+            })
+        }
+
+        return groups
+    }, [deckCards, groupBy])
+
     return (
         <div className='layout'>
-            <div className='top-bar'>
+            {/* <div className='top-bar'>
                 <button onClick={showDeckCreationPopup}>+ New Deck</button>
                 <button onClick={getRandomCard}>Random card</button>
                 <button className='right-placed-item' onClick={copyDeckListToClipboard}>Copy deck list</button>
                 <button className='right-placed-item' onClick={save}>Save</button>
                 <button onClick={load}>Load</button>
-            </div>
+            </div> */}
 
-            {deckCreationPopupVisible && <div>
+            {/* {deckCreationPopupVisible && <div>
                 <div className='labelled-input'>
                     <label htmlFor="name">Name (4 to 8 characters):</label>
                     <input
@@ -256,7 +301,7 @@ export const DeckPage = () => {
                 </div>
                 <button onClick={hideDeckCreation}>Cancel</button>
                 <button onClick={confirmDeckCreation}>Confirm</button>
-            </div>}
+            </div>} */}
 
             <DeckPageTopBar
                 cardSearchTerm={cardSearchTerm}
@@ -264,12 +309,13 @@ export const DeckPage = () => {
                 cardSearchResults={cardSearchResults}
                 showSearchWindow={showSearchWindow}
                 deckStats={deckStats}
+                deckCards={deckCards}
                 addFromQuickSearch={addFromQuickSearch}
                 pinned={topBarPinned}
                 setPinned={setTopBarPinned}
             />
 
-            {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} onChangeCardCount={onChangeCardCount} deckCards={deckCards} />}
+            {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
 
             <div className='deck'
                 onDrop={dropCardFromOutside}
@@ -277,16 +323,20 @@ export const DeckPage = () => {
                     e.preventDefault()
                 }}
             >
-                {Object.keys(deckCards).map(cardName => <div className={`deck-card`} key={cardName}>
+                {Object.keys(cardGroups).map(groupName =>
+                    <CardGroup groupName={groupName} cardNames={cardGroups[groupName]} deckCards={deckCards} addDeckCardQuantity={addDeckCardQuantity} />
+                )}
+
+                {/* {Object.keys(deckCards).map(cardName => <div className={`deck-card`} key={cardName}>
                     <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' />
                     <div className='card-count-container flex-column'>
-                        <div className='card-count'>x{deckCards[cardName]}</div>
+                        <div className='card-count'>x{deckCards[cardName].quantity}</div>
                         <div className='flex-row'>
-                            <button className='flex-button' onClick={() => onChangeCardCount(cardDictionary[cardName], (deckCards[cardName] ?? 0) - 1)}>-</button>
-                            <button className='flex-button' onClick={() => onChangeCardCount(cardDictionary[cardName], (deckCards[cardName] ?? 0) + 1)}>+</button>
+                            <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, -1)}>-</button>
+                            <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, 1)}>+</button>
                         </div>
                     </div>
-                </div>)}
+                </div>)} */}
             </div>
 
             {/* <div className='bottom-bar'>€{totalPrice.toFixed(2)}</div> */}

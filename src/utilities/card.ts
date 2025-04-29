@@ -1,4 +1,5 @@
-import { CardData, CardSorter, SortType } from "../types";
+import { COLOR_ORDER_PRIORITY, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY, MULTICOLOR_ORDER_PRIORITY } from "../data/search";
+import { CardData } from "../types";
 
 export const getCardBaseData = (card: CardData) => {
     if (card.card_faces) {
@@ -28,87 +29,41 @@ export const getCardImages = (card: CardData) => {
     return getCardBaseData(card).image_uris
 }
 
-export const sortCardsByName = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    const comparison = cardA.name.localeCompare(cardB.name)
-    return invert ? -comparison : comparison
+export const getLastCardType = (cardData: CardData) => {
+    const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
+    const cardTypeLine = cardTypesMatch ? cardTypesMatch[0] : ''
+    const cardTypes = cardTypeLine.split(' ')
+    const lastCardType = cardTypes ? cardTypes[cardTypes.length - 1] : ''
+    return lastCardType
 }
 
-export const sortCardsByManaValue = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    if (cardA.cmc === cardB.cmc) {
-        return sortCardsByName(cardA, cardB, false)
+export const getCardTypes = (cardData: CardData) => {
+    const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
+    const cardTypeLine = cardTypesMatch ? cardTypesMatch[0] : ''
+    const cardTypes = cardTypeLine.split(' ')
+    return cardTypes
+}
+
+export const getCardSubTypes = (cardData: CardData) => {
+    const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
+    const cardTypeLine = cardTypesMatch ? (cardTypesMatch[1] ?? '') : ''
+    const cardTypes = cardTypeLine.split(' ')
+    return cardTypes
+}
+
+export const getCardColorPriority = (cardData: CardData) => {
+    if (!cardData.colors) {
+        return 0
     }
 
-    const comparison = cardA.cmc - cardB.cmc
-
-    return invert ? -comparison : comparison
-}
-
-export const sortCardsByType = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    const cardATypesMatch = cardA.type_line.match(/[\w ]+(?=—{0,1})/)
-    const cardATypeLine = cardATypesMatch ? cardATypesMatch[0] : ''
-    const cardATypes = cardATypeLine.split(' ')
-    const lastCardAType = cardATypes ? cardATypes[cardATypes.length - 1] : ''
-
-    const cardBTypesMatch = cardB.type_line.match(/[\w ]+(?=—{0,1})/i)
-    const cardBTypeLine = cardBTypesMatch ? cardBTypesMatch[0] : ''
-    const cardBTypes = cardBTypeLine.split(' ')
-    const lastCardBType = cardBTypes ? cardBTypes[cardBTypes.length - 1] : ''
-
-    const comparison = lastCardAType.localeCompare(lastCardBType)
-
-    if (comparison === 0) {
-        return sortCardsByManaValue(cardA, cardB, false)
+    if (cardData.colors.length === 1) {
+        return COLOR_ORDER_PRIORITY[cardData.colors[0]]
     }
 
-    return invert ? -comparison : comparison
-}
-
-export const sortCardsByCreatureType = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    const cardACreatureTypes = cardA.type_line.split(' ')
-    const lastCardAType = cardACreatureTypes[cardACreatureTypes.length - 1]
-
-    const cardBCreatureTypes = cardB.type_line.split(' ')
-    const lastCardBType = cardBCreatureTypes[cardBCreatureTypes.length - 1]
-
-    const comparison = lastCardAType.localeCompare(lastCardBType)
-
-    if (comparison === 0) {
-        return sortCardsByManaValue(cardA, cardB, false)
+    if (cardData.colors.length === 0) {
+        const isLand = getLastCardType(cardData) === 'Land'
+        return isLand ? LAND_ORDER_PRIORITY : COLORLESS_ORDER_PRIORITY
     }
 
-    return invert ? -comparison : comparison
-}
-
-export const sortCardsByPriceEUR = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    const cardAPrice = parseFloat(cardA.prices.eur) || parseFloat(cardA.prices.eur_foil) || 0
-    const cardBPrice = parseFloat(cardB.prices.eur) || parseFloat(cardB.prices.eur_foil) || 0
-
-    if (cardAPrice === cardBPrice) {
-        return sortCardsByManaValue(cardA, cardB, false)
-    }
-
-    const comparison = cardAPrice - cardBPrice
-
-    return invert ? -comparison : comparison
-}
-
-export const sortCardsByPriceUSD = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    const cardAPrice = parseFloat(cardA.prices.usd) || parseFloat(cardA.prices.usd_foil) || 0
-    const cardBPrice = parseFloat(cardB.prices.usd) || parseFloat(cardB.prices.usd_foil) || 0
-
-    if (cardAPrice === cardBPrice) {
-        return sortCardsByManaValue(cardA, cardB, false)
-    }
-
-    const comparison = cardAPrice - cardBPrice
-
-    return invert ? -comparison : comparison
-}
-
-export const CARD_SORTERS: Record<SortType, CardSorter> = {
-    name: sortCardsByName,
-    "mana-value": sortCardsByManaValue,
-    type: sortCardsByType,
-    "price-eur": sortCardsByPriceEUR,
-    "price-usd": sortCardsByPriceUSD
+    return MULTICOLOR_ORDER_PRIORITY
 }

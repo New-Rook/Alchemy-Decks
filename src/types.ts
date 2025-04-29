@@ -26,9 +26,10 @@ export type DeckCard = {
   quantity: number
   categories: string[] // Empty array means untagged
   set?: string // Set name
-  useFromCollection?: boolean
+  // useFromCollection?: boolean
 }
-export type DeckCards = Record<string, number>
+export type DeckCards = Record<string, DeckCard>
+export type CardDictionary = Record<string, CardData>
 
 export type DeckVisibility = 'private' | 'link-only' | 'public'
 
@@ -40,6 +41,14 @@ export interface BaseCardData {
   name: string
   oracle_text: string
   type_line: string
+}
+
+export type DeckCollectionUse = {
+  cards: string[]
+}
+
+export type GlobalCategories = {
+  cards: Record<string, string[]> // Card to categories, max 5 categories
 }
 
 export interface CardData extends BaseCardData {
@@ -75,10 +84,10 @@ type CardDataImageURIs = {
 
 export type Color = 'W' | 'U' | 'B' | 'R' | 'G'
 export type ColorData = {
+  name: string
   symbol: string
   english: string // For accessibility - equivalent to label
   svg_uri: string
-  transposable: boolean
 }
 
 export type Format =
@@ -105,10 +114,17 @@ export type Format =
   "premodern" |
   "predh"
 
-export type SortType = 'name' | 'mana-value' | 'type' | 'price-eur' | 'price-usd'
-export type CardSorter = (cardA: CardData, cardB: CardData, invert: boolean) => number
-
 export type CurrencyType = 'eur' | 'usd'
 
-export type GroupBy = 'mana-value' | 'type' | 'sub-type' | 'color'
+export type SortType = 'name' | 'mana-value' | 'color' | 'type' | 'price-eur' | 'price-usd'
+export type CardSorter = (cardA: CardData, cardB: CardData, invert: boolean) => number
+
+export type GroupBy = 'mana-value' | 'type' | 'sub-type' | 'color' | 'category'
+export type CardGrouper = (deckCards: DeckCards, cardDictionary: CardDictionary, alternative: boolean) => CardGroupData[]
+
+export type CardGroupData = {
+  name: string
+  cards: string[]
+}
+
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
