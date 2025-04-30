@@ -3,6 +3,10 @@ import { UserData } from "../types";
 export const getInitialUserData = (id: string): UserData => {
     return {
         id,
-        settings: {}
+        settings: {
+            editorPrefereces: {
+                viewType: 'grid'
+            }
+        }
     }
 }

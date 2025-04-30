@@ -1,4 +1,4 @@
-import { Color, ColorData, Format, SortType } from "../types";
+import { Color, ColorData, Format, GroupBy, GroupByColorMode, SortType, ViewType } from "../types";
 
 export const COLOR_DATA: Record<Color, ColorData> = {
     W: {
@@ -84,3 +84,6 @@ export const FORMATS: Format[] = [
 ]
 
 export const SORT_TYPES: SortType[] = ['name', 'mana-value', 'type', 'price-eur']
+export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color', 'category']
+export const GROUP_BY_COLOR_MODES: GroupByColorMode[] = ['multicolored-in-one', 'multicolored-expanded', 'all-monocolored']
+export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']

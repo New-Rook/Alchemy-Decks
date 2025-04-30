@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { CardData, Deck, DeckCard, GroupBy, ViewType } from '../types'
+import { CardData, CardGroupData, Color, Deck, DeckCard, GroupBy, GroupByColorMode, ViewType } from '../types'
 import { getCardImages } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
@@ -10,6 +10,11 @@ import { SearchWindow } from './SearchWindow'
 import { DeckPageTopBar } from './DeckPage/DeckPageTopBar'
 import { useObjectRecordState } from '../hooks/useObjectRecordState'
 import { CardGroup } from './DeckPage/CardGroup'
+import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../utilities/groupers'
+import { Dropdown } from '../components/Dropdown'
+import { COLOR_DATA, GROUP_BY_COLOR_MODES, GROUP_TYPES } from '../data/search'
+import { TEST_DECK_CARDS } from '../data/dev'
+import { Checkbox } from '../components/Checkbox'
 
 const basicLandRegex = /Basic Land/
 
@@ -33,14 +38,17 @@ export const DeckPage = () => {
         setObjectRecord: setDeckCards,
         updateObjectProperty: updateDeckCard,
         deleteObject: deleteDeckCard
-    } = useObjectRecordState<string, DeckCard>({})
+    } = useObjectRecordState<string, DeckCard>(TEST_DECK_CARDS)
     const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
+    const [groupByColorMode, setGroupByColorMode] = React.useState<GroupByColorMode>('multicolored-in-one')
+    const [groupByTypeLastCardTypeOnly, setGroupByTypeLastCardTypeOnly] = React.useState(false)
     const [viewType, setViewType] = React.useState<ViewType>('grid')
     const [topBarPinned, setTopBarPinned] = React.useState(false)
     const [cardSearchTerm, setCardSearchTerm] = React.useState('')
     const [cardSearchResults, setCardSearchResults] = React.useState<CardData[]>([])
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
+    // console.log(deckCards)
 
     const hideSearchWindowAndCleanup = () => {
         hideSearchWindow()
@@ -257,25 +265,55 @@ export const DeckPage = () => {
 
     const cardGroups = React.useMemo(() => {
         if (!groupBy) {
-            return { 'All cards': Object.keys(deckCards) }
+            return [{
+                name: 'All cards',
+                cards: Object.keys(deckCards)
+            }]
         }
 
-        const groups: Record<string, string[]> = {}
+        let groups: CardGroupData[] = []
 
-        if (groupBy === 'category') {
-            // const categoryGroups: Record<string, string[]> = {}
-            Object.keys(deckCards).forEach(cardName => {
-                deckCards[cardName].categories.forEach(category => {
-                    if (!groups[category]) {
-                        groups[category] = []
-                    }
-                    groups[category].push(cardName)
-                })
-            })
+        // if (groupBy === 'category') {
+
+        // const categoryGroups: Record<string, string[]> = {}
+        // Object.keys(deckCards).forEach(cardName => {
+        //     deckCards[cardName].categories.forEach(category => {
+        //         if (!groups[category]) {
+        //             groups[category] = []
+        //         }
+        //         groups[category].push(cardName)
+        //     })
+        // })
+        // }
+
+        switch (groupBy) {
+            case 'category':
+                groups = groupCardsByCategory(deckCards)
+                break;
+            case 'color':
+                groups = groupCardsByColor(deckCards, cardDictionary, groupByColorMode)
+                break;
+            case 'mana-value':
+                groups = groupCardsByManaValue(deckCards, cardDictionary)
+                break;
+            case 'sub-type':
+                groups = groupCardsBySubType(deckCards, cardDictionary)
+                break;
+            case 'type':
+                groups = groupCardsByType(deckCards, cardDictionary, groupByTypeLastCardTypeOnly)
+                break;
         }
 
         return groups
-    }, [deckCards, groupBy])
+    }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly])
+
+    const getGroupName = React.useCallback((group: CardGroupData) => {
+        if (groupBy === 'color' && COLOR_DATA[group.name as Color]) {
+            return <img className='search-symbol' src={COLOR_DATA[group.name as Color].svg_uri} />
+        }
+
+        return group.name
+    }, [groupBy])
 
     return (
         <div className='layout'>
@@ -315,6 +353,10 @@ export const DeckPage = () => {
                 setPinned={setTopBarPinned}
             />
 
+            <Dropdown options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
+            {groupBy === 'color' && <Dropdown options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} />}
+            {groupBy === 'type' && <Checkbox label="Group only by last card type" checked={groupByTypeLastCardTypeOnly} onCheck={setGroupByTypeLastCardTypeOnly} />}
+
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
 
             <div className='deck'
@@ -323,8 +365,14 @@ export const DeckPage = () => {
                     e.preventDefault()
                 }}
             >
-                {Object.keys(cardGroups).map(groupName =>
-                    <CardGroup groupName={groupName} cardNames={cardGroups[groupName]} deckCards={deckCards} addDeckCardQuantity={addDeckCardQuantity} />
+                {cardGroups.map(group =>
+                    <CardGroup
+                        key={group.name}
+                        groupName={getGroupName(group)}
+                        cardNames={group.cards}
+                        deckCards={deckCards}
+                        addDeckCardQuantity={addDeckCardQuantity}
+                    />
                 )}
 
                 {/* {Object.keys(deckCards).map(cardName => <div className={`deck-card`} key={cardName}>

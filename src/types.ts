@@ -1,6 +1,10 @@
 export type UserData = {
   id: string
-  settings: {}
+  settings: {
+    editorPrefereces: {
+      viewType: ViewType
+    }
+  }
 }
 
 // export type Deck = {
@@ -24,7 +28,7 @@ export type Deck = {
 
 export type DeckCard = {
   quantity: number
-  categories: string[] // Empty array means untagged
+  categories?: string[] // Empty array means untagged
   set?: string // Set name
   // useFromCollection?: boolean
 }
@@ -36,8 +40,8 @@ export type DeckVisibility = 'private' | 'link-only' | 'public'
 export type Decks = Record<string, Deck>
 
 export interface BaseCardData {
-  colors: Color[];
-  image_uris: CardDataImageURIs;
+  colors: Color[]
+  image_uris: CardDataImageURIs
   name: string
   oracle_text: string
   type_line: string
@@ -126,5 +130,7 @@ export type CardGroupData = {
   name: string
   cards: string[]
 }
+
+export type GroupByColorMode = 'multicolored-in-one' | 'multicolored-expanded' | 'all-monocolored'
 
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'

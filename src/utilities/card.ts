@@ -30,24 +30,30 @@ export const getCardImages = (card: CardData) => {
 }
 
 export const getLastCardType = (cardData: CardData) => {
-    const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
-    const cardTypeLine = cardTypesMatch ? cardTypesMatch[0] : ''
-    const cardTypes = cardTypeLine.split(' ')
-    const lastCardType = cardTypes ? cardTypes[cardTypes.length - 1] : ''
+    // const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
+    // const cardTypeLine = cardTypesMatch ? cardTypesMatch[0] : ''
+    // const cardTypes = cardTypeLine.trim().split(' ')
+    const cardTypes = getCardTypes(cardData)
+    const lastCardType = cardTypes.length > 0 ? cardTypes[cardTypes.length - 1] : ''
     return lastCardType
 }
 
 export const getCardTypes = (cardData: CardData) => {
-    const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
+    const cardTypesMatch = cardData.type_line.replace(/basic|legendary/ig, '').match(/[\w ]+(?=—{0,1})/)
     const cardTypeLine = cardTypesMatch ? cardTypesMatch[0] : ''
-    const cardTypes = cardTypeLine.split(' ')
+    const cardTypes = cardTypeLine.trim().split(' ')
     return cardTypes
 }
 
 export const getCardSubTypes = (cardData: CardData) => {
-    const cardTypesMatch = cardData.type_line.match(/[\w ]+(?=—{0,1})/)
-    const cardTypeLine = cardTypesMatch ? (cardTypesMatch[1] ?? '') : ''
-    const cardTypes = cardTypeLine.split(' ')
+    const cardTypesMatch = cardData.type_line.match(/(?<=—)[\w ]+/)
+    const cardTypeLine = cardTypesMatch ? (cardTypesMatch[0] ?? '') : ''
+
+    if (!cardTypeLine) {
+        return getCardTypes(cardData)
+    }
+
+    const cardTypes = cardTypeLine.trim().split(' ')
     return cardTypes
 }
 

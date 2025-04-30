@@ -149,13 +149,13 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
                     onChangeText={setOracleTextSearchTerm}
                 />
                 {ALL_COLOR_KEYS.map(color => <button key={color} className={`search-symbol${!colorFilters.includes(color) ? ' search-symbol-inactive' : ''}`} onClick={() => filterColor(color)}><img src={COLOR_DATA[color].svg_uri} /></button>)}
-                <div className='filter' >
+                <div className='filter'>
                     <label htmlFor="format-select">Format</label>
                     <select id="format-select" value={format} onChange={(e) => setFormat(e.target.value as Format)}>
                         {FORMATS.map(format => <option key={format} value={format}>{format}</option>)}
                     </select>
                 </div>
-                <div className='filter' >
+                <div className='filter'>
                     <label htmlFor="sort-select">Sort by</label>
                     <select id="sort-select" value={sortType} onChange={(e) => setSortType(e.target.value as SortType)}>
                         {availableSortTypes.map(sortType => <option key={sortType} value={sortType}>{sortType}</option>)}
