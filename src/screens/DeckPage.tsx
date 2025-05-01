@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { CardData, CardGroupData, Color, Deck, DeckCard, GroupBy, GroupByColorMode, ViewType } from '../types'
+import { CardData, CardGroupData, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
 import { getCardImages } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
@@ -12,9 +12,10 @@ import { useObjectRecordState } from '../hooks/useObjectRecordState'
 import { CardGroup } from './DeckPage/CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType, LAND_GROUP_NAME } from '../utilities/groupers'
 import { Dropdown } from '../components/Dropdown'
-import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, COLORLESS_ORDER_PRIORITY, GROUP_BY_COLOR_MODES, GROUP_TYPES, LAND_ORDER_PRIORITY } from '../data/search'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, COLORLESS_ORDER_PRIORITY, GROUP_BY_COLOR_MODES, GROUP_TYPES, LAND_ORDER_PRIORITY, SORT_TYPES } from '../data/search'
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
+import { CARD_SORTERS } from '../utilities/sorters'
 
 const basicLandRegex = /Basic Land/
 
@@ -26,6 +27,8 @@ export const DeckPage = () => {
     const { cardDictionary } = useContext(AppContext)
 
     const { user } = useContext(AuthContext)
+
+    const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
 
     const [categories, setCategories] = React.useState<Record<string, string[]>>({ uncategorised: [] })
     const [currentCardPosition, setCurrentCardPosition] = React.useState([0, 0])
@@ -42,6 +45,7 @@ export const DeckPage = () => {
     const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
     const [groupByColorMode, setGroupByColorMode] = React.useState<GroupByColorMode>('multicolored-in-one')
     const [groupByTypeLastCardTypeOnly, setGroupByTypeLastCardTypeOnly] = React.useState(false)
+    const [sortType, setSortType] = React.useState<SortType>('mana-value')
     const [viewType, setViewType] = React.useState<ViewType>('grid')
     const [topBarPinned, setTopBarPinned] = React.useState(false)
     const [cardSearchTerm, setCardSearchTerm] = React.useState('')
@@ -98,6 +102,20 @@ export const DeckPage = () => {
 
         return { numberOfCards, price, legalities }
     }, [deckCards, cardDictionary])
+
+    const availableSortTypes = React.useMemo(() => {
+        return SORT_TYPES.filter(sort => {
+            if (sort === 'price-eur') {
+                return currencyType === 'eur'
+            }
+
+            if (sort === 'price-usd') {
+                return currencyType === 'usd'
+            }
+
+            return true
+        })
+    }, [currencyType])
 
     const addDeckCardQuantity = React.useCallback((cardName: string, quantity: number) => {
         const newQuantity = Math.max((deckCards[cardName]?.quantity ?? 0) + quantity, 0)
@@ -304,11 +322,12 @@ export const DeckPage = () => {
                 break;
         }
 
+        groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
+
         return groups
-    }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly])
+    }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
     const getGroupName = React.useCallback((group: CardGroupData) => {
-        console.log(group.name)
         if (groupBy === 'color') {
             const colorCombination = group.name
             if (COLOR_ORDER_PRIORITY[colorCombination as Color]) {
@@ -367,9 +386,10 @@ export const DeckPage = () => {
                 setPinned={setTopBarPinned}
             />
 
-            <Dropdown options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
-            {groupBy === 'color' && <Dropdown options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} />}
+            <Dropdown label={'Group by'} options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
+            {groupBy === 'color' && <Dropdown label={'Color group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} />}
             {groupBy === 'type' && <Checkbox label="Group only by last card type" checked={groupByTypeLastCardTypeOnly} onCheck={setGroupByTypeLastCardTypeOnly} />}
+            <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
 
