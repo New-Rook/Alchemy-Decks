@@ -39,5 +39,23 @@ export const TEST_DECK_CARDS: DeckCards = {
     },
     "Ornithopter": {
         "quantity": 1
+    },
+    "Fireglass Mentor": {
+        "quantity": 1
+    },
+    "Glacial Dragonhunt": {
+        "quantity": 1
+    },
+    "Lazav, Wearer of Faces": {
+        "quantity": 1
+    },
+    "Bartolomé del Presidio": {
+        "quantity": 1
+    },
+    "Skirmish Rhino": {
+        "quantity": 1
+    },
+    "Jodah, the Unifier": {
+        "quantity": 1
     }
 }

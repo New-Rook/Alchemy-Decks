@@ -41,19 +41,35 @@ export const COLORLESS_DATA: ColorData & { key: string } = {
     "english": "one colorless mana",
 }
 
-export const COLOR_ORDER_PRIORITY: Record<Color, number> = {
-    W: 0,
-    U: 1,
-    B: 2,
-    R: 3,
-    G: 4
-}
+const ORDER_PRIORITY_OFFSET = 1
 
-export const MULTICOLOR_ORDER_PRIORITY = 5
-export const COLORLESS_ORDER_PRIORITY = 6
-export const LAND_ORDER_PRIORITY = 7
+const COLORS: Color[] = ['W', 'U', 'B', 'R', 'G']
 
-export const COLOR_COMBINATION_ORDER = ['WU', 'UB', 'BR', 'RG', 'WG', 'WB', 'UR', 'GB', 'RW', 'GU']
+export const COLOR_ORDER_PRIORITY: Record<Color, number> = COLORS.reduce<Record<string, number>>((priorities, color, index) => {
+    priorities[color] = index + ORDER_PRIORITY_OFFSET
+    return priorities
+}, {})
+
+const NUMBER_OF_COLORS = Object.keys(COLOR_ORDER_PRIORITY).length
+
+// export const MULTICOLOR_ORDER_PRIORITY = 5
+
+const COLOR_COMBINATIONS = [
+    'WU', 'UB', 'BR', 'RG', 'GW', 'WB', 'UR', 'BG', 'RW', 'GU',
+    'WUB', 'UBR', 'BRG', 'RGW', 'GWU', 'RWB', 'GUR', 'WBG', 'URW', 'BGU',
+    'WUBR', 'UBRG', 'BRGW', 'RGWU', 'GWUB', 'WUBRG'
+]
+
+export const COLOR_COMBINATION_ORDER_PRIORITY =
+    COLOR_COMBINATIONS.reduce<Record<string, number>>((priorities, colorCombination, index) => {
+        priorities[colorCombination] = index + NUMBER_OF_COLORS + ORDER_PRIORITY_OFFSET
+        return priorities
+    }, {})
+
+const NUMBER_OF_COLOR_COMBINATIONS = Object.keys(COLOR_COMBINATION_ORDER_PRIORITY).length
+
+export const COLORLESS_ORDER_PRIORITY = NUMBER_OF_COLORS + NUMBER_OF_COLOR_COMBINATIONS + ORDER_PRIORITY_OFFSET
+export const LAND_ORDER_PRIORITY = COLORLESS_ORDER_PRIORITY + 1
 
 export const ALL_COLOR_KEYS: Color[] = Object.keys(COLOR_DATA) as Color[]
 export const ALL_COLORS: ColorData[] = Object.values(COLOR_DATA) as ColorData[]
@@ -83,7 +99,358 @@ export const FORMATS: Format[] = [
     // "predh"
 ]
 
-export const SORT_TYPES: SortType[] = ['name', 'mana-value', 'type', 'price-eur']
+export const SORT_TYPES: SortType[] = ['name', 'mana-value', 'color', 'type', 'price-eur']
 export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color', 'category']
 export const GROUP_BY_COLOR_MODES: GroupByColorMode[] = ['multicolored-in-one', 'multicolored-expanded', 'all-monocolored']
 export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
+
+export const COLOR_COMBINATIONS_MAP: Record<string, string> = {
+    "WU": "WU",
+    "WUB": "WUB",
+    "WUBR": "WUBR",
+    "WUBRG": "WUBRG",
+    "WUBG": "GWUB",
+    "WUBGR": "WUBRG",
+    "WUR": "URW",
+    "WURB": "WUBR",
+    "WURBG": "WUBRG",
+    "WURG": "RGWU",
+    "WURGB": "WUBRG",
+    "WUG": "GWU",
+    "WUGB": "GWUB",
+    "WUGBR": "WUBRG",
+    "WUGR": "RGWU",
+    "WUGRB": "WUBRG",
+    "WB": "WB",
+    "WBU": "WUB",
+    "WBUR": "WUBR",
+    "WBURG": "WUBRG",
+    "WBUG": "GWUB",
+    "WBUGR": "WUBRG",
+    "WBR": "RWB",
+    "WBRU": "WUBR",
+    "WBRUG": "WUBRG",
+    "WBRG": "BRGW",
+    "WBRGU": "WUBRG",
+    "WBG": "WBG",
+    "WBGU": "GWUB",
+    "WBGUR": "WUBRG",
+    "WBGR": "BRGW",
+    "WBGRU": "WUBRG",
+    "WR": "RW",
+    "WRU": "URW",
+    "WRUB": "WUBR",
+    "WRUBG": "WUBRG",
+    "WRUG": "RGWU",
+    "WRUGB": "WUBRG",
+    "WRB": "RWB",
+    "WRBU": "WUBR",
+    "WRBUG": "WUBRG",
+    "WRBG": "BRGW",
+    "WRBGU": "WUBRG",
+    "WRG": "RGW",
+    "WRGU": "RGWU",
+    "WRGUB": "WUBRG",
+    "WRGB": "BRGW",
+    "WRGBU": "WUBRG",
+    "WG": "GW",
+    "WGU": "GWU",
+    "WGUB": "GWUB",
+    "WGUBR": "WUBRG",
+    "WGUR": "RGWU",
+    "WGURB": "WUBRG",
+    "WGB": "WBG",
+    "WGBU": "GWUB",
+    "WGBUR": "WUBRG",
+    "WGBR": "BRGW",
+    "WGBRU": "WUBRG",
+    "WGR": "RGW",
+    "WGRU": "RGWU",
+    "WGRUB": "WUBRG",
+    "WGRB": "BRGW",
+    "WGRBU": "WUBRG",
+    "UW": "WU",
+    "UWB": "WUB",
+    "UWBR": "WUBR",
+    "UWBRG": "WUBRG",
+    "UWBG": "GWUB",
+    "UWBGR": "WUBRG",
+    "UWR": "URW",
+    "UWRB": "WUBR",
+    "UWRBG": "WUBRG",
+    "UWRG": "RGWU",
+    "UWRGB": "WUBRG",
+    "UWG": "GWU",
+    "UWGB": "GWUB",
+    "UWGBR": "WUBRG",
+    "UWGR": "RGWU",
+    "UWGRB": "WUBRG",
+    "UB": "UB",
+    "UBW": "WUB",
+    "UBWR": "WUBR",
+    "UBWRG": "WUBRG",
+    "UBWG": "GWUB",
+    "UBWGR": "WUBRG",
+    "UBR": "UBR",
+    "UBRW": "WUBR",
+    "UBRWG": "WUBRG",
+    "UBRG": "UBRG",
+    "UBRGW": "WUBRG",
+    "UBG": "BGU",
+    "UBGW": "GWUB",
+    "UBGWR": "WUBRG",
+    "UBGR": "UBRG",
+    "UBGRW": "WUBRG",
+    "UR": "UR",
+    "URW": "URW",
+    "URWB": "WUBR",
+    "URWBG": "WUBRG",
+    "URWG": "RGWU",
+    "URWGB": "WUBRG",
+    "URB": "UBR",
+    "URBW": "WUBR",
+    "URBWG": "WUBRG",
+    "URBG": "UBRG",
+    "URBGW": "WUBRG",
+    "URG": "GUR",
+    "URGW": "RGWU",
+    "URGWB": "WUBRG",
+    "URGB": "UBRG",
+    "URGBW": "WUBRG",
+    "UG": "GU",
+    "UGW": "GWU",
+    "UGWB": "GWUB",
+    "UGWBR": "WUBRG",
+    "UGWR": "RGWU",
+    "UGWRB": "WUBRG",
+    "UGB": "BGU",
+    "UGBW": "GWUB",
+    "UGBWR": "WUBRG",
+    "UGBR": "UBRG",
+    "UGBRW": "WUBRG",
+    "UGR": "GUR",
+    "UGRW": "RGWU",
+    "UGRWB": "WUBRG",
+    "UGRB": "UBRG",
+    "UGRBW": "WUBRG",
+    "BW": "WB",
+    "BWU": "WUB",
+    "BWUR": "WUBR",
+    "BWURG": "WUBRG",
+    "BWUG": "GWUB",
+    "BWUGR": "WUBRG",
+    "BWR": "RWB",
+    "BWRU": "WUBR",
+    "BWRUG": "WUBRG",
+    "BWRG": "BRGW",
+    "BWRGU": "WUBRG",
+    "BWG": "WBG",
+    "BWGU": "GWUB",
+    "BWGUR": "WUBRG",
+    "BWGR": "BRGW",
+    "BWGRU": "WUBRG",
+    "BU": "UB",
+    "BUW": "WUB",
+    "BUWR": "WUBR",
+    "BUWRG": "WUBRG",
+    "BUWG": "GWUB",
+    "BUWGR": "WUBRG",
+    "BUR": "UBR",
+    "BURW": "WUBR",
+    "BURWG": "WUBRG",
+    "BURG": "UBRG",
+    "BURGW": "WUBRG",
+    "BUG": "BGU",
+    "BUGW": "GWUB",
+    "BUGWR": "WUBRG",
+    "BUGR": "UBRG",
+    "BUGRW": "WUBRG",
+    "BR": "BR",
+    "BRW": "RWB",
+    "BRWU": "WUBR",
+    "BRWUG": "WUBRG",
+    "BRWG": "BRGW",
+    "BRWGU": "WUBRG",
+    "BRU": "UBR",
+    "BRUW": "WUBR",
+    "BRUWG": "WUBRG",
+    "BRUG": "UBRG",
+    "BRUGW": "WUBRG",
+    "BRG": "BRG",
+    "BRGW": "BRGW",
+    "BRGWU": "WUBRG",
+    "BRGU": "UBRG",
+    "BRGUW": "WUBRG",
+    "BG": "BG",
+    "BGW": "WBG",
+    "BGWU": "GWUB",
+    "BGWUR": "WUBRG",
+    "BGWR": "BRGW",
+    "BGWRU": "WUBRG",
+    "BGU": "BGU",
+    "BGUW": "GWUB",
+    "BGUWR": "WUBRG",
+    "BGUR": "UBRG",
+    "BGURW": "WUBRG",
+    "BGR": "BRG",
+    "BGRW": "BRGW",
+    "BGRWU": "WUBRG",
+    "BGRU": "UBRG",
+    "BGRUW": "WUBRG",
+    "RW": "RW",
+    "RWU": "URW",
+    "RWUB": "WUBR",
+    "RWUBG": "WUBRG",
+    "RWUG": "RGWU",
+    "RWUGB": "WUBRG",
+    "RWB": "RWB",
+    "RWBU": "WUBR",
+    "RWBUG": "WUBRG",
+    "RWBG": "BRGW",
+    "RWBGU": "WUBRG",
+    "RWG": "RGW",
+    "RWGU": "RGWU",
+    "RWGUB": "WUBRG",
+    "RWGB": "BRGW",
+    "RWGBU": "WUBRG",
+    "RU": "UR",
+    "RUW": "URW",
+    "RUWB": "WUBR",
+    "RUWBG": "WUBRG",
+    "RUWG": "RGWU",
+    "RUWGB": "WUBRG",
+    "RUB": "UBR",
+    "RUBW": "WUBR",
+    "RUBWG": "WUBRG",
+    "RUBG": "UBRG",
+    "RUBGW": "WUBRG",
+    "RUG": "GUR",
+    "RUGW": "RGWU",
+    "RUGWB": "WUBRG",
+    "RUGB": "UBRG",
+    "RUGBW": "WUBRG",
+    "RB": "BR",
+    "RBW": "RWB",
+    "RBWU": "WUBR",
+    "RBWUG": "WUBRG",
+    "RBWG": "BRGW",
+    "RBWGU": "WUBRG",
+    "RBU": "UBR",
+    "RBUW": "WUBR",
+    "RBUWG": "WUBRG",
+    "RBUG": "UBRG",
+    "RBUGW": "WUBRG",
+    "RBG": "BRG",
+    "RBGW": "BRGW",
+    "RBGWU": "WUBRG",
+    "RBGU": "UBRG",
+    "RBGUW": "WUBRG",
+    "RG": "RG",
+    "RGW": "RGW",
+    "RGWU": "RGWU",
+    "RGWUB": "WUBRG",
+    "RGWB": "BRGW",
+    "RGWBU": "WUBRG",
+    "RGU": "GUR",
+    "RGUW": "RGWU",
+    "RGUWB": "WUBRG",
+    "RGUB": "UBRG",
+    "RGUBW": "WUBRG",
+    "RGB": "BRG",
+    "RGBW": "BRGW",
+    "RGBWU": "WUBRG",
+    "RGBU": "UBRG",
+    "RGBUW": "WUBRG",
+    "GW": "GW",
+    "GWU": "GWU",
+    "GWUB": "GWUB",
+    "GWUBR": "WUBRG",
+    "GWUR": "RGWU",
+    "GWURB": "WUBRG",
+    "GWB": "WBG",
+    "GWBU": "GWUB",
+    "GWBUR": "WUBRG",
+    "GWBR": "BRGW",
+    "GWBRU": "WUBRG",
+    "GWR": "RGW",
+    "GWRU": "RGWU",
+    "GWRUB": "WUBRG",
+    "GWRB": "BRGW",
+    "GWRBU": "WUBRG",
+    "GU": "GU",
+    "GUW": "GWU",
+    "GUWB": "GWUB",
+    "GUWBR": "WUBRG",
+    "GUWR": "RGWU",
+    "GUWRB": "WUBRG",
+    "GUB": "BGU",
+    "GUBW": "GWUB",
+    "GUBWR": "WUBRG",
+    "GUBR": "UBRG",
+    "GUBRW": "WUBRG",
+    "GUR": "GUR",
+    "GURW": "RGWU",
+    "GURWB": "WUBRG",
+    "GURB": "UBRG",
+    "GURBW": "WUBRG",
+    "GB": "BG",
+    "GBW": "WBG",
+    "GBWU": "GWUB",
+    "GBWUR": "WUBRG",
+    "GBWR": "BRGW",
+    "GBWRU": "WUBRG",
+    "GBU": "BGU",
+    "GBUW": "GWUB",
+    "GBUWR": "WUBRG",
+    "GBUR": "UBRG",
+    "GBURW": "WUBRG",
+    "GBR": "BRG",
+    "GBRW": "BRGW",
+    "GBRWU": "WUBRG",
+    "GBRU": "UBRG",
+    "GBRUW": "WUBRG",
+    "GR": "RG",
+    "GRW": "RGW",
+    "GRWU": "RGWU",
+    "GRWUB": "WUBRG",
+    "GRWB": "BRGW",
+    "GRWBU": "WUBRG",
+    "GRU": "GUR",
+    "GRUW": "RGWU",
+    "GRUWB": "WUBRG",
+    "GRUB": "UBRG",
+    "GRUBW": "WUBRG",
+    "GRB": "BRG",
+    "GRBW": "BRGW",
+    "GRBWU": "WUBRG",
+    "GRBU": "UBRG",
+    "GRBUW": "WUBRG"
+}
+
+// React.useEffect(() => {
+//     const colorCombinations: Record<string, string> = {}
+
+//     const recursiveColors = (prev: string, current: string, otherColors: string[]) => {
+//         const total = prev + current
+
+//         if (total.length > 1) {
+//             const totalSplitColors = total.split('')
+//             COLOR_COMBINATIONS.forEach((colorCombination) => {
+//                 const colorCombinationSplitColors = colorCombination.split('')
+//                 if (totalSplitColors.length === colorCombinationSplitColors.length
+//                     && totalSplitColors.every(color => colorCombinationSplitColors.includes(color))
+//                 ) {
+//                     colorCombinations[total] = colorCombination
+//                 }
+//             })
+//         }
+
+//         otherColors.forEach((color) => {
+//             recursiveColors(total, color, otherColors.filter(otherColor => otherColor !== color))
+//         })
+//     }
+
+//     recursiveColors('', '', Object.keys(COLOR_DATA))
+
+//     console.log(colorCombinations)
+// }, [])

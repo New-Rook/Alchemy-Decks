@@ -1,4 +1,4 @@
-import { COLOR_ORDER_PRIORITY, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY, MULTICOLOR_ORDER_PRIORITY } from "../data/search";
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
 import { CardData } from "../types";
 
 export const getCardBaseData = (card: CardData) => {
@@ -59,17 +59,18 @@ export const getCardSubTypes = (cardData: CardData) => {
 
 export const getCardColorPriority = (cardData: CardData) => {
     if (!cardData.colors) {
-        return 0
+        return 100
+    }
+
+    if (cardData.colors.length === 0) {
+        return getLastCardType(cardData) === 'Land'
+            ? LAND_ORDER_PRIORITY
+            : COLORLESS_ORDER_PRIORITY
     }
 
     if (cardData.colors.length === 1) {
         return COLOR_ORDER_PRIORITY[cardData.colors[0]]
     }
 
-    if (cardData.colors.length === 0) {
-        const isLand = getLastCardType(cardData) === 'Land'
-        return isLand ? LAND_ORDER_PRIORITY : COLORLESS_ORDER_PRIORITY
-    }
-
-    return MULTICOLOR_ORDER_PRIORITY
+    return COLOR_COMBINATION_ORDER_PRIORITY[COLOR_COMBINATIONS_MAP[cardData.colors.join('')]]
 }

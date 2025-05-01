@@ -47,12 +47,12 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
                     card.prices.eur_foil = convertedPrice.toFixed(2).toString()
                 }
 
-                if (card.colors) {
-                    card.colors.sort((colorA, colorB) => COLOR_ORDER_PRIORITY[colorA] - COLOR_ORDER_PRIORITY[colorB])
-                }
-                if (card.color_identity) {
-                    card.color_identity.sort((colorA, colorB) => COLOR_ORDER_PRIORITY[colorA] - COLOR_ORDER_PRIORITY[colorB])
-                }
+                // if (card.colors) {
+                //     card.colors.sort((colorA, colorB) => COLOR_ORDER_PRIORITY[colorA] - COLOR_ORDER_PRIORITY[colorB])
+                // }
+                // if (card.color_identity) {
+                //     card.color_identity.sort((colorA, colorB) => COLOR_ORDER_PRIORITY[colorA] - COLOR_ORDER_PRIORITY[colorB])
+                // }
 
                 dict[card.name] = card
                 return dict

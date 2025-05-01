@@ -10,9 +10,9 @@ import { SearchWindow } from './SearchWindow'
 import { DeckPageTopBar } from './DeckPage/DeckPageTopBar'
 import { useObjectRecordState } from '../hooks/useObjectRecordState'
 import { CardGroup } from './DeckPage/CardGroup'
-import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../utilities/groupers'
+import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType, LAND_GROUP_NAME } from '../utilities/groupers'
 import { Dropdown } from '../components/Dropdown'
-import { COLOR_DATA, GROUP_BY_COLOR_MODES, GROUP_TYPES } from '../data/search'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, COLORLESS_ORDER_PRIORITY, GROUP_BY_COLOR_MODES, GROUP_TYPES, LAND_ORDER_PRIORITY } from '../data/search'
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 
@@ -308,8 +308,22 @@ export const DeckPage = () => {
     }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly])
 
     const getGroupName = React.useCallback((group: CardGroupData) => {
-        if (groupBy === 'color' && COLOR_DATA[group.name as Color]) {
-            return <img className='search-symbol' src={COLOR_DATA[group.name as Color].svg_uri} />
+        console.log(group.name)
+        if (groupBy === 'color') {
+            const colorCombination = group.name
+            if (COLOR_ORDER_PRIORITY[colorCombination as Color]) {
+                return <img className='search-symbol' src={COLOR_DATA[colorCombination as Color].svg_uri} />
+            }
+
+            if (COLOR_COMBINATION_ORDER_PRIORITY[group.name]) {
+                return <div>
+                    {colorCombination.split('').map(color => <img key={color} className='search-symbol' src={COLOR_DATA[color as Color].svg_uri} />)}
+                </div>
+            }
+
+            if (group.name === COLORLESS_DATA.key) {
+                return <img className='search-symbol' src={COLORLESS_DATA.svg_uri} />
+            }
         }
 
         return group.name

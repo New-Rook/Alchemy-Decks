@@ -1,5 +1,5 @@
-import { COLORLESS_DATA } from "../data/search";
-import { CardDictionary, CardGroupData, CardGrouper, DeckCards, GroupBy, GroupByColorMode } from "../types";
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_DATA, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
+import { CardDictionary, CardGroupData, CardGrouper, Color, DeckCards, GroupBy, GroupByColorMode } from "../types";
 import { getCardSubTypes, getCardTypes, getLastCardType } from "./card";
 
 const convertGroupRecordToGroupData = (groups: Record<string, string[]>) => {
@@ -32,7 +32,7 @@ export const groupCardsByCategory = (deckCards: DeckCards) => {
     return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
 }
 
-const LAND_GROUP_NAME = 'Land'
+export const LAND_GROUP_NAME = 'Land'
 
 export const groupCardsByManaValue = (deckCards: DeckCards, cardDictionary: CardDictionary) => {
     const groups: Record<string, string[]> = {}
@@ -90,7 +90,6 @@ export const groupCardsBySubType = (deckCards: DeckCards, cardDictionary: CardDi
 
     Object.keys(deckCards).forEach(cardName => {
         const cardTypes = getCardSubTypes(cardDictionary[cardName])
-        console.log(cardTypes)
         cardTypes.forEach(cardType => {
             if (!groups[cardType]) {
                 groups[cardType] = []
@@ -98,8 +97,6 @@ export const groupCardsBySubType = (deckCards: DeckCards, cardDictionary: CardDi
             groups[cardType].push(cardName)
         })
     })
-
-
 
     return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
 }
@@ -152,7 +149,12 @@ export const groupCardsByColor = (deckCards: DeckCards, cardDictionary: CardDict
             })
         }
         else if (mode === 'multicolored-expanded') {
-
+            const draftColorCombination = cardDictionary[cardName].colors.join('')
+            const colorCombination = COLOR_COMBINATIONS_MAP[draftColorCombination]
+            if (!groups[colorCombination]) {
+                groups[colorCombination] = []
+            }
+            groups[colorCombination].push(cardName)
         }
         else {
             if (!groups[MULTICOLOR_GROUP_NAME]) {
@@ -162,7 +164,27 @@ export const groupCardsByColor = (deckCards: DeckCards, cardDictionary: CardDict
         }
     })
 
-    return convertGroupRecordToGroupData(groups)
+    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => getGroupColorPriority(groupA) - getGroupColorPriority(groupB))
+}
+
+const getGroupColorPriority = (group: CardGroupData) => {
+    if (COLOR_ORDER_PRIORITY[group.name as Color]) {
+        return COLOR_ORDER_PRIORITY[group.name as Color]
+    }
+
+    if (COLOR_COMBINATION_ORDER_PRIORITY[group.name]) {
+        return COLOR_COMBINATION_ORDER_PRIORITY[group.name]
+    }
+
+    if (group.name === COLORLESS_DATA.key) {
+        return COLORLESS_ORDER_PRIORITY
+    }
+
+    if (group.name === LAND_GROUP_NAME) {
+        return LAND_ORDER_PRIORITY
+    }
+
+    return 100
 }
 
 // export const CARD_GROUPERS: Record<GroupBy, CardGrouper> = {
