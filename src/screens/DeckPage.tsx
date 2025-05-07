@@ -16,6 +16,8 @@ import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COL
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import { DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
 
 const basicLandRegex = /Basic Land/
 
@@ -327,7 +329,7 @@ export const DeckPage = () => {
         return groups
     }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
-    const getGroupName = React.useCallback((group: CardGroupData) => {
+    const getGroupLabel = React.useCallback((group: CardGroupData) => {
         if (groupBy === 'color') {
             const colorCombination = group.name
             if (COLOR_ORDER_PRIORITY[colorCombination as Color]) {
@@ -347,6 +349,27 @@ export const DeckPage = () => {
 
         return group.name
     }, [groupBy])
+
+    const handleCategoryDragEnd = (event: DragEndEvent) => {
+        if (groupBy === 'category' && event.active.id && event.over?.id) {
+            const cardDragIDSplit = event.active.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
+            const cardName = cardDragIDSplit[0]
+            const cardCurrentCategory = cardDragIDSplit[1]
+            const categoryDropIDSplit = event.over.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
+            const droppedCategoryName = categoryDropIDSplit[0]
+            const droppedCategoryOperation = cardCurrentCategory === NO_CATEGORY_NAME ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : categoryDropIDSplit[1]
+            if (cardName && cardCurrentCategory !== droppedCategoryName) {
+                console.log('category update', droppedCategoryOperation, [cardName, droppedCategoryName])
+                if (droppedCategoryOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
+                    updateDeckCard(cardName, 'categories', [...(deckCards[cardName].categories ?? []), droppedCategoryName])
+                }
+                else if (droppedCategoryOperation === DRAG_AND_DROP_OVERWRITE_OPERATION_NAME) {
+                    updateDeckCard(cardName, 'categories', [droppedCategoryName])
+                }
+            }
+            // console.log([event.active.id, event.over?.id])
+        }
+    }
 
     return (
         <div className='layout'>
@@ -393,23 +416,26 @@ export const DeckPage = () => {
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
 
-            <div className='deck'
-                onDrop={dropCardFromOutside}
-                onDragOver={e => {
-                    e.preventDefault()
-                }}
-            >
-                {cardGroups.map(group =>
-                    <CardGroup
-                        key={group.name}
-                        groupName={getGroupName(group)}
-                        cardNames={group.cards}
-                        deckCards={deckCards}
-                        addDeckCardQuantity={addDeckCardQuantity}
-                    />
-                )}
+            <DndContext onDragEnd={handleCategoryDragEnd}>
+                <div className='deck'
+                    onDrop={dropCardFromOutside}
+                    onDragOver={e => {
+                        e.preventDefault()
+                    }}
+                >
+                    {cardGroups.map(group =>
+                        <CardGroup
+                            key={group.name}
+                            groupName={group.name}
+                            groupLabel={getGroupLabel(group)}
+                            cardNames={group.cards}
+                            deckCards={deckCards}
+                            addDeckCardQuantity={addDeckCardQuantity}
+                            enableDragAndDrop={groupBy === 'category'}
+                        />
+                    )}
 
-                {/* {Object.keys(deckCards).map(cardName => <div className={`deck-card`} key={cardName}>
+                    {/* {Object.keys(deckCards).map(cardName => <div className={`deck-card`} key={cardName}>
                     <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' />
                     <div className='card-count-container flex-column'>
                         <div className='card-count'>x{deckCards[cardName].quantity}</div>
@@ -419,7 +445,8 @@ export const DeckPage = () => {
                         </div>
                     </div>
                 </div>)} */}
-            </div>
+                </div>
+            </DndContext>
 
             {/* <div className='bottom-bar'>€{totalPrice.toFixed(2)}</div> */}
         </div>

@@ -1,13 +1,12 @@
+import { NO_CATEGORY_NAME } from "../data/editor";
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_DATA, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
-import { CardDictionary, CardGroupData, CardGrouper, Color, DeckCards, GroupBy, GroupByColorMode } from "../types";
+import { CardDictionary, CardGroupData, Color, DeckCards, GroupByColorMode } from "../types";
 import { getCardSubTypes, getCardTypes, getLastCardType } from "./card";
 
 const convertGroupRecordToGroupData = (groups: Record<string, string[]>) => {
     const groupData = Object.keys(groups).map<CardGroupData>(groupName => ({ name: groupName, cards: groups[groupName] }))
     return groupData
 }
-
-const NO_CATEGORY_NAME = 'No Category'
 
 export const groupCardsByCategory = (deckCards: DeckCards) => {
     const groups: Record<string, string[]> = {}

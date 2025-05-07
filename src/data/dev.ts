@@ -2,7 +2,8 @@ import { DeckCards } from "../types";
 
 export const TEST_DECK_CARDS: DeckCards = {
     "An Offer You Can't Refuse": {
-        "quantity": 2
+        "quantity": 2,
+        categories: ['Counterspell']
     },
     "Fleeting Distraction": {
         "quantity": 2
@@ -14,7 +15,8 @@ export const TEST_DECK_CARDS: DeckCards = {
         "quantity": 2
     },
     "Hammerhand": {
-        "quantity": 2
+        "quantity": 2,
+        categories: ['Haste', 'Evasion']
     },
     "Hell to Pay": {
         "quantity": 4
@@ -50,7 +52,8 @@ export const TEST_DECK_CARDS: DeckCards = {
         "quantity": 1
     },
     "Bartolomé del Presidio": {
-        "quantity": 1
+        "quantity": 1,
+        categories: ['Evasion']
     },
     "Skirmish Rhino": {
         "quantity": 1

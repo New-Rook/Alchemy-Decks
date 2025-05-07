@@ -178,7 +178,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
                         onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1) }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
                         {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].quantity}</div>}
-                        <div className='card-count'>{getCardPriceDisplay(cardData)}</div>
+                        {/* <div className='card-count'>{getCardPriceDisplay(cardData)}</div> */}
                     </div>
                 })}
             </div>

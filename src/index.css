@@ -180,10 +180,15 @@ input[type='password'] {
   object-fit: contain;
 }
 
-.deck-card:hover {
+/* .deck-card:hover {
   scale: 1.5;
   z-index: 1;
-}
+} */
+
+/* .deck-card:active {
+  scale: 1;
+  z-index: 1;
+} */
 
 .stat-row {
   display: flex;

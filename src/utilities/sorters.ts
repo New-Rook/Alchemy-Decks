@@ -7,11 +7,13 @@ export const sortCardsByName = (cardA: CardData, cardB: CardData, invert: boolea
 }
 
 export const sortCardsByManaValue = (cardA: CardData, cardB: CardData, invert: boolean) => {
-    if (cardA.cmc === cardB.cmc) {
+    const cardAManaValue = getLastCardType(cardA) === 'Land' ? Infinity : cardA.cmc
+    const cardBManaValue = getLastCardType(cardB) === 'Land' ? Infinity : cardB.cmc
+    if (cardAManaValue === cardBManaValue) {
         return sortCardsByName(cardA, cardB, false)
     }
 
-    const comparison = cardA.cmc - cardB.cmc
+    const comparison = cardAManaValue - cardBManaValue
 
     return invert ? -comparison : comparison
 }

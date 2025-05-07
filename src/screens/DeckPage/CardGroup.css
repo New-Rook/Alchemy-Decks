@@ -1,0 +1,48 @@
+.category-drop-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.category-drop-section {
+    /* flex-grow: 1;
+    flex-shrink: 0; */
+    width: 50%;
+    color: white;
+    font-size: 30px;
+}
+
+.category-drop-section-full-size {
+    width: 100%;
+    color: white;
+    font-size: 30px;
+}
+
+.category-drop-add {
+    background-color: rgb(0 77 201 / 50%);
+}
+
+.category-drop-add-hover {
+    background-color: rgb(0 77 201 / 75%);
+}
+
+.category-drop-add-title {
+    background-color: blue;
+    padding: 0.25em;
+    z-index: 3;
+}
+
+.category-drop-overwrite {
+    background-color: rgb(99 10 194 / 50%);
+}
+
+.category-drop-overwrite-hover {
+    background-color: rgb(99 10 194 / 75%);
+}
+
+.category-drop-overwrite-title {
+    background-color: purple;
+    padding: 0.25em;
+    z-index: 3;
+}
