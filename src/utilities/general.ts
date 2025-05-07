@@ -9,3 +9,27 @@ export const stringStartsAndEndsWith = (text: string, startEndChar: string) => {
 
     return text.charAt(0) === startEndChar && text.charAt(text.length - 1) === startEndChar
 }
+
+// Takes an array and removes a given element, returning a new array
+export const omitFromArray = <T>(array: T[], element: T) => {
+    const index = array.indexOf(element)
+
+    if (index === -1) {
+        return array
+    }
+
+    const arrayShallowCopy = [...array]
+    arrayShallowCopy.splice(index, 1)
+    return arrayShallowCopy
+}
+
+// Takes a record and removes a given key, returning a new object
+export const omitFromRecord = <K extends string | number | symbol, V>(record: Record<K, V>, key: K) => {
+    if (!record[key]) {
+        return record
+    }
+
+    const newObj = { ...record }
+    delete newObj[key]
+    return newObj
+}

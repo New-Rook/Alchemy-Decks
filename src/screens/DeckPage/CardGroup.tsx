@@ -12,9 +12,11 @@ type Props = {
     deckCards: DeckCards
     addDeckCardQuantity: (cardName: string, quantity: number) => void
     enableDragAndDrop: boolean
+    selectedCards: Record<string, boolean>
+    selectCard: (cardName: string) => void
 }
 
-export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop }: Props) => {
+export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard }: Props) => {
     const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
 
@@ -80,6 +82,8 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         deckCard={deckCards[cardName]}
                         addDeckCardQuantity={addDeckCardQuantity}
                         enableDragAndDrop={enableDragAndDrop}
+                        selectCard={selectCard}
+                        selected={selectedCards[cardName]}
                     />
                 )}
             </div>

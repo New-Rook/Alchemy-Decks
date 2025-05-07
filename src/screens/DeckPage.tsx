@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { CardData, CardGroupData, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
+import { CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
 import { getCardImages } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
@@ -16,8 +16,10 @@ import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COL
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
-import { DndContext, DragEndEvent } from '@dnd-kit/core'
-import { DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
+import { TextInput } from '../components/TextInput'
+import { omitFromArray, omitFromRecord } from '../utilities/general'
 
 const basicLandRegex = /Basic Land/
 
@@ -42,6 +44,7 @@ export const DeckPage = () => {
         objectRecord: deckCards,
         setObjectRecord: setDeckCards,
         updateObjectProperty: updateDeckCard,
+        updateMultipleObjectsProperty: updateMultipleDeckCards,
         deleteObject: deleteDeckCard
     } = useObjectRecordState<string, DeckCard>(TEST_DECK_CARDS)
     const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
@@ -53,8 +56,14 @@ export const DeckPage = () => {
     const [cardSearchTerm, setCardSearchTerm] = React.useState('')
     const [cardSearchResults, setCardSearchResults] = React.useState<CardData[]>([])
 
+    const [categoryUpdateOperation, setCategoryUpdateOperation] = React.useState<CategoryUpdateOperation>('overwrite')
+    const [categoryUpdateText, setCategoryUpdateText] = React.useState('')
+    const [selectedCards, setSelectedCards] = React.useState<Record<string, boolean>>({})
+
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
     // console.log(deckCards)
+
+    const dragSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 10 } }))
 
     const hideSearchWindowAndCleanup = () => {
         hideSearchWindow()
@@ -283,6 +292,15 @@ export const DeckPage = () => {
         }
     }
 
+    const selectCard = (cardName: string) => {
+        if (selectedCards[cardName]) {
+            setSelectedCards((prevCards) => omitFromRecord(prevCards, cardName))
+        }
+        else {
+            setSelectedCards((prevCards) => ({ ...prevCards, [cardName]: true }))
+        }
+    }
+
     const cardGroups = React.useMemo(() => {
         if (!groupBy) {
             return [{
@@ -371,6 +389,11 @@ export const DeckPage = () => {
         }
     }
 
+    // const updateSelectedCardsCategories = () => {
+    //     const deckCardUpdates = Object.keys(selectedCards).map<[string, 'categories', string[]]>(cardName => ([cardName, 'categories', []]))
+    //     updateMultipleDeckCards(deckCardUpdates)
+    // }
+
     return (
         <div className='layout'>
             {/* <div className='top-bar'>
@@ -416,7 +439,7 @@ export const DeckPage = () => {
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
 
-            <DndContext onDragEnd={handleCategoryDragEnd}>
+            <DndContext sensors={dragSensors} onDragEnd={handleCategoryDragEnd}>
                 <div className='deck'
                     onDrop={dropCardFromOutside}
                     onDragOver={e => {
@@ -432,6 +455,8 @@ export const DeckPage = () => {
                             deckCards={deckCards}
                             addDeckCardQuantity={addDeckCardQuantity}
                             enableDragAndDrop={groupBy === 'category'}
+                            selectedCards={selectedCards}
+                            selectCard={selectCard}
                         />
                     )}
 
@@ -447,6 +472,20 @@ export const DeckPage = () => {
                 </div>)} */}
                 </div>
             </DndContext>
+
+            {Object.keys(selectedCards).length > 0 && <div style={{
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 2,
+                backgroundColor: 'white',
+                flexDirection: 'row',
+                display: 'flex',
+                gap: '2em',
+                padding: '0.5em'
+            }}>
+                <Dropdown label={'Operation'} options={CATEGORY_UPDATE_OPERATIONS} value={categoryUpdateOperation} onSelect={setCategoryUpdateOperation} />
+                <TextInput label={'Category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+            </div>}
 
             {/* <div className='bottom-bar'>€{totalPrice.toFixed(2)}</div> */}
         </div>

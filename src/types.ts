@@ -134,3 +134,5 @@ export type CardGroupData = {
 export type GroupByColorMode = 'multicolored-in-one' | 'multicolored-expanded' | 'all-monocolored'
 
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
+
+export type CategoryUpdateOperation = 'add' | 'overwrite'

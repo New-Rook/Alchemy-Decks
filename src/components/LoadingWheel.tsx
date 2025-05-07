@@ -13,7 +13,8 @@ export const LoadingWheel = ({ className, ...props }: React.HTMLAttributes<HTMLD
             animation: '2s linear rotate-items infinite'
         }}>
         {ALL_COLORS.map((color, index) =>
-            <img className='loading-wheel-icon'
+            <img key={color.name}
+                className='loading-wheel-icon'
                 style={{
                     width: `${iconSize}px`,
                     height: `${iconSize}px`,

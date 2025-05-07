@@ -12,13 +12,15 @@ type Props = {
     deckCard: DeckCard
     addDeckCardQuantity: (cardName: string, quantity: number) => void
     enableDragAndDrop: boolean
+    selected: boolean
+    selectCard: (cardName: string) => void
 }
 
 const SLIDE_BACK_STYLE = {
     transition: 'transform 0.25s'
 }
 
-export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enableDragAndDrop }: Props) => {
+export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enableDragAndDrop, selected, selectCard }: Props) => {
     const { cardDictionary } = useContext(AppContext)
 
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -30,11 +32,14 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
     } : SLIDE_BACK_STYLE
 
     return (
-        <div className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging ? 2 : undefined }}  {...listeners} {...attributes}>
+        <div onClick={() => selectCard(cardName)} className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging ? 2 : undefined }}  {...listeners} {...attributes}>
+            {selected && <div className='deck-card-selected' onPointerDown={(e) => e.stopPropagation()}>
+                <input className='deck-card-selected-icon' type="checkbox" checked />
+            </div>}
             {/* <div className={`deck-card`} key={cardName}
             {...(enableDragAndDrop ? { ref: setNodeRef, style, ...listeners, ...attributes } : {})}> */}
             <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' draggable={false} />
-            <div className='card-count-container flex-column' onPointerDown={(e) => e.stopPropagation()}>
+            <div className='card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>x{deckCard.quantity}</div>
                 <div className='flex-row'>
                     <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, -1)}>-</button>
