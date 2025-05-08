@@ -34,7 +34,7 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
     return (
         <div onClick={() => selectCard(cardName)} className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging ? 2 : undefined }}  {...listeners} {...attributes}>
             {selected && <div className='deck-card-selected' onPointerDown={(e) => e.stopPropagation()}>
-                <input className='deck-card-selected-icon' type="checkbox" checked />
+                <input className='deck-card-selected-icon' type="checkbox" checked readOnly />
             </div>}
             {/* <div className={`deck-card`} key={cardName}
             {...(enableDragAndDrop ? { ref: setNodeRef, style, ...listeners, ...attributes } : {})}> */}

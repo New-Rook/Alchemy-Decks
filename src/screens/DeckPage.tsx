@@ -19,7 +19,7 @@ import { CARD_SORTERS } from '../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
 import { TextInput } from '../components/TextInput'
-import { omitFromArray, omitFromRecord } from '../utilities/general'
+import { numbersOnlyTextInputValidator, omitFromArray, omitFromRecord } from '../utilities/general'
 
 const basicLandRegex = /Basic Land/
 
@@ -44,7 +44,6 @@ export const DeckPage = () => {
         objectRecord: deckCards,
         setObjectRecord: setDeckCards,
         updateObjectProperty: updateDeckCard,
-        updateMultipleObjectsProperty: updateMultipleDeckCards,
         deleteObject: deleteDeckCard
     } = useObjectRecordState<string, DeckCard>(TEST_DECK_CARDS)
     const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
@@ -58,6 +57,7 @@ export const DeckPage = () => {
 
     const [categoryUpdateOperation, setCategoryUpdateOperation] = React.useState<CategoryUpdateOperation>('overwrite')
     const [categoryUpdateText, setCategoryUpdateText] = React.useState('')
+    const [quantityUpdateText, setQuantityUpdateText] = React.useState('')
     const [selectedCards, setSelectedCards] = React.useState<Record<string, boolean>>({})
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
@@ -389,10 +389,59 @@ export const DeckPage = () => {
         }
     }
 
-    // const updateSelectedCardsCategories = () => {
-    //     const deckCardUpdates = Object.keys(selectedCards).map<[string, 'categories', string[]]>(cardName => ([cardName, 'categories', []]))
-    //     updateMultipleDeckCards(deckCardUpdates)
-    // }
+    const updateSelectedCards = () => {
+        const newDeckCards = { ...deckCards }
+
+        const quantity = parseInt(quantityUpdateText)
+        const categories = categoryUpdateText.split(/ +/).filter(category => !!category)
+
+        Object.keys(selectedCards).forEach((cardName) => {
+            if (Number.isInteger(quantity)) {
+                newDeckCards[cardName].quantity = parseInt(quantityUpdateText)
+            }
+            if (categories.length > 0) {
+                if (!newDeckCards[cardName].categories) {
+                    newDeckCards[cardName].categories = []
+                }
+                // if (categoryUpdateOperation === 'add') {
+                const uniqueCategories = new Set([...newDeckCards[cardName].categories, ...categories])
+                newDeckCards[cardName].categories = Array.from(uniqueCategories)
+                // }
+                // else {
+                //     newDeckCards[cardName].categories = categories
+                // }
+            }
+        })
+
+        setDeckCards(newDeckCards)
+        setCategoryUpdateText('')
+        setQuantityUpdateText('')
+    }
+
+    const removeSelectedCards = () => {
+        const newDeckCards = { ...deckCards }
+
+        Object.keys(selectedCards).forEach((cardName) => {
+            delete newDeckCards[cardName]
+        })
+
+        setDeckCards(newDeckCards)
+        setSelectedCards({})
+    }
+
+    const removeSelectedCardsCategories = () => {
+        const newDeckCards = { ...deckCards }
+
+        Object.keys(selectedCards).forEach((cardName) => {
+            newDeckCards[cardName].categories = undefined
+        })
+
+        setDeckCards(newDeckCards)
+    }
+
+    const deselectAllCards = () => {
+        setSelectedCards({})
+    }
 
     return (
         <div className='layout'>
@@ -483,8 +532,13 @@ export const DeckPage = () => {
                 gap: '2em',
                 padding: '0.5em'
             }}>
-                <Dropdown label={'Operation'} options={CATEGORY_UPDATE_OPERATIONS} value={categoryUpdateOperation} onSelect={setCategoryUpdateOperation} />
-                <TextInput label={'Category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+                {/* <Dropdown label={'Operation'} options={CATEGORY_UPDATE_OPERATIONS} value={categoryUpdateOperation} onSelect={setCategoryUpdateOperation} /> */}
+                <TextInput label={'Add categories'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+                <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={numbersOnlyTextInputValidator} />
+                <button onClick={updateSelectedCards}>Update cards</button>
+                <button onClick={removeSelectedCardsCategories}>Remove categories</button>
+                <button onClick={removeSelectedCards}>Remove cards</button>
+                <button onClick={deselectAllCards}>Deselect cards</button>
             </div>}
 
             {/* <div className='bottom-bar'>€{totalPrice.toFixed(2)}</div> */}

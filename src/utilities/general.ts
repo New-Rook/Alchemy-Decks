@@ -33,3 +33,7 @@ export const omitFromRecord = <K extends string | number | symbol, V>(record: Re
     delete newObj[key]
     return newObj
 }
+
+export const numbersOnlyTextInputValidator = (text: string) => {
+    return !/\D/.test(text)
+}
