@@ -8,10 +8,10 @@ type Props = {
     setCardSearchTerm: (text: string) => void
     cardSearchResults: CardData[]
     showSearchWindow: () => void
-    deckStats: {
-        numberOfCards: number
-        price: number
-    }
+    // deckStats: {
+    //     numberOfCards: number
+    //     price: number
+    // }
     deckCards: DeckCards
     addFromQuickSearch: (cardData: CardData) => void
     pinned: boolean
@@ -23,7 +23,7 @@ export const DeckPageTopBar = ({
     setCardSearchTerm,
     cardSearchResults,
     showSearchWindow,
-    deckStats,
+    // deckStats,
     deckCards,
     addFromQuickSearch,
     pinned,
@@ -50,7 +50,7 @@ export const DeckPageTopBar = ({
                 <button className='right-placed-item' onClick={copyDeckListToClipboard}>Copy deck list</button>
                 <div className='flex-row flex-gap flex-center'>
                     {/* <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div> */}
-                    <div>{deckStats.numberOfCards}</div>
+                    {/* <div>{deckStats.numberOfCards}</div> */}
                     {/* <div>€{deckStats.price.toFixed(2)}</div> */}
                     <button onClick={() => setPinned(!pinned)}>{pinned ? 'Unpin' : 'Pin'}</button>
                 </div>

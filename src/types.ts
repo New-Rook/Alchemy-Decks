@@ -27,11 +27,19 @@ export type Deck = {
 }
 
 export type DeckCard = {
-  quantity: number
+  // quantity: number
   categories?: string[] // Empty array means untagged
   set?: string // Set name
   // useFromCollection?: boolean
+  // boards: {
+  //   mainboard: number
+  //   sideboard?: number
+  //   considering?: number
+  // }
+  boards: Partial<Record<Board, number>>
 }
+
+export type Board = 'mainboard' | 'sideboard' | 'considering'
 export type DeckCards = Record<string, DeckCard>
 export type CardDictionary = Record<string, CardData>
 

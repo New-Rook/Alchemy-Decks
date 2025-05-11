@@ -14,12 +14,17 @@ import { BrowseDecksPage } from "./screens/BrowseDecksPage"
 import { StaplePage } from "./screens/StaplePage"
 import { PrivateRoute } from "./components/PrivateRoute"
 import { GuestRoute } from "./components/GuestRoute"
+import { useContext } from "react"
+import { AppContext } from "./context/AppContext"
+import { LoadingScreen } from "./components/LoadingScreen"
 
 export const AppRoutes = () => {
+    const { cardDictionary } = useContext(AppContext)
+
     return (
         <Routes>
             <Route element={<MainLayout />}>
-                <Route path={'/'} element={<HomePage />} />
+                <Route path={'/'} element={cardDictionary && Object.keys(cardDictionary).length > 0 ? <DeckPage /> : <LoadingScreen />} />
                 <Route path={'/login'} element={<GuestRoute><LoginPage /></GuestRoute>} />
                 <Route path={'/register'} element={<GuestRoute><RegisterPage /></GuestRoute>} />
                 <Route path={'/forgot-password'} element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />

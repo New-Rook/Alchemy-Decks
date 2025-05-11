@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
+import { Board, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
 import { getCardImages } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
@@ -16,10 +16,10 @@ import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COL
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, PointerSensor, useDndContext, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core'
 import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
 import { TextInput } from '../components/TextInput'
-import { numbersOnlyTextInputValidator, omitFromArray, omitFromRecord } from '../utilities/general'
+import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
 
 const basicLandRegex = /Basic Land/
 
@@ -58,12 +58,41 @@ export const DeckPage = () => {
     const [categoryUpdateOperation, setCategoryUpdateOperation] = React.useState<CategoryUpdateOperation>('overwrite')
     const [categoryUpdateText, setCategoryUpdateText] = React.useState('')
     const [quantityUpdateText, setQuantityUpdateText] = React.useState('')
-    const [selectedCards, setSelectedCards] = React.useState<Record<string, boolean>>({})
+    const [selectedCards, setSelectedCards] = React.useState<Record<string, Board>>({})
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
     // console.log(deckCards)
 
     const dragSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 10 } }))
+
+    const mainboard = React.useMemo(() => {
+        return Object.keys(deckCards).reduce<Record<string, number>>((board, cardName) => {
+            if (deckCards[cardName].boards.mainboard) {
+                board[cardName] = deckCards[cardName].boards.mainboard
+            }
+            return board
+        }, {})
+    }, [deckCards])
+
+
+    const sideboard = React.useMemo(() => {
+        return Object.keys(deckCards).reduce<Record<string, number>>((board, cardName) => {
+            if (deckCards[cardName].boards.sideboard) {
+                board[cardName] = deckCards[cardName].boards.sideboard
+            }
+            return board
+        }, {})
+    }, [deckCards])
+
+
+    const considering = React.useMemo(() => {
+        return Object.keys(deckCards).reduce<Record<string, number>>((board, cardName) => {
+            if (deckCards[cardName].boards.considering) {
+                board[cardName] = deckCards[cardName].boards.considering
+            }
+            return board
+        }, {})
+    }, [deckCards])
 
     const hideSearchWindowAndCleanup = () => {
         hideSearchWindow()
@@ -75,44 +104,57 @@ export const DeckPage = () => {
         }
     }, [searchWindowVisible])
 
-    const deckStats = React.useMemo(() => {
-        let numberOfCards = 0
-        let price = 0
-        const legalities: Record<string, boolean> = {}
+    // const deckStats = React.useMemo(() => {
+    //     let numberOfMainboardCards = 0
+    //     let numberOfSideboardCards = 0
+    //     let mainboardPrice = 0
+    //     let sideboardPrice = 0
+    //     const legalities: Record<string, boolean> = {}
 
-        Object.keys(deckCards).forEach((cardName) => {
-            const cardQuantity = deckCards[cardName].quantity
-            numberOfCards += cardQuantity
-            price += cardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
-            if (!basicLandRegex.test(cardDictionary[cardName].type_line)) {
-                Object.keys(cardDictionary[cardName].legalities).forEach(format => {
-                    if (legalities[format] === false) {
-                        return
-                    }
+    //     Object.keys(deckCards).forEach((cardName) => {
+    //         const mainboardCardQuantity = deckCards[cardName].boards.mainboard ?? 0
+    //         numberOfMainboardCards += mainboardCardQuantity
+    //         mainboardPrice += mainboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
 
-                    const legality = cardDictionary[cardName].legalities[format]
-                    if (legality === 'legal' && ((format === 'commander' && cardQuantity <= 1) || cardQuantity <= 4)) {
-                        legalities[format] = true
-                    }
-                    else if (legality === 'restricted' && cardQuantity <= 1) {
-                        legalities[format] = true
-                    }
-                    else {
-                        legalities[format] = false
-                    }
-                })
-            }
-        })
+    //         const sideboardCardQuantity = deckCards[cardName].boards.sideboard ?? 0
+    //         numberOfMainboardCards += sideboardCardQuantity
+    //         sideboardPrice += sideboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
 
-        const formats = Object.keys(legalities)
-        formats.forEach((format) => {
-            if (!legalities[format]) {
-                delete legalities[format]
-            }
-        })
+    //         const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
 
-        return { numberOfCards, price, legalities }
-    }, [deckCards, cardDictionary])
+    //         if (!basicLandRegex.test(cardDictionary[cardName].type_line)) {
+    //             Object.keys(cardDictionary[cardName].legalities).forEach(format => {
+    //                 if (legalities[format] === false) {
+    //                     return
+    //                 }
+
+    //                 const legality = cardDictionary[cardName].legalities[format]
+    //                 if (legality === 'legal' && ((format === 'commander' && cardQuantity <= 1) || cardQuantity <= 4)) {
+    //                     legalities[format] = true
+    //                 }
+    //                 else if (legality === 'restricted' && cardQuantity <= 1) {
+    //                     legalities[format] = true
+    //                 }
+    //                 else {
+    //                     legalities[format] = false
+    //                 }
+    //             })
+    //         }
+    //     })
+
+    //     const formats = Object.keys(legalities)
+    //     formats.forEach((format) => {
+    //         if (!legalities[format]) {
+    //             delete legalities[format]
+    //         }
+    //     })
+
+    //     return {
+    //         mainboard: { numberOfCards: numberOfMainboardCards, price: mainboardPrice },
+    //         sideboard: { numberOfCards: numberOfSideboardCards, price: sideboardPrice },
+    //         legalities
+    //     }
+    // }, [deckCards, cardDictionary])
 
     const availableSortTypes = React.useMemo(() => {
         return SORT_TYPES.filter(sort => {
@@ -128,16 +170,43 @@ export const DeckPage = () => {
         })
     }, [currencyType])
 
-    const addDeckCardQuantity = React.useCallback((cardName: string, quantity: number) => {
-        const newQuantity = Math.max((deckCards[cardName]?.quantity ?? 0) + quantity, 0)
+    const addDeckCardQuantity = React.useCallback((cardName: string, quantity: number, board: Board) => {
+        const newQuantity = Math.max((deckCards[cardName]?.boards[board] ?? 0) + quantity, 0)
 
         if (newQuantity === 0) {
-            deleteDeckCard(cardName)
+            if (Object.keys(deckCards[cardName].boards).length === 1) {
+                deleteDeckCard(cardName)
+            }
+
+            updateDeckCard(cardName, 'boards', omitFromPartialRecord(deckCards[cardName].boards, board))
         }
         else {
-            updateDeckCard(cardName, 'quantity', newQuantity)
+            updateDeckCard(cardName, 'boards', { ...deckCards[cardName]?.boards, [board]: newQuantity })
         }
     }, [deckCards, updateDeckCard, deleteDeckCard])
+
+    const moveCardBoard = (cardName: string, fromBoard: Board, toBoard: Board) => {
+        const newCardBoards = { ...deckCards[cardName].boards }
+
+        const quantity = newCardBoards[fromBoard]
+        delete newCardBoards[fromBoard]
+        newCardBoards[toBoard] = (newCardBoards[toBoard] ?? 0) + (quantity ?? 0)
+
+        updateDeckCard(cardName, 'boards', newCardBoards)
+    }
+
+    const moveSelectedCardsToBoard = (board: Board) => {
+        const newDeckCards = { ...deckCards }
+
+        Object.keys(selectedCards).forEach((cardName) => {
+            const currentBoard = selectedCards[cardName]
+            const quantity = newDeckCards[cardName].boards[currentBoard]
+            delete newDeckCards[cardName].boards[currentBoard]
+            newDeckCards[cardName].boards[board] = (newDeckCards[cardName].boards[board] ?? 0) + (quantity ?? 0)
+        })
+
+        setDeckCards(newDeckCards)
+    }
 
     const getRandomCard = async () => {
         try {
@@ -148,7 +217,7 @@ export const DeckPage = () => {
                 return
             }
             const cardData = result
-            addDeckCardQuantity(cardData.name, 1)
+            addDeckCardQuantity(cardData.name, 1, 'mainboard')
             // setDeckCards(prev => ({
             //     ...prev, [cardData.name]:
             //     {
@@ -222,7 +291,7 @@ export const DeckPage = () => {
     }
 
     const addFromQuickSearch = (cardData: CardData) => {
-        addDeckCardQuantity(cardData.name, 1)
+        addDeckCardQuantity(cardData.name, 1, 'mainboard')
         setCardSearchTerm('')
     }
 
@@ -236,7 +305,7 @@ export const DeckPage = () => {
     //     }
     // }
 
-    const dropCardFromOutside = async (e: React.DragEvent<HTMLDivElement>) => {
+    const dropCardFromOutside = async (e: React.DragEvent<HTMLDivElement>, board: Board) => {
         setCardSearchTerm('')
         e.preventDefault()
 
@@ -265,7 +334,7 @@ export const DeckPage = () => {
             }
 
             // setDeckCards(prev => ({ ...prev, [cardData.name]: (deckCards[cardData.name] ?? 0) + 1 }))
-            addDeckCardQuantity(cardData.name, 1)
+            addDeckCardQuantity(cardData.name, 1, board)
         }
 
         if (marketPlaceMatch) {
@@ -277,7 +346,7 @@ export const DeckPage = () => {
             const cardMarketCardData = cardMarketResult
             if (!cardMarketCardData.status) {
                 // setDeckCards(prev => ({ ...prev, [cardMarketCardData.name]: (deckCards[cardMarketCardData.name] ?? 0) + 1 }))
-                addDeckCardQuantity(cardMarketCardData.name, 1)
+                addDeckCardQuantity(cardMarketCardData.name, 1, board)
                 return
             }
 
@@ -286,22 +355,22 @@ export const DeckPage = () => {
             const tcgPlayerCardData = tcgPlayerResult
             if (!tcgPlayerCardData.status) {
                 // setDeckCards(prev => ({ ...prev, [tcgPlayerCardData.name]: (deckCards[tcgPlayerCardData.name] ?? 0) + 1 }))
-                addDeckCardQuantity(tcgPlayerCardData.name, 1)
+                addDeckCardQuantity(tcgPlayerCardData.name, 1, board)
                 return
             }
         }
     }
 
-    const selectCard = (cardName: string) => {
+    const selectCard = (cardName: string, board: Board) => {
         if (selectedCards[cardName]) {
             setSelectedCards((prevCards) => omitFromRecord(prevCards, cardName))
         }
         else {
-            setSelectedCards((prevCards) => ({ ...prevCards, [cardName]: true }))
+            setSelectedCards((prevCards) => ({ ...prevCards, [cardName]: board }))
         }
     }
 
-    const cardGroups = React.useMemo(() => {
+    const mainboardCardGroups = React.useMemo(() => {
         if (!groupBy) {
             return [{
                 name: 'All cards',
@@ -311,41 +380,100 @@ export const DeckPage = () => {
 
         let groups: CardGroupData[] = []
 
-        // if (groupBy === 'category') {
-
-        // const categoryGroups: Record<string, string[]> = {}
-        // Object.keys(deckCards).forEach(cardName => {
-        //     deckCards[cardName].categories.forEach(category => {
-        //         if (!groups[category]) {
-        //             groups[category] = []
-        //         }
-        //         groups[category].push(cardName)
-        //     })
-        // })
-        // }
+        const boardCards = Object.keys(mainboard)
 
         switch (groupBy) {
             case 'category':
-                groups = groupCardsByCategory(deckCards)
+                groups = groupCardsByCategory(deckCards, boardCards)
                 break;
             case 'color':
-                groups = groupCardsByColor(deckCards, cardDictionary, groupByColorMode)
+                groups = groupCardsByColor(boardCards, cardDictionary, groupByColorMode)
                 break;
             case 'mana-value':
-                groups = groupCardsByManaValue(deckCards, cardDictionary)
+                groups = groupCardsByManaValue(boardCards, cardDictionary)
                 break;
             case 'sub-type':
-                groups = groupCardsBySubType(deckCards, cardDictionary)
+                groups = groupCardsBySubType(boardCards, cardDictionary)
                 break;
             case 'type':
-                groups = groupCardsByType(deckCards, cardDictionary, groupByTypeLastCardTypeOnly)
+                groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
                 break;
         }
 
         groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
 
         return groups
-    }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
+    }, [deckCards, mainboard, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
+
+    const sideboardCardGroups = React.useMemo(() => {
+        if (!groupBy) {
+            return [{
+                name: 'All cards',
+                cards: Object.keys(deckCards)
+            }]
+        }
+
+        let groups: CardGroupData[] = []
+
+        const boardCards = Object.keys(sideboard)
+
+        switch (groupBy) {
+            case 'category':
+                groups = groupCardsByCategory(deckCards, boardCards)
+                break;
+            case 'color':
+                groups = groupCardsByColor(boardCards, cardDictionary, groupByColorMode)
+                break;
+            case 'mana-value':
+                groups = groupCardsByManaValue(boardCards, cardDictionary)
+                break;
+            case 'sub-type':
+                groups = groupCardsBySubType(boardCards, cardDictionary)
+                break;
+            case 'type':
+                groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
+                break;
+        }
+
+        groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
+
+        return groups
+    }, [deckCards, sideboard, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
+
+    const consideringCardGroups = React.useMemo(() => {
+        if (!groupBy) {
+            return [{
+                name: 'All cards',
+                cards: Object.keys(deckCards)
+            }]
+        }
+
+        let groups: CardGroupData[] = []
+
+        const boardCards = Object.keys(considering)
+
+        switch (groupBy) {
+            case 'category':
+                groups = groupCardsByCategory(deckCards, boardCards)
+                break;
+            case 'color':
+                groups = groupCardsByColor(boardCards, cardDictionary, groupByColorMode)
+                break;
+            case 'mana-value':
+                groups = groupCardsByManaValue(boardCards, cardDictionary)
+                break;
+            case 'sub-type':
+                groups = groupCardsBySubType(boardCards, cardDictionary)
+                break;
+            case 'type':
+                groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
+                break;
+        }
+
+        groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
+
+        return groups
+    }, [deckCards, considering, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
     const getGroupLabel = React.useCallback((group: CardGroupData) => {
         if (groupBy === 'color') {
@@ -368,7 +496,7 @@ export const DeckPage = () => {
         return group.name
     }, [groupBy])
 
-    const handleCategoryDragEnd = (event: DragEndEvent) => {
+    const handleCardDragEnd = (event: DragEndEvent) => {
         if (groupBy === 'category' && event.active.id && event.over?.id) {
             const cardDragIDSplit = event.active.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
             const cardName = cardDragIDSplit[0]
@@ -397,7 +525,7 @@ export const DeckPage = () => {
 
         Object.keys(selectedCards).forEach((cardName) => {
             if (Number.isInteger(quantity)) {
-                newDeckCards[cardName].quantity = parseInt(quantityUpdateText)
+                newDeckCards[cardName].boards[selectedCards[cardName]] = parseInt(quantityUpdateText)
             }
             if (categories.length > 0) {
                 if (!newDeckCards[cardName].categories) {
@@ -443,6 +571,15 @@ export const DeckPage = () => {
         setSelectedCards({})
     }
 
+    // const boardGroups = React.useMemo(() => {
+    //     return [{ name: 'Mainboard', groups: mainboardCardGroups },
+    //     { name: 'Sideboard', groups: sideboardCardGroups },
+    //     { name: 'Considering', groups: consideringCardGroups }
+    //     ]
+    // }, [mainboardCardGroups, sideboardCardGroups, consideringCardGroups])
+
+    // useDndMonitor({ onDragStart: () => console.log('start'), onDragEnd: () => console.log('end') })
+
     return (
         <div className='layout'>
             {/* <div className='top-bar'>
@@ -474,7 +611,7 @@ export const DeckPage = () => {
                 setCardSearchTerm={setCardSearchTerm}
                 cardSearchResults={cardSearchResults}
                 showSearchWindow={showSearchWindow}
-                deckStats={deckStats}
+                // deckStats={deckStats}
                 deckCards={deckCards}
                 addFromQuickSearch={addFromQuickSearch}
                 pinned={topBarPinned}
@@ -488,26 +625,60 @@ export const DeckPage = () => {
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
 
-            <DndContext sensors={dragSensors} onDragEnd={handleCategoryDragEnd}>
-                <div className='deck'
-                    onDrop={dropCardFromOutside}
-                    onDragOver={e => {
-                        e.preventDefault()
-                    }}
-                >
-                    {cardGroups.map(group =>
-                        <CardGroup
-                            key={group.name}
-                            groupName={group.name}
-                            groupLabel={getGroupLabel(group)}
-                            cardNames={group.cards}
-                            deckCards={deckCards}
-                            addDeckCardQuantity={addDeckCardQuantity}
-                            enableDragAndDrop={groupBy === 'category'}
-                            selectedCards={selectedCards}
-                            selectCard={selectCard}
-                        />
-                    )}
+            <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
+                <div className='deck'>
+                    <div className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'mainboard')} onDragOver={e => e.preventDefault()}>
+                        {mainboardCardGroups.map(group =>
+                            <CardGroup
+                                key={group.name}
+                                groupName={group.name}
+                                groupLabel={getGroupLabel(group)}
+                                cardNames={group.cards}
+                                deckCards={deckCards}
+                                addDeckCardQuantity={addDeckCardQuantity}
+                                enableDragAndDrop={groupBy === 'category'}
+                                selectedCards={selectedCards}
+                                selectCard={selectCard}
+                                board={'mainboard'}
+                            />
+                        )}
+                    </div>
+
+                    {sideboardCardGroups.length > 0 && <div className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'sideboard')} onDragOver={e => e.preventDefault()}>
+                        Sideboard
+                        {sideboardCardGroups.map(group =>
+                            <CardGroup
+                                key={group.name}
+                                groupName={group.name}
+                                groupLabel={getGroupLabel(group)}
+                                cardNames={group.cards}
+                                deckCards={deckCards}
+                                addDeckCardQuantity={addDeckCardQuantity}
+                                enableDragAndDrop={groupBy === 'category'}
+                                selectedCards={selectedCards}
+                                selectCard={selectCard}
+                                board={'sideboard'}
+                            />
+                        )}
+                    </div>}
+
+                    {consideringCardGroups.length > 0 && <div className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'considering')} onDragOver={e => e.preventDefault()}>
+                        Considering
+                        {consideringCardGroups.map(group =>
+                            <CardGroup
+                                key={group.name}
+                                groupName={group.name}
+                                groupLabel={getGroupLabel(group)}
+                                cardNames={group.cards}
+                                deckCards={deckCards}
+                                addDeckCardQuantity={addDeckCardQuantity}
+                                enableDragAndDrop={groupBy === 'category'}
+                                selectedCards={selectedCards}
+                                selectCard={selectCard}
+                                board={'considering'}
+                            />
+                        )}
+                    </div>}
 
                     {/* {Object.keys(deckCards).map(cardName => <div className={`deck-card`} key={cardName}>
                     <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' />
@@ -534,12 +705,23 @@ export const DeckPage = () => {
             }}>
                 {/* <Dropdown label={'Operation'} options={CATEGORY_UPDATE_OPERATIONS} value={categoryUpdateOperation} onSelect={setCategoryUpdateOperation} /> */}
                 <TextInput label={'Add categories'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
-                <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={numbersOnlyTextInputValidator} />
+                <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
                 <button onClick={updateSelectedCards}>Update cards</button>
                 <button onClick={removeSelectedCardsCategories}>Remove categories</button>
                 <button onClick={removeSelectedCards}>Remove cards</button>
+                {/* <div className='flex-column'> */}
+                <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
+                <button onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</button>
+                <button onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</button>
+                {/* </div> */}
                 <button onClick={deselectAllCards}>Deselect cards</button>
             </div>}
+
+            {/* <div style={{ position: 'sticky', bottom: 0, right: 0 }}> */}
+            <div style={{ position: 'fixed', bottom: 0, right: 0 }}>
+                <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
+            </div>
+            {/* </div> */}
 
             {/* <div className='bottom-bar'>€{totalPrice.toFixed(2)}</div> */}
         </div>

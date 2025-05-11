@@ -34,6 +34,27 @@ export const omitFromRecord = <K extends string | number | symbol, V>(record: Re
     return newObj
 }
 
+export const omitFromPartialRecord = <K extends string | number | symbol, V>(record: Partial<Record<K, V>>, key: K) => {
+    if (!record[key]) {
+        return record
+    }
+
+    const newObj = { ...record }
+    delete newObj[key]
+    return newObj
+}
+
 export const numbersOnlyTextInputValidator = (text: string) => {
     return !/\D/.test(text)
+}
+
+export const numbersLimitTextInputValidator = (limit: number) => {
+    return (text: string) => {
+        const number = parseInt(text)
+        return !Number.isInteger(number) || number <= limit
+    }
+}
+
+export const combineTextInputValidators = (...validators: ((text: string) => boolean)[]) => {
+    return (text: string) => validators.every(validator => validator(text))
 }

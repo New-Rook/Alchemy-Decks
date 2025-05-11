@@ -8,10 +8,10 @@ const convertGroupRecordToGroupData = (groups: Record<string, string[]>) => {
     return groupData
 }
 
-export const groupCardsByCategory = (deckCards: DeckCards) => {
+export const groupCardsByCategory = (deckCards: DeckCards, boardCards: string[]) => {
     const groups: Record<string, string[]> = {}
 
-    Object.keys(deckCards).forEach(cardName => {
+    boardCards.forEach(cardName => {
         if (!deckCards[cardName].categories) {
             if (!groups[NO_CATEGORY_NAME]) {
                 groups[NO_CATEGORY_NAME] = []
@@ -28,15 +28,25 @@ export const groupCardsByCategory = (deckCards: DeckCards) => {
         })
     })
 
-    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
+    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => {
+        if (groupA.name === NO_CATEGORY_NAME) {
+            return 1
+        }
+
+        if (groupB.name === NO_CATEGORY_NAME) {
+            return -1
+        }
+
+        return groupA.name.localeCompare(groupB.name)
+    })
 }
 
 export const LAND_GROUP_NAME = 'Land'
 
-export const groupCardsByManaValue = (deckCards: DeckCards, cardDictionary: CardDictionary) => {
+export const groupCardsByManaValue = (boardCards: string[], cardDictionary: CardDictionary) => {
     const groups: Record<string, string[]> = {}
 
-    Object.keys(deckCards).forEach(cardName => {
+    boardCards.forEach(cardName => {
         if (cardDictionary[cardName].cmc === 0 && getLastCardType(cardDictionary[cardName]) === 'Land') {
             if (!groups[LAND_GROUP_NAME]) {
                 groups[LAND_GROUP_NAME] = []
@@ -55,10 +65,10 @@ export const groupCardsByManaValue = (deckCards: DeckCards, cardDictionary: Card
 }
 
 // Alternative for this grouper is excluding creatures from artifacts and enchantments if the card has multiple types
-export const groupCardsByType = (deckCards: DeckCards, cardDictionary: CardDictionary, lastCardTypeOnly: boolean) => {
+export const groupCardsByType = (boardCards: string[], cardDictionary: CardDictionary, lastCardTypeOnly: boolean) => {
     const groups: Record<string, string[]> = {}
 
-    Object.keys(deckCards).forEach(cardName => {
+    boardCards.forEach(cardName => {
         if (lastCardTypeOnly) {
             const lastCardType = getLastCardType(cardDictionary[cardName])
             if (!groups[lastCardType]) {
@@ -84,10 +94,10 @@ export const groupCardsByType = (deckCards: DeckCards, cardDictionary: CardDicti
     return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
 }
 
-export const groupCardsBySubType = (deckCards: DeckCards, cardDictionary: CardDictionary) => {
+export const groupCardsBySubType = (boardCards: string[], cardDictionary: CardDictionary) => {
     const groups: Record<string, string[]> = {}
 
-    Object.keys(deckCards).forEach(cardName => {
+    boardCards.forEach(cardName => {
         const cardTypes = getCardSubTypes(cardDictionary[cardName])
         cardTypes.forEach(cardType => {
             if (!groups[cardType]) {
@@ -104,10 +114,10 @@ const COLOR_MISSING_GROUP_NAME = '---'
 const MULTICOLOR_GROUP_NAME = 'Multicolored'
 
 // Alternative for this grouper is grouping by color combinations for multicolored cards
-export const groupCardsByColor = (deckCards: DeckCards, cardDictionary: CardDictionary, mode: GroupByColorMode) => {
+export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDictionary, mode: GroupByColorMode) => {
     const groups: Record<string, string[]> = {}
 
-    Object.keys(deckCards).forEach(cardName => {
+    boardCards.forEach(cardName => {
         if (!cardDictionary[cardName].colors) {
             if (!groups[COLOR_MISSING_GROUP_NAME]) {
                 groups[COLOR_MISSING_GROUP_NAME] = []

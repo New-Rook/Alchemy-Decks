@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
-import { CardData, Color, CurrencyType, DeckCards, Format, SortType } from '../types'
+import { Board, CardData, Color, CurrencyType, DeckCards, Format, SortType } from '../types'
 import { SORT_TYPES, ALL_COLOR_KEYS, COLOR_DATA, FORMATS } from '../data/search'
 import { getCardAllCardName, getCardAllOracleText, getCardImages } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
@@ -12,7 +12,7 @@ import { CARD_SORTERS } from '../utilities/sorters'
 type Props = {
     back: () => void
     deckCards: DeckCards
-    addDeckCardQuantity: (cardName: string, quantity: number) => void
+    addDeckCardQuantity: (cardName: string, quantity: number, board: Board) => void
 }
 
 const PAGINATION_LIMIT = 40
@@ -174,10 +174,10 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
             <div className='card-search-window-results'>
                 {paginatedCards.map((cardData, index) => {
                     return <div className='deck-card' key={index}
-                        onClick={() => addDeckCardQuantity(cardData.name, 1)}
-                        onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1) }}>
+                        onClick={() => addDeckCardQuantity(cardData.name, 1, 'mainboard')}
+                        onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1, 'mainboard') }}>
                         <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
-                        {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].quantity}</div>}
+                        {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].boards.mainboard || deckCards[cardData.name].boards.sideboard ? 0 : ''}{deckCards[cardData.name].boards.sideboard ? ` + ${deckCards[cardData.name].boards.sideboard}` : ''}</div>}
                         {/* <div className='card-count'>{getCardPriceDisplay(cardData)}</div> */}
                     </div>
                 })}

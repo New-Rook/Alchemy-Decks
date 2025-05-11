@@ -1,5 +1,5 @@
 import React from "react"
-import { DeckCards } from "../../types"
+import { Board, DeckCards } from "../../types"
 import { Card } from "./Card"
 import { useDroppable } from "@dnd-kit/core"
 import './CardGroup.css'
@@ -10,13 +10,14 @@ type Props = {
     groupLabel: React.ReactNode
     cardNames: string[]
     deckCards: DeckCards
-    addDeckCardQuantity: (cardName: string, quantity: number) => void
+    addDeckCardQuantity: (cardName: string, quantity: number, board: Board) => void
     enableDragAndDrop: boolean
-    selectedCards: Record<string, boolean>
-    selectCard: (cardName: string) => void
+    selectedCards: Record<string, Board>
+    selectCard: (cardName: string, board: Board) => void
+    board: Board
 }
 
-export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard }: Props) => {
+export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board }: Props) => {
     const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
 
@@ -25,7 +26,7 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
     // }
 
     const numberOfCards = React.useMemo(() => {
-        return cardNames.reduce((total, cardName) => total + deckCards[cardName].quantity, 0)
+        return cardNames.reduce((total, cardName) => total + (deckCards[cardName].boards[board] ?? 0), 0)
     }, [cardNames, deckCards])
 
     const draggedCardIsNotFromThisGroup = React.useMemo(() => {
@@ -83,7 +84,8 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         addDeckCardQuantity={addDeckCardQuantity}
                         enableDragAndDrop={enableDragAndDrop}
                         selectCard={selectCard}
-                        selected={selectedCards[cardName]}
+                        selected={!!selectedCards[cardName]}
+                        board={board}
                     />
                 )}
             </div>
@@ -97,7 +99,8 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         ref={setOverwriteNodeRef}>
                         {draggedCardIsNotFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title">Overwrite</div>}
                     </div>
-                </div>}
+                </div>
+            }
         </div>
     )
 }
