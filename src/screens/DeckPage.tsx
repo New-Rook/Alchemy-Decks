@@ -16,7 +16,7 @@ import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COL
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
-import { DndContext, DragEndEvent, PointerSensor, useDndContext, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core'
+import { closestCenter, closestCorners, DndContext, DragEndEvent, PointerSensor, useDndContext, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core'
 import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
 import { TextInput } from '../components/TextInput'
 import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
@@ -63,7 +63,49 @@ export const DeckPage = () => {
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
     // console.log(deckCards)
 
+    const mainboardRef = React.useRef<HTMLDivElement>(null)
+    const sideboardRef = React.useRef<HTMLDivElement>(null)
+    const consideringRef = React.useRef<HTMLDivElement>(null)
+
+    const boardRefs = React.useMemo<Record<Board, React.RefObject<HTMLDivElement | null>>>(
+        () => ({ mainboard: mainboardRef, sideboard: sideboardRef, considering: consideringRef }),
+        [mainboardRef, sideboardRef, consideringRef])
+
     const dragSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 10 } }))
+
+    const lastKnownScrollPosition = React.useRef(0)
+    const userScrollRef = React.useRef(true)
+    const userScrollRefTimeoutID = React.useRef<NodeJS.Timeout>(null)
+
+    React.useEffect(() => {
+        const onScroll = () => {
+            if (userScrollRef.current) {
+                lastKnownScrollPosition.current = window.scrollY;
+            }
+
+            if (userScrollRefTimeoutID.current) {
+                clearTimeout(userScrollRefTimeoutID.current)
+            }
+            userScrollRefTimeoutID.current = setTimeout(() => userScrollRef.current = true, 30)
+        }
+
+        document.addEventListener('scroll', onScroll)
+
+        return () => document.removeEventListener('scroll', onScroll)
+    }, [])
+
+    // React.useEffect(() => {
+    //     const onScroll = (event: Event) => {
+    //         // lastKnownScrollPosition.current = window.scrollY;
+    //         // console.log('inp', event.data)
+    //         console.log(Date.now() - timeref.current)
+    //         timeref.current = Date.now()
+    //     }
+
+    //     document.addEventListener('input', onScroll)
+
+    //     return () => document.removeEventListener('input', onScroll)
+    // }, [])
 
     const mainboard = React.useMemo(() => {
         return Object.keys(deckCards).reduce<Record<string, number>>((board, cardName) => {
@@ -206,6 +248,7 @@ export const DeckPage = () => {
         })
 
         setDeckCards(newDeckCards)
+        setSelectedCards({})
     }
 
     const getRandomCard = async () => {
@@ -362,7 +405,7 @@ export const DeckPage = () => {
     }
 
     const selectCard = (cardName: string, board: Board) => {
-        if (selectedCards[cardName]) {
+        if (selectedCards[cardName] === board) {
             setSelectedCards((prevCards) => omitFromRecord(prevCards, cardName))
         }
         else {
@@ -517,22 +560,35 @@ export const DeckPage = () => {
         }
     }
 
+    const scrollToBoard = (board: Board) => {
+        if (boardRefs[board].current) {
+            boardRefs[board].current?.scrollIntoView({ behavior: 'smooth' })
+        }
+        userScrollRef.current = false
+    }
+
+    const scrollToLastKnownPosition = () => {
+        window.scrollTo({ top: lastKnownScrollPosition.current, behavior: 'smooth' })
+        userScrollRef.current = false
+    }
+
     const updateSelectedCards = () => {
         const newDeckCards = { ...deckCards }
 
         const quantity = parseInt(quantityUpdateText)
-        const categories = categoryUpdateText.split(/ +/).filter(category => !!category)
+        // const categories = categoryUpdateText.split(/ +/).filter(category => !!category)
+        const category = categoryUpdateText.trim()
 
         Object.keys(selectedCards).forEach((cardName) => {
             if (Number.isInteger(quantity)) {
                 newDeckCards[cardName].boards[selectedCards[cardName]] = parseInt(quantityUpdateText)
             }
-            if (categories.length > 0) {
+            if (category) {
                 if (!newDeckCards[cardName].categories) {
                     newDeckCards[cardName].categories = []
                 }
                 // if (categoryUpdateOperation === 'add') {
-                const uniqueCategories = new Set([...newDeckCards[cardName].categories, ...categories])
+                const uniqueCategories = new Set([...newDeckCards[cardName].categories, category])
                 newDeckCards[cardName].categories = Array.from(uniqueCategories)
                 // }
                 // else {
@@ -544,6 +600,7 @@ export const DeckPage = () => {
         setDeckCards(newDeckCards)
         setCategoryUpdateText('')
         setQuantityUpdateText('')
+        setSelectedCards({})
     }
 
     const removeSelectedCards = () => {
@@ -627,7 +684,8 @@ export const DeckPage = () => {
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
-                    <div className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'mainboard')} onDragOver={e => e.preventDefault()}>
+                    {/* <BoardButton board={'sideboard'} scrollToBoard={scrollToBoard} /> */}
+                    {mainboardCardGroups.length > 0 && <div ref={mainboardRef} className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'mainboard')} onDragOver={e => e.preventDefault()}>
                         {mainboardCardGroups.map(group =>
                             <CardGroup
                                 key={group.name}
@@ -642,9 +700,9 @@ export const DeckPage = () => {
                                 board={'mainboard'}
                             />
                         )}
-                    </div>
+                    </div>}
 
-                    {sideboardCardGroups.length > 0 && <div className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'sideboard')} onDragOver={e => e.preventDefault()}>
+                    {sideboardCardGroups.length > 0 && <div ref={sideboardRef} className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'sideboard')} onDragOver={e => e.preventDefault()}>
                         Sideboard
                         {sideboardCardGroups.map(group =>
                             <CardGroup
@@ -662,7 +720,7 @@ export const DeckPage = () => {
                         )}
                     </div>}
 
-                    {consideringCardGroups.length > 0 && <div className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'considering')} onDragOver={e => e.preventDefault()}>
+                    {consideringCardGroups.length > 0 && <div ref={consideringRef} className='flex-column' onDrop={(e) => dropCardFromOutside(e, 'considering')} onDragOver={e => e.preventDefault()}>
                         Considering
                         {consideringCardGroups.map(group =>
                             <CardGroup
@@ -704,7 +762,7 @@ export const DeckPage = () => {
                 padding: '0.5em'
             }}>
                 {/* <Dropdown label={'Operation'} options={CATEGORY_UPDATE_OPERATIONS} value={categoryUpdateOperation} onSelect={setCategoryUpdateOperation} /> */}
-                <TextInput label={'Add categories'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+                <TextInput label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
                 <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
                 <button onClick={updateSelectedCards}>Update cards</button>
                 <button onClick={removeSelectedCardsCategories}>Remove categories</button>
@@ -718,8 +776,12 @@ export const DeckPage = () => {
             </div>}
 
             {/* <div style={{ position: 'sticky', bottom: 0, right: 0 }}> */}
-            <div style={{ position: 'fixed', bottom: 0, right: 0 }}>
-                <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
+            <div style={{ position: 'fixed', gap: '0.25em', bottom: '1%', right: '1%', display: 'flex', flexDirection: 'column' }}>
+                <button onClick={() => scrollToBoard('mainboard')}>Go to mainboard</button>
+                <button onClick={() => scrollToBoard('sideboard')}>Go to sideboard</button>
+                {/* <BoardButton board={'sideboard'} scrollToBoard={scrollToBoard} /> */}
+                <button onClick={() => scrollToBoard('considering')}>Go to considering</button>
+                <button onClick={scrollToLastKnownPosition}>Scroll back</button>
             </div>
             {/* </div> */}
 

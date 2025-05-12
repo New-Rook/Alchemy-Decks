@@ -163,7 +163,7 @@ input[type='password'] {
 
 .deck-card {
   position: relative;
-  width: clamp(120px, 20vw, 600px);
+  width: clamp(120px, 20vw, 300px);
   scale: 1;
   transition:
     scale 0.1s,

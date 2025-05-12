@@ -84,7 +84,7 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         addDeckCardQuantity={addDeckCardQuantity}
                         enableDragAndDrop={enableDragAndDrop}
                         selectCard={selectCard}
-                        selected={!!selectedCards[cardName]}
+                        selected={selectedCards[cardName] === board}
                         board={board}
                     />
                 )}
