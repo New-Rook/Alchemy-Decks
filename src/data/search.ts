@@ -100,7 +100,7 @@ export const FORMATS: Format[] = [
 ]
 
 export const SORT_TYPES: SortType[] = ['name', 'mana-value', 'color', 'type', 'price-eur']
-export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color', 'category']
+export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color', 'category', 'none']
 export const GROUP_BY_COLOR_MODES: GroupByColorMode[] = ['multicolored-in-one', 'multicolored-expanded', 'all-monocolored']
 export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
 

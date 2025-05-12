@@ -131,7 +131,7 @@ export type CurrencyType = 'eur' | 'usd'
 export type SortType = 'name' | 'mana-value' | 'color' | 'type' | 'price-eur' | 'price-usd'
 export type CardSorter = (cardA: CardData, cardB: CardData, invert: boolean) => number
 
-export type GroupBy = 'mana-value' | 'type' | 'sub-type' | 'color' | 'category'
+export type GroupBy = 'mana-value' | 'type' | 'sub-type' | 'color' | 'category' | 'none'
 export type CardGrouper = (deckCards: DeckCards, cardDictionary: CardDictionary, alternative: boolean) => CardGroupData[]
 
 export type CardGroupData = {

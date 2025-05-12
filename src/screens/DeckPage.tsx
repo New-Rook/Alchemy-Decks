@@ -17,7 +17,7 @@ import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
 import { closestCenter, closestCorners, DndContext, DragEndEvent, PointerSensor, useDndContext, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core'
-import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from '../data/editor'
+import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
 import { TextInput } from '../components/TextInput'
 import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
 
@@ -484,9 +484,9 @@ export const DeckPage = () => {
     }, [deckCards, sideboard, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
     const consideringCardGroups = React.useMemo(() => {
-        if (!groupBy) {
+        if (groupBy === 'none') {
             return [{
-                name: 'All cards',
+                name: NO_GROUP_NAME,
                 cards: Object.keys(deckCards)
             }]
         }

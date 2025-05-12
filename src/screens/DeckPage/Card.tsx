@@ -25,14 +25,14 @@ const SLIDE_BACK_STYLE = {
 export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enableDragAndDrop, selected, selectCard, board }: Props) => {
     const { cardDictionary } = React.useContext(AppContext)
 
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    const { attributes, listeners, setNodeRef, transform, isDragging, node } = useDraggable({
         id: `${cardName}${DRAG_AND_DROP_ID_DELIMITER}${groupName}`, disabled: !enableDragAndDrop
     });
 
     const [flipped, setFlipped] = React.useState(false)
     const [isPendingHoveringState, setIsPendingHoveringState] = React.useState(false)
     const [isHovering, setIsHovering] = React.useState(false)
-    const ref = React.useRef<HTMLDivElement>(null)
+    const [windowHalvesPosition, setWindowHalvesPosition] = React.useState({ right: false, bottom: false })
 
     React.useEffect(() => {
         if (!isPendingHoveringState || isDragging) {
@@ -40,7 +40,15 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
             return
         }
 
-        const timeoutID = setTimeout(() => setIsHovering(true), 250)
+        const timeoutID = setTimeout(() => {
+            setIsHovering(true)
+            if (node.current) {
+                const rect = node.current.getBoundingClientRect()
+                const isOnRightHalf = rect.left > window.innerWidth / 2
+                const isOnBottomHalf = rect.top > window.innerHeight / 2
+                setWindowHalvesPosition({ right: isOnRightHalf, bottom: isOnBottomHalf })
+            }
+        }, 250)
         return () => clearTimeout(timeoutID)
     }, [isPendingHoveringState, isDragging, selected])
 
@@ -59,6 +67,15 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
             : getCardImages(cardDictionary[cardName]).normal
     }, [cardDictionary, cardName, flipped])
 
+
+    const expandedCardClassName = React.useMemo(() => {
+        if (!isHovering || isDragging) {
+            return ''
+        }
+
+        return 'expanded-card-active ' + (windowHalvesPosition.right ? 'expanded-card-active-right' : 'expanded-card-active-left')
+    }, [isHovering, isDragging, windowHalvesPosition])
+
     return (
         <div onClick={() => selectCard(cardName, board)} className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging || isHovering ? 2 : undefined, transformStyle: 'preserve-3d' }}  {...listeners} {...attributes}>
             {/* <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
@@ -75,9 +92,8 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
             {/* {cardDictionary[cardName].card_faces && flipped ? <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' draggable={false} /> : <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
                 style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} />} */}
             {/* {<img src={cardDictionary[cardName].card_faces && flipped ? cardDictionary[cardName].card_faces[1].image_uris.normal : getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' draggable={false} />} */}
-            <img src={imageSource} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
-                draggable={false} />
-            <img src={imageSource} className={`deck-card-image expanded-card ${isHovering && !isDragging ? 'expanded-card-active' : ''}`} draggable={false} />
+            <img src={imageSource} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)} draggable={false} />
+            <img src={imageSource} className={`deck-card-image expanded-card ${expandedCardClassName}`} draggable={false} />
             <div className='card-count-container flex-column' style={{ zIndex: 3 }} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>x{deckCard.boards[board]}</div>
                 <div className='flex-row'>
