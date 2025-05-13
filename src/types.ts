@@ -29,7 +29,10 @@ export type Deck = {
 export type DeckCard = {
   // quantity: number
   categories?: string[] // Empty array means untagged
-  set?: string // Set name
+  print?: {
+    set: string
+    uris: string[]
+  }
   // useFromCollection?: boolean
   // boards: {
   //   mainboard: number
@@ -81,17 +84,25 @@ export interface CardData extends BaseCardData {
     usd_etched: string
   }
   released_at: string
+  set: string
+  set_name: string
 }
 
 type Legality = 'legal' | 'restricted' | 'not_legal'
 
 type CardDataImageURIs = {
-  small: string,
-  normal: string,
-  large: string,
-  png: string,
-  art_crop: string,
+  small: string
+  normal: string
+  large: string
+  png: string
+  art_crop: string
   border_crop: string
+}
+
+export type CardArtData = {
+  set: string
+  set_name: string
+  image_uris: CardDataImageURIs[]
 }
 
 export type Color = 'W' | 'U' | 'B' | 'R' | 'G'

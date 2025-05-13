@@ -3,7 +3,7 @@ import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { Board, CardData, Color, CurrencyType, DeckCards, Format, SortType } from '../types'
 import { SORT_TYPES, ALL_COLOR_KEYS, COLOR_DATA, FORMATS } from '../data/search'
-import { getCardAllCardName, getCardAllOracleText, getCardImages } from '../utilities/card'
+import { getCardAllCardName, getCardAllOracleText, getCardFrontImage } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
 import { stringStartsAndEndsWith } from '../utilities/general'
 import { useAdvancedState } from '../hooks/useAdvancedState'
@@ -176,7 +176,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
                     return <div className='deck-card' key={index}
                         onClick={() => addDeckCardQuantity(cardData.name, 1, 'mainboard')}
                         onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1, 'mainboard') }}>
-                        <img src={getCardImages(cardData)?.normal} className='deck-card-image' />
+                        <img src={getCardFrontImage(cardData)?.normal} className='deck-card-image' />
                         {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].boards.mainboard || deckCards[cardData.name].boards.sideboard ? 0 : ''}{deckCards[cardData.name].boards.sideboard ? ` + ${deckCards[cardData.name].boards.sideboard}` : ''}</div>}
                         {/* <div className='card-count'>{getCardPriceDisplay(cardData)}</div> */}
                     </div>

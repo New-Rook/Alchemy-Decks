@@ -1,6 +1,6 @@
 import { Board, DeckCard } from "../../types"
 import { AppContext } from "../../context/AppContext"
-import { getCardImages } from "../../utilities/card"
+import { getCardFrontImage } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
 import { DRAG_AND_DROP_ID_DELIMITER } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
@@ -62,11 +62,12 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
     }
 
     const imageSource = React.useMemo(() => {
-        return cardDictionary[cardName].card_faces && flipped
-            ? cardDictionary[cardName].card_faces[1].image_uris.normal
-            : getCardImages(cardDictionary[cardName]).normal
-    }, [cardDictionary, cardName, flipped])
+        if (cardDictionary[cardName].card_faces && flipped) {
+            return deckCard.print?.uris[1] ?? cardDictionary[cardName].card_faces[1].image_uris.normal
+        }
 
+        return deckCard.print?.uris[0] ?? getCardFrontImage(cardDictionary[cardName]).normal
+    }, [cardDictionary, cardName, flipped, deckCard])
 
     const expandedCardClassName = React.useMemo(() => {
         if (!isHovering || isDragging) {

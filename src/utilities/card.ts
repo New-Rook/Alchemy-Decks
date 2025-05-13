@@ -25,8 +25,16 @@ export const getCardAllCardName = (card: CardData) => {
     return card.name
 }
 
-export const getCardImages = (card: CardData) => {
+export const getCardFrontImage = (card: CardData) => {
     return getCardBaseData(card).image_uris
+}
+
+export const getCardImages = (card: CardData) => {
+    if (card.card_faces) {
+        return card.card_faces.map(cardFace => cardFace.image_uris)
+    }
+
+    return [card.image_uris]
 }
 
 export const getLastCardType = (cardData: CardData) => {

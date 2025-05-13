@@ -2,8 +2,8 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { Board, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
-import { getCardImages } from '../utilities/card'
+import { Board, CardArtData, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
+import { getCardFrontImage } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
 import { SearchWindow } from './SearchWindow'
@@ -20,6 +20,7 @@ import { closestCenter, closestCorners, DndContext, DragEndEvent, PointerSensor,
 import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
 import { TextInput } from '../components/TextInput'
 import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
+import { CartArtWindow } from './CartArtWindow'
 
 const basicLandRegex = /Basic Land/
 
@@ -61,6 +62,7 @@ export const DeckPage = () => {
     const [selectedCards, setSelectedCards] = React.useState<Record<string, Board>>({})
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
+    const [cardArtWindowVisible, showCardArtWindow, hideCardArtWindow] = useBooleanState()
     // console.log(deckCards)
 
     const mainboardRef = React.useRef<HTMLDivElement>(null)
@@ -416,7 +418,7 @@ export const DeckPage = () => {
     const mainboardCardGroups = React.useMemo(() => {
         if (!groupBy) {
             return [{
-                name: 'All cards',
+                name: NO_GROUP_NAME,
                 cards: Object.keys(deckCards)
             }]
         }
@@ -451,7 +453,7 @@ export const DeckPage = () => {
     const sideboardCardGroups = React.useMemo(() => {
         if (!groupBy) {
             return [{
-                name: 'All cards',
+                name: NO_GROUP_NAME,
                 cards: Object.keys(deckCards)
             }]
         }
@@ -637,6 +639,33 @@ export const DeckPage = () => {
 
     // useDndMonitor({ onDragStart: () => console.log('start'), onDragEnd: () => console.log('end') })
 
+    const saveArtChanges = (cardArtMap: Record<string, CardArtData>) => {
+        const newDeckCards = { ...deckCards }
+
+        Object.keys(cardArtMap).forEach((cardName) => {
+            if (newDeckCards[cardName].print?.set === cardArtMap[cardName].set) {
+                return
+            }
+
+            // newDeckCards[cardName].print = {
+            //     set: cardArtMap[cardName].set,
+            //     uris: cardArtMap[cardName].image_uris.map(image => image.normal)
+            // }
+            newDeckCards[cardName] = {
+                ...newDeckCards[cardName],
+                print: {
+                    set: cardArtMap[cardName].set,
+                    uris: cardArtMap[cardName].image_uris.map(image => image.normal)
+                }
+            }
+        })
+
+        setDeckCards(newDeckCards)
+        setCategoryUpdateText('')
+        setQuantityUpdateText('')
+        setSelectedCards({})
+    }
+
     return (
         <div className='layout'>
             {/* <div className='top-bar'>
@@ -681,6 +710,7 @@ export const DeckPage = () => {
             <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
+            {cardArtWindowVisible && <CartArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
@@ -768,6 +798,7 @@ export const DeckPage = () => {
                 <button onClick={removeSelectedCardsCategories}>Remove categories</button>
                 <button onClick={removeSelectedCards}>Remove cards</button>
                 {/* <div className='flex-column'> */}
+                <button onClick={showCardArtWindow}>Change card art</button>
                 <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
                 <button onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</button>
                 <button onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</button>

@@ -1,7 +1,7 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
 import { CardData, DeckCards } from "../../types"
-import { getCardImages } from "../../utilities/card"
+import { getCardFrontImage } from "../../utilities/card"
 
 type Props = {
     cardSearchTerm: string
@@ -56,7 +56,7 @@ export const DeckPageTopBar = ({
                 </div>
             </div>
             {cardSearchResults.slice(0, 5).map(cardData => <button key={cardData.name} className='card-search-result' onClick={() => addFromQuickSearch(cardData)}>
-                <img src={getCardImages(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
+                <img src={getCardFrontImage(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
             </button>)}
         </div>
     )
