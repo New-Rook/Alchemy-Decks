@@ -13,15 +13,19 @@ export type UserData = {
 //   format: Format
 // }
 
-export type Deck = {
+export type Deck = DeckMetaData & {
   authorID: string
-  name: string
   cards: DeckCards
   // cards: {
   //   mainboard: DeckCards
   //   sideboard: DeckCards
   //   considering: DeckCards
   // }
+}
+
+export type DeckMetaData = {
+  name: string
+  description: string
   format: Format
   visibility: DeckVisibility
 }
