@@ -3,6 +3,7 @@ import { DeckMetaData } from '../types'
 import { TextInput } from '../components/TextInput'
 import { Dropdown } from '../components/Dropdown'
 import { VISIBILITY_TYPES } from '../data/editor'
+import { FORMATS } from '../data/search'
 
 type Props = {
     back: () => void
@@ -33,6 +34,14 @@ export const DeckMetaDataWindow = ({ back, save, deckMetaData, legalityWarnings 
                     label={'Description'}
                     value={deckMetaDataDraft.description}
                     onChangeText={(text) => setDeckMetaDataDraft({ ...deckMetaDataDraft, description: text })}
+                />
+            </div>
+            <div className='flex-column'>
+                <Dropdown
+                    label={'Format'}
+                    value={deckMetaDataDraft.format}
+                    options={FORMATS}
+                    onSelect={(format) => setDeckMetaDataDraft({ ...deckMetaDataDraft, format })}
                 />
             </div>
             <div className='flex-column'>

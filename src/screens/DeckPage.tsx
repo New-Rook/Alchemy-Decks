@@ -179,12 +179,12 @@ export const DeckPage = () => {
             const infiniteQuantity = /A deck can have any number/.test(cardDictionary[cardName].oracle_text)
 
             Object.keys(cardDictionary[cardName].legalities).forEach(format => {
-                if (legalities[format] === false) {
-                    return
-                }
+                // if (legalities[format] === false) {
+                //     return
+                // }
 
                 const legality = cardDictionary[cardName].legalities[format]
-                if (legality === 'legal' && (
+                if (legalities[format] !== false && legality === 'legal' && (
                     infiniteQuantity
                     || (alternateQuantity && cardQuantity <= alternateQuantity)
                     || (format === 'commander' && cardQuantity <= 1)
@@ -193,16 +193,20 @@ export const DeckPage = () => {
                 )) {
                     legalities[format] = true
                 }
-                else if (legality === 'restricted' && cardQuantity <= 1) {
+                else if (legalities[format] !== false && legality === 'restricted' && cardQuantity <= 1) {
                     legalities[format] = true
                 }
                 else if (format === deckMetaData.format) {
                     legalities[format] = false
                     if (legality === 'not_legal') {
-                        legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}`
-                    } else {
+                        legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}.`
+                    }
+                    else if (legality === 'banned') {
+                        legalityWarnings[cardName] = `This card is banned in ${deckMetaData.format}.`
+                    }
+                    else {
                         // Quantity higher than limit
-                        legalityWarnings[cardName] = `The number of copies of this card goes over the limit for ${deckMetaData.format}`
+                        legalityWarnings[cardName] = `The number of copies of this card goes over the limit for ${deckMetaData.format}.`
                     }
                 }
             })
@@ -781,7 +785,7 @@ export const DeckPage = () => {
             {groupBy === 'type' && <Checkbox label="Group only by last card type" checked={groupByTypeLastCardTypeOnly} onCheck={setGroupByTypeLastCardTypeOnly} />}
             <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
 
-            {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
+            {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} format={deckMetaData.format} deckCards={deckCards} addDeckCardQuantity={addDeckCardQuantity} />}
             {cardArtWindowVisible && <CartArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
             {deckMetaDataWindowVisible && <DeckMetaDataWindow back={hideDeckMetaDataWindow} save={setDeckMetaData} deckMetaData={deckMetaData} legalityWarnings={deckStats.legalityWarnings} />}
 

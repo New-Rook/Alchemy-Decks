@@ -92,7 +92,7 @@ export interface CardData extends BaseCardData {
   set_name: string
 }
 
-type Legality = 'legal' | 'restricted' | 'not_legal'
+type Legality = 'legal' | 'restricted' | 'not_legal' | 'banned'
 
 type CardDataImageURIs = {
   small: string

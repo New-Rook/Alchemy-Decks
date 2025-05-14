@@ -8,9 +8,11 @@ import { TextInput } from '../components/TextInput'
 import { stringStartsAndEndsWith } from '../utilities/general'
 import { useAdvancedState } from '../hooks/useAdvancedState'
 import { CARD_SORTERS } from '../utilities/sorters'
+import { Checkbox } from '../components/Checkbox'
 
 type Props = {
     back: () => void
+    format: Format
     deckCards: DeckCards
     addDeckCardQuantity: (cardName: string, quantity: number, board: Board) => void
 }
@@ -18,7 +20,7 @@ type Props = {
 const PAGINATION_LIMIT = 40
 const searchRegex = /\w+|"[\w ]+"/g
 
-export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) => {
+export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: Props) => {
     const { currentDeckID, cardDictionary } = useContext(AppContext)
 
     const [searchWindowPageIndex, setSearchWindowPageIndex] = React.useState(0)
@@ -27,13 +29,14 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
         setSearchWindowPageIndex(0)
     }, [])
 
-    const [format, setFormat] = useAdvancedState<Format>('standard', resetPageIndex)
+    // const [format, setFormat] = useAdvancedState<Format>('standard', resetPageIndex)
     const [sortType, setSortType] = useAdvancedState<SortType>('mana-value', resetPageIndex)
     const [sortAscending, setSortAscending] = useAdvancedState(true, resetPageIndex)
     const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
     const [colorFilters, setColorFilters] = useAdvancedState<Color[]>([], resetPageIndex)
     const [oracleTextSearchTerm, setOracleTextSearchTerm] = useAdvancedState('', resetPageIndex)
     const [nameSearchTerm, setNameSearchTerm] = useAdvancedState('', resetPageIndex)
+    const [showBannedCards, setShowBannedCards] = useAdvancedState(false, resetPageIndex)
 
     const getCardPriceDisplay = React.useCallback((cardData: CardData) => {
         if (currencyType === 'eur') {
@@ -71,8 +74,8 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
     }, [currencyType])
 
     const legalCards = React.useMemo(() => {
-        return Object.values(cardDictionary).filter(card => card.legalities[format] === 'legal' || card.legalities[format] === 'restricted')
-    }, [cardDictionary, format])
+        return Object.values(cardDictionary).filter(card => card.legalities[format] === 'legal' || card.legalities[format] === 'restricted' || (card.legalities[format] === 'banned' && showBannedCards))
+    }, [cardDictionary, format, showBannedCards])
 
     const searchTermNameFilteredCards = React.useMemo(() => {
         const searchTerms = nameSearchTerm.match(searchRegex)
@@ -149,12 +152,13 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity }: Props) =>
                     onChangeText={setOracleTextSearchTerm}
                 />
                 {ALL_COLOR_KEYS.map(color => <button key={color} className={`search-symbol${!colorFilters.includes(color) ? ' search-symbol-inactive' : ''}`} onClick={() => filterColor(color)}><img src={COLOR_DATA[color].svg_uri} /></button>)}
-                <div className='filter'>
+                {/* <div className='filter'>
                     <label htmlFor="format-select">Format</label>
                     <select id="format-select" value={format} onChange={(e) => setFormat(e.target.value as Format)}>
                         {FORMATS.map(format => <option key={format} value={format}>{format}</option>)}
                     </select>
-                </div>
+                </div> */}
+                <Checkbox label="Show banned cards" checked={showBannedCards} onCheck={setShowBannedCards} />
                 <div className='filter'>
                     <label htmlFor="sort-select">Sort by</label>
                     <select id="sort-select" value={sortType} onChange={(e) => setSortType(e.target.value as SortType)}>
