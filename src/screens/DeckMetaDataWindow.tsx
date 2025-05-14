@@ -1,5 +1,8 @@
 import React from 'react'
 import { DeckMetaData } from '../types'
+import { TextInput } from '../components/TextInput'
+import { Dropdown } from '../components/Dropdown'
+import { VISIBILITY_TYPES } from '../data/editor'
 
 type Props = {
     back: () => void
@@ -19,19 +22,32 @@ export const DeckMetaDataWindow = ({ back, save, deckMetaData, legalityWarnings 
     return (
         <div className='card-search-window'>
             <div className='flex-column'>
-                Deck name
-                {deckMetaData.name}
+                <TextInput
+                    label={'Deck name'}
+                    value={deckMetaDataDraft.name}
+                    onChangeText={(text) => setDeckMetaDataDraft({ ...deckMetaDataDraft, name: text })}
+                />
             </div>
             <div className='flex-column'>
-                Description
-                {deckMetaData.description}
+                <TextInput
+                    label={'Description'}
+                    value={deckMetaDataDraft.description}
+                    onChangeText={(text) => setDeckMetaDataDraft({ ...deckMetaDataDraft, description: text })}
+                />
+            </div>
+            <div className='flex-column'>
+                <Dropdown
+                    label={'Visibility'}
+                    value={deckMetaDataDraft.visibility}
+                    options={VISIBILITY_TYPES}
+                    onSelect={(visibility) => setDeckMetaDataDraft({ ...deckMetaDataDraft, visibility })}
+                />
             </div>
             <div className='flex-column'>
                 Warnings
                 {Object.keys(legalityWarnings).map(cardName =>
                     <p className='flex-row'>
-                        {cardName}
-                        {legalityWarnings[cardName]}
+                        {cardName} {legalityWarnings[cardName]}
                     </p>
                 )}
             </div>
