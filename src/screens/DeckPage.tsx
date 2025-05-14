@@ -69,7 +69,6 @@ export const DeckPage = () => {
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
     const [cardArtWindowVisible, showCardArtWindow, hideCardArtWindow] = useBooleanState()
     const [deckMetaDataWindowVisible, showDeckMetaDataWindow, hideDeckMetaDataWindow] = useBooleanState()
-    // console.log(deckCards)
 
     const mainboardRef = React.useRef<HTMLDivElement>(null)
     const sideboardRef = React.useRef<HTMLDivElement>(null)
@@ -159,7 +158,8 @@ export const DeckPage = () => {
         let numberOfSideboardCards = 0
         let mainboardPrice = 0
         let sideboardPrice = 0
-        const legalities: Record<string, boolean> = {}
+        // const legalities: Record<string, boolean> = {}
+        let legal = true
         const legalityWarnings: Record<string, string> = {}
 
         Object.keys(deckCards).forEach((cardName) => {
@@ -178,51 +178,51 @@ export const DeckPage = () => {
             const alternateQuantity = alternateQuantityMatch ? NUMBER_NAME_MAP[alternateQuantityMatch[0]] : undefined
             const infiniteQuantity = /A deck can have any number/.test(cardDictionary[cardName].oracle_text)
 
-            Object.keys(cardDictionary[cardName].legalities).forEach(format => {
-                // if (legalities[format] === false) {
-                //     return
-                // }
+            // Object.keys(cardDictionary[cardName].legalities).forEach(format => {
+            // if (legalities[format] === false) {
+            //     return
+            // }
 
-                const legality = cardDictionary[cardName].legalities[format]
-                if (legalities[format] !== false && legality === 'legal' && (
-                    infiniteQuantity
-                    || (alternateQuantity && cardQuantity <= alternateQuantity)
-                    || (format === 'commander' && cardQuantity <= 1)
-                    || cardQuantity <= 4
-                    || isBasicLand
-                )) {
-                    legalities[format] = true
-                }
-                else if (legalities[format] !== false && legality === 'restricted' && cardQuantity <= 1) {
-                    legalities[format] = true
-                }
-                else if (format === deckMetaData.format) {
-                    legalities[format] = false
-                    if (legality === 'not_legal') {
-                        legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}.`
-                    }
-                    else if (legality === 'banned') {
-                        legalityWarnings[cardName] = `This card is banned in ${deckMetaData.format}.`
-                    }
-                    else {
-                        // Quantity higher than limit
-                        legalityWarnings[cardName] = `The number of copies of this card goes over the limit for ${deckMetaData.format}.`
-                    }
-                }
-            })
-        })
-
-        const formats = Object.keys(legalities)
-        formats.forEach((format) => {
-            if (!legalities[format]) {
-                delete legalities[format]
+            const legality = cardDictionary[cardName].legalities[deckMetaData.format]
+            if (legality === 'legal' && (
+                infiniteQuantity
+                || (alternateQuantity && cardQuantity <= alternateQuantity)
+                || (deckMetaData.format === 'commander' && cardQuantity <= 1)
+                || cardQuantity <= 4
+                || isBasicLand
+            )) {
+                // legalities[format] = true
             }
+            else if (legality === 'restricted' && cardQuantity <= 1) {
+                // legalities[format] = true
+            }
+            else {
+                legal = false
+                if (legality === 'not_legal') {
+                    legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}.`
+                }
+                else if (legality === 'banned') {
+                    legalityWarnings[cardName] = `This card is banned in ${deckMetaData.format}.`
+                }
+                else {
+                    // Quantity higher than limit
+                    legalityWarnings[cardName] = `The number of copies of this card goes over the limit for ${deckMetaData.format}.`
+                }
+            }
+            // })
         })
+
+        // const formats = Object.keys(legalities)
+        // formats.forEach((format) => {
+        //     if (!legalities[format]) {
+        //         delete legalities[format]
+        //     }
+        // })
 
         return {
             mainboard: { numberOfCards: numberOfMainboardCards, price: mainboardPrice },
             sideboard: { numberOfCards: numberOfSideboardCards, price: sideboardPrice },
-            legalities,
+            legal,
             legalityWarnings
         }
     }, [deckCards, cardDictionary, deckMetaData])
@@ -247,6 +247,7 @@ export const DeckPage = () => {
         if (newQuantity === 0) {
             if (Object.keys(deckCards[cardName].boards).length === 1) {
                 deleteDeckCard(cardName)
+                return
             }
 
             updateDeckCard(cardName, 'boards', omitFromPartialRecord(deckCards[cardName].boards, board))
@@ -773,6 +774,8 @@ export const DeckPage = () => {
                 cardSearchResults={cardSearchResults}
                 showSearchWindow={showSearchWindow}
                 showDeckMetaDataWindow={showDeckMetaDataWindow}
+                deckLegal={deckStats.legal}
+                deckMetaData={deckMetaData}
                 // deckStats={deckStats}
                 deckCards={deckCards}
                 addFromQuickSearch={addFromQuickSearch}

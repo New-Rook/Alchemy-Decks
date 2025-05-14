@@ -1,6 +1,6 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
-import { CardData, DeckCards } from "../../types"
+import { CardData, DeckCards, DeckMetaData } from "../../types"
 import { getCardFrontImage } from "../../utilities/card"
 
 type Props = {
@@ -9,6 +9,8 @@ type Props = {
     cardSearchResults: CardData[]
     showSearchWindow: () => void
     showDeckMetaDataWindow: () => void
+    deckLegal: boolean
+    deckMetaData: DeckMetaData
     // deckStats: {
     //     numberOfCards: number
     //     price: number
@@ -25,6 +27,8 @@ export const DeckPageTopBar = ({
     cardSearchResults,
     showSearchWindow,
     showDeckMetaDataWindow,
+    deckLegal,
+    deckMetaData,
     // deckStats,
     deckCards,
     addFromQuickSearch,
@@ -40,7 +44,7 @@ export const DeckPageTopBar = ({
 
     return (
         <div className={`card-search${pinned ? ' top-bar-sticky' : ''}`}>
-            <div className='stat-row'>
+            <div className='stat-row flex-gap'>
                 <div className='flex-row'>
                     <TextInput
                         label="Quick search"
@@ -49,7 +53,9 @@ export const DeckPageTopBar = ({
                     />
                     <button onClick={showSearchWindow}>Full search</button>
                 </div>
-                <button className='right-placed-item' onClick={showDeckMetaDataWindow}>Change deck data</button>
+                <p className='right-placed-item'>{deckMetaData.format}</p>
+                <p >{!deckLegal && `This deck is not legal in ${deckMetaData.format}.`}</p>
+                <button onClick={showDeckMetaDataWindow}>Change deck data</button>
                 <button onClick={copyDeckListToClipboard}>Copy deck list</button>
                 <div className='flex-row flex-gap flex-center'>
                     {/* <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div> */}

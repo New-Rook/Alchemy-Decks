@@ -79,7 +79,7 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
     }, [isHovering, isDragging, windowHalvesPosition])
 
     return (
-        <div onClick={() => selectCard(cardName, board)} className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging || isHovering ? 2 : undefined, transformStyle: 'preserve-3d' }}  {...listeners} {...attributes}>
+        <div onClick={() => selectCard(cardName, board)} className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging || isHovering ? 2 : undefined, transformStyle: 'preserve-3d', backgroundColor: legalityWarning ? 'red' : undefined }}  {...listeners} {...attributes}>
             {/* <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
                 style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} /> */}
             {/* {cardDictionary[cardName].card_faces && <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' style={{ position: 'absolute', left: 0, rotate: flipped ? 'y 0deg' : 'y 180deg', transition: 'rotate 0.5s', translate: '0 0 -100px' }} draggable={false} />} */}
