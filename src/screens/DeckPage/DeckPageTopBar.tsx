@@ -8,6 +8,7 @@ type Props = {
     setCardSearchTerm: (text: string) => void
     cardSearchResults: CardData[]
     showSearchWindow: () => void
+    showDeckMetaDataWindow: () => void
     // deckStats: {
     //     numberOfCards: number
     //     price: number
@@ -23,6 +24,7 @@ export const DeckPageTopBar = ({
     setCardSearchTerm,
     cardSearchResults,
     showSearchWindow,
+    showDeckMetaDataWindow,
     // deckStats,
     deckCards,
     addFromQuickSearch,
@@ -47,7 +49,8 @@ export const DeckPageTopBar = ({
                     />
                     <button onClick={showSearchWindow}>Full search</button>
                 </div>
-                <button className='right-placed-item' onClick={copyDeckListToClipboard}>Copy deck list</button>
+                <button className='right-placed-item' onClick={showDeckMetaDataWindow}>Change deck data</button>
+                <button onClick={copyDeckListToClipboard}>Copy deck list</button>
                 <div className='flex-row flex-gap flex-center'>
                     {/* <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div> */}
                     {/* <div>{deckStats.numberOfCards}</div> */}

@@ -15,9 +15,10 @@ type Props = {
     selectedCards: Record<string, Board>
     selectCard: (cardName: string, board: Board) => void
     board: Board
+    legalityWarnings: Record<string, string>
 }
 
-export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board }: Props) => {
+export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board, legalityWarnings }: Props) => {
     const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
 
@@ -86,6 +87,7 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         selectCard={selectCard}
                         selected={selectedCards[cardName] === board}
                         board={board}
+                        legalityWarning={legalityWarnings[cardName]}
                     />
                 )}
             </div>

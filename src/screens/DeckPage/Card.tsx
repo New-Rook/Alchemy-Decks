@@ -16,13 +16,14 @@ type Props = {
     selected: boolean
     selectCard: (cardName: string, board: Board) => void
     board: Board
+    legalityWarning: string
 }
 
 const SLIDE_BACK_STYLE = {
     transition: 'transform 0.25s'
 }
 
-export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enableDragAndDrop, selected, selectCard, board }: Props) => {
+export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enableDragAndDrop, selected, selectCard, board, legalityWarning }: Props) => {
     const { cardDictionary } = React.useContext(AppContext)
 
     const { attributes, listeners, setNodeRef, transform, isDragging, node } = useDraggable({
@@ -94,7 +95,15 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
                 style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} />} */}
             {/* {<img src={cardDictionary[cardName].card_faces && flipped ? cardDictionary[cardName].card_faces[1].image_uris.normal : getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' draggable={false} />} */}
             <img src={imageSource} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)} draggable={false} />
-            <img src={imageSource} className={`deck-card-image expanded-card ${expandedCardClassName}`} draggable={false} />
+            {/* <img src={imageSource} className={`deck-card-image expanded-card ${expandedCardClassName}`} draggable={false} /> */}
+            <div className={`flex-column expanded-card ${expandedCardClassName}`}>
+                {!windowHalvesPosition.bottom && <img src={imageSource} className={`deck-card-image`} draggable={false} />}
+                {isHovering && <div className="flex-column" style={{ backgroundColor: 'white' }}>
+                    {deckCard.categories && <div className="flex-row flex-gap overflow-wrap">{deckCard.categories.map(category => <p>{category}</p>)}</div>}
+                    <div style={{ color: 'red' }}>{legalityWarning}</div>
+                </div>}
+                {windowHalvesPosition.bottom && <img src={imageSource} className={`deck-card-image`} draggable={false} />}
+            </div>
             <div className='card-count-container flex-column' style={{ zIndex: 3 }} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>x{deckCard.boards[board]}</div>
                 <div className='flex-row'>

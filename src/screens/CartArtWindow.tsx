@@ -64,6 +64,7 @@ export const CartArtWindow = ({ back, save, deckCards, selectedCards }: Props) =
 
     const saveChanges = () => {
         save(chosenCardArts)
+        back()
     }
 
     const getCardChosenDisplay = (cardName: string) => {

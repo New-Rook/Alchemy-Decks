@@ -84,6 +84,10 @@ input[type='password'] {
   flex-direction: column;
 }
 
+.overflow-wrap {
+  overflow: wrap;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

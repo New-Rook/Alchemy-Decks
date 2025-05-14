@@ -2,8 +2,8 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { Board, CardArtData, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
-import { getCardFrontImage } from '../utilities/card'
+import { Board, CardArtData, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, DeckMetaData, Format, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
+import { getCardAllOracleText, getCardFrontImage } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
 import { SearchWindow } from './SearchWindow'
@@ -21,10 +21,13 @@ import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_
 import { TextInput } from '../components/TextInput'
 import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
 import { CartArtWindow } from './CartArtWindow'
+import { NUMBER_NAME_MAP } from '../data/general'
+import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 
-const basicLandRegex = /Basic Land/
+const basicLandRegex = /Basic/
 
 export const DeckPage = () => {
+    // const [deckFormat, setDeckFormat] = React.useState<Format>('standard')
     const [deckName, setDeckName] = useState('')
     const [deckCreationPopupVisible, showDeckCreationPopup, hideDeckCreationPopup] = useBooleanState()
 
@@ -35,10 +38,12 @@ export const DeckPage = () => {
 
     const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
 
-    const [categories, setCategories] = React.useState<Record<string, string[]>>({ uncategorised: [] })
-    const [currentCardPosition, setCurrentCardPosition] = React.useState([0, 0])
-    const [currentCardOffset, setCurrentCardOffset] = React.useState([0, 0])
-    const [currentCard, setCurrentCard] = React.useState('')
+    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>({ name: 'Test deck', description: 'This is a description test', format: 'standard', visibility: 'private' })
+
+    // const [categories, setCategories] = React.useState<Record<string, string[]>>({ uncategorised: [] })
+    // const [currentCardPosition, setCurrentCardPosition] = React.useState([0, 0])
+    // const [currentCardOffset, setCurrentCardOffset] = React.useState([0, 0])
+    // const [currentCard, setCurrentCard] = React.useState('')
     // const [deckCards, setDeckCards] = React.useState<Record<string, DeckCard>>({})
     // const [deckCards, setDeckCards, updateDeckCard, deleteDeckCard] = useObjectRecordState<string, DeckCard>({})
     const {
@@ -63,6 +68,7 @@ export const DeckPage = () => {
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
     const [cardArtWindowVisible, showCardArtWindow, hideCardArtWindow] = useBooleanState()
+    const [deckMetaDataWindowVisible, showDeckMetaDataWindow, hideDeckMetaDataWindow] = useBooleanState()
     // console.log(deckCards)
 
     const mainboardRef = React.useRef<HTMLDivElement>(null)
@@ -148,57 +154,74 @@ export const DeckPage = () => {
         }
     }, [searchWindowVisible])
 
-    // const deckStats = React.useMemo(() => {
-    //     let numberOfMainboardCards = 0
-    //     let numberOfSideboardCards = 0
-    //     let mainboardPrice = 0
-    //     let sideboardPrice = 0
-    //     const legalities: Record<string, boolean> = {}
+    const deckStats = React.useMemo(() => {
+        let numberOfMainboardCards = 0
+        let numberOfSideboardCards = 0
+        let mainboardPrice = 0
+        let sideboardPrice = 0
+        const legalities: Record<string, boolean> = {}
+        const legalityWarnings: Record<string, string> = {}
 
-    //     Object.keys(deckCards).forEach((cardName) => {
-    //         const mainboardCardQuantity = deckCards[cardName].boards.mainboard ?? 0
-    //         numberOfMainboardCards += mainboardCardQuantity
-    //         mainboardPrice += mainboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
+        Object.keys(deckCards).forEach((cardName) => {
+            const mainboardCardQuantity = deckCards[cardName].boards.mainboard ?? 0
+            numberOfMainboardCards += mainboardCardQuantity
+            mainboardPrice += mainboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
 
-    //         const sideboardCardQuantity = deckCards[cardName].boards.sideboard ?? 0
-    //         numberOfMainboardCards += sideboardCardQuantity
-    //         sideboardPrice += sideboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
+            const sideboardCardQuantity = deckCards[cardName].boards.sideboard ?? 0
+            numberOfMainboardCards += sideboardCardQuantity
+            sideboardPrice += sideboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
 
-    //         const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
+            const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
 
-    //         if (!basicLandRegex.test(cardDictionary[cardName].type_line)) {
-    //             Object.keys(cardDictionary[cardName].legalities).forEach(format => {
-    //                 if (legalities[format] === false) {
-    //                     return
-    //                 }
+            const isBasicLand = basicLandRegex.test(cardDictionary[cardName].type_line)
+            const alternateQuantityMatch = getCardAllOracleText(cardDictionary[cardName]).match(/(?<=A deck can have up to )\w+/)
+            const alternateQuantity = alternateQuantityMatch ? NUMBER_NAME_MAP[alternateQuantityMatch[0]] : undefined
+            const infiniteQuantity = /A deck can have any number/.test(cardDictionary[cardName].oracle_text)
 
-    //                 const legality = cardDictionary[cardName].legalities[format]
-    //                 if (legality === 'legal' && ((format === 'commander' && cardQuantity <= 1) || cardQuantity <= 4)) {
-    //                     legalities[format] = true
-    //                 }
-    //                 else if (legality === 'restricted' && cardQuantity <= 1) {
-    //                     legalities[format] = true
-    //                 }
-    //                 else {
-    //                     legalities[format] = false
-    //                 }
-    //             })
-    //         }
-    //     })
+            Object.keys(cardDictionary[cardName].legalities).forEach(format => {
+                if (legalities[format] === false) {
+                    return
+                }
 
-    //     const formats = Object.keys(legalities)
-    //     formats.forEach((format) => {
-    //         if (!legalities[format]) {
-    //             delete legalities[format]
-    //         }
-    //     })
+                const legality = cardDictionary[cardName].legalities[format]
+                if (legality === 'legal' && (
+                    infiniteQuantity
+                    || (alternateQuantity && cardQuantity <= alternateQuantity)
+                    || (format === 'commander' && cardQuantity <= 1)
+                    || cardQuantity <= 4
+                    || isBasicLand
+                )) {
+                    legalities[format] = true
+                }
+                else if (legality === 'restricted' && cardQuantity <= 1) {
+                    legalities[format] = true
+                }
+                else if (format === deckMetaData.format) {
+                    legalities[format] = false
+                    if (legality === 'not_legal') {
+                        legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}`
+                    } else {
+                        // Quantity higher than limit
+                        legalityWarnings[cardName] = `The number of copies of this card goes over the limit for ${deckMetaData.format}`
+                    }
+                }
+            })
+        })
 
-    //     return {
-    //         mainboard: { numberOfCards: numberOfMainboardCards, price: mainboardPrice },
-    //         sideboard: { numberOfCards: numberOfSideboardCards, price: sideboardPrice },
-    //         legalities
-    //     }
-    // }, [deckCards, cardDictionary])
+        const formats = Object.keys(legalities)
+        formats.forEach((format) => {
+            if (!legalities[format]) {
+                delete legalities[format]
+            }
+        })
+
+        return {
+            mainboard: { numberOfCards: numberOfMainboardCards, price: mainboardPrice },
+            sideboard: { numberOfCards: numberOfSideboardCards, price: sideboardPrice },
+            legalities,
+            legalityWarnings
+        }
+    }, [deckCards, cardDictionary, deckMetaData])
 
     const availableSortTypes = React.useMemo(() => {
         return SORT_TYPES.filter(sort => {
@@ -415,8 +438,56 @@ export const DeckPage = () => {
         }
     }
 
+    // const getCardGroups = React.useCallback((board: Board) => {
+    //     // if (groupBy === 'none') {
+    //     //     return [{
+    //     //         name: NO_GROUP_NAME,
+    //     //         cards: Object.keys(deckCards)
+    //     //     }]
+    //     // }
+
+    //     const boardCardMap = Object.keys(deckCards).reduce<Record<string, number>>((boardMap, cardName) => {
+    //         if (deckCards[cardName].boards[board]) {
+    //             boardMap[cardName] = deckCards[cardName].boards[board]
+    //         }
+    //         return boardMap
+    //     }, {})
+
+    //     let groups: CardGroupData[] = []
+
+    //     const boardCards = Object.keys(boardCardMap)
+
+    //     switch (groupBy) {
+    //         case 'category':
+    //             groups = groupCardsByCategory(deckCards, boardCards)
+    //             break;
+    //         case 'color':
+    //             groups = groupCardsByColor(boardCards, cardDictionary, groupByColorMode)
+    //             break;
+    //         case 'mana-value':
+    //             groups = groupCardsByManaValue(boardCards, cardDictionary)
+    //             break;
+    //         case 'sub-type':
+    //             groups = groupCardsBySubType(boardCards, cardDictionary)
+    //             break;
+    //         case 'type':
+    //             groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
+    //             break;
+    //         case 'none':
+    //             groups = [{
+    //                 name: NO_GROUP_NAME,
+    //                 cards: Object.keys(boardCards)
+    //             }]
+    //             break;
+    //     }
+
+    //     groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
+
+    //     return groups
+    // }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType]) 
+
     const mainboardCardGroups = React.useMemo(() => {
-        if (!groupBy) {
+        if (groupBy === 'none') {
             return [{
                 name: NO_GROUP_NAME,
                 cards: Object.keys(deckCards)
@@ -451,7 +522,7 @@ export const DeckPage = () => {
     }, [deckCards, mainboard, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
     const sideboardCardGroups = React.useMemo(() => {
-        if (!groupBy) {
+        if (groupBy === 'none') {
             return [{
                 name: NO_GROUP_NAME,
                 cards: Object.keys(deckCards)
@@ -697,6 +768,7 @@ export const DeckPage = () => {
                 setCardSearchTerm={setCardSearchTerm}
                 cardSearchResults={cardSearchResults}
                 showSearchWindow={showSearchWindow}
+                showDeckMetaDataWindow={showDeckMetaDataWindow}
                 // deckStats={deckStats}
                 deckCards={deckCards}
                 addFromQuickSearch={addFromQuickSearch}
@@ -711,6 +783,7 @@ export const DeckPage = () => {
 
             {searchWindowVisible && <SearchWindow back={hideSearchWindowAndCleanup} addDeckCardQuantity={addDeckCardQuantity} deckCards={deckCards} />}
             {cardArtWindowVisible && <CartArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
+            {deckMetaDataWindowVisible && <DeckMetaDataWindow back={hideDeckMetaDataWindow} save={setDeckMetaData} deckMetaData={deckMetaData} legalityWarnings={deckStats.legalityWarnings} />}
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
@@ -728,6 +801,7 @@ export const DeckPage = () => {
                                 selectedCards={selectedCards}
                                 selectCard={selectCard}
                                 board={'mainboard'}
+                                legalityWarnings={deckStats.legalityWarnings}
                             />
                         )}
                     </div>}
@@ -746,6 +820,7 @@ export const DeckPage = () => {
                                 selectedCards={selectedCards}
                                 selectCard={selectCard}
                                 board={'sideboard'}
+                                legalityWarnings={deckStats.legalityWarnings}
                             />
                         )}
                     </div>}
@@ -764,6 +839,7 @@ export const DeckPage = () => {
                                 selectedCards={selectedCards}
                                 selectCard={selectCard}
                                 board={'considering'}
+                                legalityWarnings={deckStats.legalityWarnings}
                             />
                         )}
                     </div>}
