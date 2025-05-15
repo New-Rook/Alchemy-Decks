@@ -64,3 +64,19 @@
 .expanded-card-active-right {
     left: -130%;
 }
+
+.card-data-left {
+    right: 105%;
+}
+
+.card-data-right {
+    left: 105%;
+}
+
+.card-data-top {
+    bottom: 105%;
+}
+
+.card-data-bottom {
+    top: 105%;
+}

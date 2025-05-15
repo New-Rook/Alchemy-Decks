@@ -30,15 +30,19 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
         return cardNames.reduce((total, cardName) => total + (deckCards[cardName].boards[board] ?? 0), 0)
     }, [cardNames, deckCards])
 
-    const draggedCardIsNotFromThisGroup = React.useMemo(() => {
+    const draggedCard = React.useMemo(() => {
         if (!enableDragAndDrop || !active) {
-            return
+            return { isNotFromThisGroup: false, hasThisGroupCategory: false }
         }
 
         const cardDragIDSplit = active.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
+        const draggedCardName = cardDragIDSplit[0]
         const cardCurrentCategory = cardDragIDSplit[1]
 
-        return cardCurrentCategory !== groupName
+        return {
+            isNotFromThisGroup: cardCurrentCategory !== groupName,
+            hasThisGroupCategory: cardNames.includes(draggedCardName)
+        }
     }, [enableDragAndDrop, active])
 
     // console.log({ isOverAdd, isOverOverwrite })
@@ -47,7 +51,7 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
     // console.log('cardIsFromThisGroup', cardIsFromThisGroup)
 
     const getDraggedClassName = (operation: string) => {
-        if (!draggedCardIsNotFromThisGroup) {
+        if (!draggedCard.isNotFromThisGroup) {
             return ''
         }
 
@@ -72,6 +76,10 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
         return ''
     }
 
+    const showAddDropSection = React.useMemo(() => {
+        return groupName !== NO_CATEGORY_NAME && !draggedCard.hasThisGroupCategory
+    }, [groupName, draggedCard.hasThisGroupCategory])
+
     return (
         <div className="flex-column" style={{ position: 'relative' }}>
             {groupLabel} ({numberOfCards})
@@ -93,13 +101,13 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
             </div>
             {
                 <div className="flex-row category-drop-container">
-                    {groupName !== NO_CATEGORY_NAME && <div className={`flex-row flex-center category-drop-section${getDraggedClassName('add')}`}
+                    {showAddDropSection && <div className={`flex-row flex-center category-drop-section${getDraggedClassName('add')}`}
                         ref={setAddNodeRef}>
-                        {draggedCardIsNotFromThisGroup && isOverAdd && <div className="category-drop-add-title">Add</div>}
+                        {draggedCard.isNotFromThisGroup && isOverAdd && <div className="category-drop-add-title">Add</div>}
                     </div>}
-                    <div className={`flex-row flex-center ${groupName === NO_CATEGORY_NAME ? 'category-drop-section-full-size' : 'category-drop-section'}${getDraggedClassName('overwrite')}`}
+                    <div className={`flex-row flex-center ${!showAddDropSection ? 'category-drop-section-full-size' : 'category-drop-section'}${getDraggedClassName('overwrite')}`}
                         ref={setOverwriteNodeRef}>
-                        {draggedCardIsNotFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title">Overwrite</div>}
+                        {draggedCard.isNotFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title">Overwrite</div>}
                     </div>
                 </div>
             }

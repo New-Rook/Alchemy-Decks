@@ -50,7 +50,8 @@ export const DeckPage = () => {
         objectRecord: deckCards,
         setObjectRecord: setDeckCards,
         updateObjectProperty: updateDeckCard,
-        deleteObject: deleteDeckCard
+        deleteObject: deleteDeckCard,
+        deleteObjectProperty: deleteDeckCardProperty
     } = useObjectRecordState<string, DeckCard>(TEST_DECK_CARDS)
     const [groupBy, setGroupBy] = React.useState<GroupBy>('mana-value')
     const [groupByColorMode, setGroupByColorMode] = React.useState<GroupByColorMode>('multicolored-in-one')
@@ -624,10 +625,13 @@ export const DeckPage = () => {
             const cardCurrentCategory = cardDragIDSplit[1]
             const categoryDropIDSplit = event.over.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
             const droppedCategoryName = categoryDropIDSplit[0]
-            const droppedCategoryOperation = cardCurrentCategory === NO_CATEGORY_NAME ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : categoryDropIDSplit[1]
+            const droppedCategoryOperation = categoryDropIDSplit[1]
             if (cardName && cardCurrentCategory !== droppedCategoryName) {
                 console.log('category update', droppedCategoryOperation, [cardName, droppedCategoryName])
-                if (droppedCategoryOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
+                if (droppedCategoryName === NO_CATEGORY_NAME) {
+                    deleteDeckCardProperty(cardName, 'categories')
+                }
+                else if (droppedCategoryOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
                     updateDeckCard(cardName, 'categories', [...(deckCards[cardName].categories ?? []), droppedCategoryName])
                 }
                 else if (droppedCategoryOperation === DRAG_AND_DROP_OVERWRITE_OPERATION_NAME) {
