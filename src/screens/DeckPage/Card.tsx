@@ -127,7 +127,7 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
             <div className={`flex-column expanded-card ${expandedCardClassName}`}>
                 {/* {!windowHalvesPosition.bottom && <img src={imageSource} className={`deck-card-image`} draggable={false} />} */}
                 {isHovering && <div className={`flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`} style={{ position: 'absolute', backgroundColor: 'white' }}>
-                    {deckCard.categories && <div className="flex-row flex-gap overflow-wrap">{deckCard.categories.map(category => <p>{category}</p>)}</div>}
+                    {deckCard.categories && <div className="flex-row flex-gap overflow-wrap">{deckCard.categories.map(category => <p key={category}>{category}</p>)}</div>}
                     <div style={{ color: 'red' }}>{legalityWarning}</div>
                 </div>}
                 {/* {windowHalvesPosition.bottom && <img src={imageSource} className={`deck-card-image`} draggable={false} />} */}

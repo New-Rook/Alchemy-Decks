@@ -59,7 +59,8 @@ export const DeckPageTopBar = ({
                 </div>
                 <div className="flex-column">
                     Deck price
-                    <div>{deckStats.mainboard.price}{deckStats.sideboard.price > 0 && ` + ${deckStats.sideboard.price}`}</div>
+                    {/* <div>{deckStats.mainboard.price}{deckStats.sideboard.price > 0 && ` + ${deckStats.sideboard.price}`}</div> */}
+                    <div>{deckStats.sideboard.price === 0 ? deckStats.mainboard.price : `${(deckStats.mainboard.price + deckStats.sideboard.price).toFixed(2)} (${deckStats.mainboard.price} + ${deckStats.sideboard.price}))`}</div>
                 </div>
                 <div className='flex-row flex-gap flex-center'>
                     {/* <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div> */}

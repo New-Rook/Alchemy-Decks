@@ -213,6 +213,21 @@ export const DeckPage = () => {
             // })
         })
 
+        const getCardBoardTypes = (board: Record<string, number>) => {
+            const mainboardCards = Object.keys(board)
+
+            const categories = groupCardsByCategory(deckCards, mainboardCards)
+            const colors = groupCardsByColor(mainboardCards, cardDictionary, groupByColorMode)
+            const manaValues = groupCardsByManaValue(mainboardCards, cardDictionary)
+            const subTypes = groupCardsBySubType(mainboardCards, cardDictionary)
+            const types = groupCardsByType(mainboardCards, cardDictionary, groupByTypeLastCardTypeOnly)
+
+            return { categories, colors, manaValues, subTypes, types }
+        }
+
+        const mainboardCardStats = getCardBoardTypes(mainboard)
+        const sideboardCardStats = getCardBoardTypes(sideboard)
+
         // const formats = Object.keys(legalities)
         // formats.forEach((format) => {
         //     if (!legalities[format]) {
@@ -221,12 +236,12 @@ export const DeckPage = () => {
         // })
 
         return {
-            mainboard: { numberOfCards: numberOfMainboardCards, price: numberToDecimalPoints(mainboardPrice, 2) },
-            sideboard: { numberOfCards: numberOfSideboardCards, price: numberToDecimalPoints(sideboardPrice, 2) },
+            mainboard: { numberOfCards: numberOfMainboardCards, price: numberToDecimalPoints(mainboardPrice, 2), cardStats: mainboardCardStats },
+            sideboard: { numberOfCards: numberOfSideboardCards, price: numberToDecimalPoints(sideboardPrice, 2), cardStats: sideboardCardStats },
             legal,
             legalityWarnings
         }
-    }, [deckCards, cardDictionary, deckMetaData])
+    }, [deckCards, mainboard, sideboard, cardDictionary, deckMetaData])
 
     const availableSortTypes = React.useMemo(() => {
         return SORT_TYPES.filter(sort => {
@@ -493,12 +508,12 @@ export const DeckPage = () => {
     // }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType]) 
 
     const mainboardCardGroups = React.useMemo(() => {
-        if (groupBy === 'none') {
-            return [{
-                name: NO_GROUP_NAME,
-                cards: Object.keys(deckCards)
-            }]
-        }
+        // if (groupBy === 'none') {
+        //     return [{
+        //         name: NO_GROUP_NAME,
+        //         cards: Object.keys(deckCards)
+        //     }]
+        // }
 
         let groups: CardGroupData[] = []
 
@@ -520,6 +535,12 @@ export const DeckPage = () => {
             case 'type':
                 groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
                 break;
+            case 'none':
+                groups = [{
+                    name: NO_GROUP_NAME,
+                    cards: boardCards
+                }]
+                break;
         }
 
         groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
@@ -528,12 +549,12 @@ export const DeckPage = () => {
     }, [deckCards, mainboard, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
     const sideboardCardGroups = React.useMemo(() => {
-        if (groupBy === 'none') {
-            return [{
-                name: NO_GROUP_NAME,
-                cards: Object.keys(deckCards)
-            }]
-        }
+        // if (groupBy === 'none') {
+        //     return [{
+        //         name: NO_GROUP_NAME,
+        //         cards: Object.keys(deckCards)
+        //     }]
+        // }
 
         let groups: CardGroupData[] = []
 
@@ -555,6 +576,12 @@ export const DeckPage = () => {
             case 'type':
                 groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
                 break;
+            case 'none':
+                groups = [{
+                    name: NO_GROUP_NAME,
+                    cards: boardCards
+                }]
+                break;
         }
 
         groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], false)))
@@ -563,12 +590,12 @@ export const DeckPage = () => {
     }, [deckCards, sideboard, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType])
 
     const consideringCardGroups = React.useMemo(() => {
-        if (groupBy === 'none') {
-            return [{
-                name: NO_GROUP_NAME,
-                cards: Object.keys(deckCards)
-            }]
-        }
+        // if (groupBy === 'none') {
+        //     return [{
+        //         name: NO_GROUP_NAME,
+        //         cards: Object.keys(deckCards)
+        //     }]
+        // }
 
         let groups: CardGroupData[] = []
 
@@ -589,6 +616,12 @@ export const DeckPage = () => {
                 break;
             case 'type':
                 groups = groupCardsByType(boardCards, cardDictionary, groupByTypeLastCardTypeOnly)
+                break;
+            case 'none':
+                groups = [{
+                    name: NO_GROUP_NAME,
+                    cards: boardCards
+                }]
                 break;
         }
 
@@ -866,6 +899,18 @@ export const DeckPage = () => {
                 </div>)} */}
                 </div>
             </DndContext>
+            {/* 
+            <div className='flex-column'>
+                Deck stats
+                <div>
+                    <p>Number of cards in mainboard {deckStats.mainboard.numberOfCards}</p>
+                    <p>Number of cards in sideboard {deckStats.sideboard.numberOfCards}</p>
+                </div>
+                <div>
+                    <p>Number of cards in mainboard {deckStats.mainboard.cardStats.types}</p>
+                    <p>Number of cards in sideboard {deckStats.sideboard.numberOfCards}</p>
+                </div>
+            </div> */}
 
             {Object.keys(selectedCards).length > 0 && <div style={{
                 position: 'sticky',

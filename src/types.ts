@@ -30,15 +30,21 @@ export type DeckMetaData = {
   visibility: DeckVisibility
 }
 
+type BoardStats = {
+  numberOfCards: number;
+  price: number;
+  cardStats: {
+    categories: CardGroupData[];
+    colors: CardGroupData[];
+    manaValues: CardGroupData[];
+    subTypes: CardGroupData[];
+    types: CardGroupData[];
+  }
+}
+
 export type DeckStats = {
-  mainboard: {
-    numberOfCards: number;
-    price: number;
-  };
-  sideboard: {
-    numberOfCards: number;
-    price: number;
-  };
+  mainboard: BoardStats
+  sideboard: BoardStats
   legal: boolean;
   legalityWarnings: Record<string, string>;
 }
