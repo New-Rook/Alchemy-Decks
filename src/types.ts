@@ -30,6 +30,19 @@ export type DeckMetaData = {
   visibility: DeckVisibility
 }
 
+export type DeckStats = {
+  mainboard: {
+    numberOfCards: number;
+    price: number;
+  };
+  sideboard: {
+    numberOfCards: number;
+    price: number;
+  };
+  legal: boolean;
+  legalityWarnings: Record<string, string>;
+}
+
 export type DeckCard = {
   // quantity: number
   categories?: string[] // Empty array means untagged

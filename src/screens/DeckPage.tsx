@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
-import { Board, CardArtData, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, DeckMetaData, Format, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
+import { Board, CardArtData, CardData, CardGroupData, CategoryUpdateOperation, Color, CurrencyType, Deck, DeckCard, DeckMetaData, DeckStats, Format, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
 import { getCardAllOracleText, getCardFrontImage } from '../utilities/card'
 import { AuthContext } from '../context/AuthContext'
 import { getDataFromDatabase, setDataToDatabase } from '../api/common/database'
@@ -19,7 +19,7 @@ import { CARD_SORTERS } from '../utilities/sorters'
 import { closestCenter, closestCorners, DndContext, DragEndEvent, PointerSensor, useDndContext, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core'
 import { CATEGORY_UPDATE_OPERATIONS, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
 import { TextInput } from '../components/TextInput'
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
+import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, numberToDecimalPoints, omitFromArray, omitFromPartialRecord, omitFromRecord } from '../utilities/general'
 import { CartArtWindow } from './CartArtWindow'
 import { NUMBER_NAME_MAP } from '../data/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
@@ -153,7 +153,7 @@ export const DeckPage = () => {
         }
     }, [searchWindowVisible])
 
-    const deckStats = React.useMemo(() => {
+    const deckStats = React.useMemo<DeckStats>(() => {
         let numberOfMainboardCards = 0
         let numberOfSideboardCards = 0
         let mainboardPrice = 0
@@ -168,7 +168,7 @@ export const DeckPage = () => {
             mainboardPrice += mainboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
 
             const sideboardCardQuantity = deckCards[cardName].boards.sideboard ?? 0
-            numberOfMainboardCards += sideboardCardQuantity
+            numberOfSideboardCards += sideboardCardQuantity
             sideboardPrice += sideboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
 
             const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
@@ -220,8 +220,8 @@ export const DeckPage = () => {
         // })
 
         return {
-            mainboard: { numberOfCards: numberOfMainboardCards, price: mainboardPrice },
-            sideboard: { numberOfCards: numberOfSideboardCards, price: sideboardPrice },
+            mainboard: { numberOfCards: numberOfMainboardCards, price: numberToDecimalPoints(mainboardPrice, 2) },
+            sideboard: { numberOfCards: numberOfSideboardCards, price: numberToDecimalPoints(sideboardPrice, 2) },
             legal,
             legalityWarnings
         }
@@ -774,9 +774,8 @@ export const DeckPage = () => {
                 cardSearchResults={cardSearchResults}
                 showSearchWindow={showSearchWindow}
                 showDeckMetaDataWindow={showDeckMetaDataWindow}
-                deckLegal={deckStats.legal}
                 deckMetaData={deckMetaData}
-                // deckStats={deckStats}
+                deckStats={deckStats}
                 deckCards={deckCards}
                 addFromQuickSearch={addFromQuickSearch}
                 pinned={topBarPinned}

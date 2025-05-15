@@ -10,6 +10,10 @@ export const stringStartsAndEndsWith = (text: string, startEndChar: string) => {
     return text.charAt(0) === startEndChar && text.charAt(text.length - 1) === startEndChar
 }
 
+export const numberToDecimalPoints = (num: number, decimalPoints: number) => {
+    return parseFloat(num.toFixed(decimalPoints))
+}
+
 // Takes an array and removes a given element, returning a new array
 export const omitFromArray = <T>(array: T[], element: T) => {
     const index = array.indexOf(element)
@@ -43,6 +47,8 @@ export const omitFromPartialRecord = <K extends string | number | symbol, V>(rec
     delete newObj[key]
     return newObj
 }
+
+// Text input specific
 
 export const numbersOnlyTextInputValidator = (text: string) => {
     return !/\D/.test(text)

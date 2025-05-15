@@ -1,6 +1,6 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
-import { CardData, DeckCards, DeckMetaData } from "../../types"
+import { CardData, DeckCards, DeckMetaData, DeckStats } from "../../types"
 import { getCardFrontImage } from "../../utilities/card"
 
 type Props = {
@@ -9,12 +9,8 @@ type Props = {
     cardSearchResults: CardData[]
     showSearchWindow: () => void
     showDeckMetaDataWindow: () => void
-    deckLegal: boolean
     deckMetaData: DeckMetaData
-    // deckStats: {
-    //     numberOfCards: number
-    //     price: number
-    // }
+    deckStats: DeckStats
     deckCards: DeckCards
     addFromQuickSearch: (cardData: CardData) => void
     pinned: boolean
@@ -27,8 +23,8 @@ export const DeckPageTopBar = ({
     cardSearchResults,
     showSearchWindow,
     showDeckMetaDataWindow,
-    deckLegal,
     deckMetaData,
+    deckStats,
     // deckStats,
     deckCards,
     addFromQuickSearch,
@@ -54,9 +50,17 @@ export const DeckPageTopBar = ({
                     <button onClick={showSearchWindow}>Full search</button>
                 </div>
                 <p className='right-placed-item'>{deckMetaData.format}</p>
-                <p >{!deckLegal && `This deck is not legal in ${deckMetaData.format}.`}</p>
+                <p >{!deckStats.legal && `This deck is not legal in ${deckMetaData.format}.`}</p>
                 <button onClick={showDeckMetaDataWindow}>Change deck data</button>
                 <button onClick={copyDeckListToClipboard}>Copy deck list</button>
+                <div className="flex-column">
+                    Deck size
+                    <div>{deckStats.mainboard.numberOfCards}{deckStats.sideboard.numberOfCards > 0 && ` + ${deckStats.sideboard.numberOfCards}`}</div>
+                </div>
+                <div className="flex-column">
+                    Deck price
+                    <div>{deckStats.mainboard.price}{deckStats.sideboard.price > 0 && ` + ${deckStats.sideboard.price}`}</div>
+                </div>
                 <div className='flex-row flex-gap flex-center'>
                     {/* <div>{Object.keys(deckStats.legalities).map(format => <div key={format}>{format}</div>)}</div> */}
                     {/* <div>{deckStats.numberOfCards}</div> */}
