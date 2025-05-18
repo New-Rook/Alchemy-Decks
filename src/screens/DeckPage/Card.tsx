@@ -117,7 +117,7 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
             {/* {<img src={cardDictionary[cardName].card_faces && flipped ? cardDictionary[cardName].card_faces[1].image_uris.normal : getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' draggable={false} />} */}
             <div className='flex-row deck-card-image'>
                 {isDragging && <div style={{ position: 'absolute', backgroundColor: 'white' }} className={`flex-row flex-gap overflow-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
-                    <p style={{ color: dragData?.operation === 'overwrite' && category !== dragData.category ? 'red' : undefined }}>{category}</p>
+                    <p key={category} style={{ color: dragData?.operation === 'overwrite' && category !== dragData.category ? 'red' : undefined }}>{category}</p>
                 )}
                     {(dragData?.operation === 'add' || !dragData?.containsCategory) && dragData?.category !== NO_CATEGORY_NAME && <p style={{ color: 'green' }}>{dragData?.category}</p>}
                 </div>}
