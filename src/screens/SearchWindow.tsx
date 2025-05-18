@@ -38,6 +38,9 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
     const [nameSearchTerm, setNameSearchTerm] = useAdvancedState('', resetPageIndex)
     const [showBannedCards, setShowBannedCards] = useAdvancedState(false, resetPageIndex)
 
+    const [pendingNameSearchTerm, setPendingNameSearchTerm] = React.useState('')
+    const [pendingOracleTextSearchTerm, setPendingOracleTextSearchTerm] = React.useState('')
+
     const getCardPriceDisplay = React.useCallback((cardData: CardData) => {
         if (currencyType === 'eur') {
             if (cardData.prices.eur !== '0.00') {
@@ -58,6 +61,28 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
 
         return '---'
     }, [currencyType])
+
+    React.useEffect(() => {
+        if (!pendingNameSearchTerm) {
+            setNameSearchTerm('')
+            return
+        }
+
+        const timeoutID = setTimeout(() => setNameSearchTerm(pendingNameSearchTerm), 250)
+
+        return () => clearTimeout(timeoutID)
+    }, [pendingNameSearchTerm])
+
+    React.useEffect(() => {
+        if (!pendingOracleTextSearchTerm) {
+            setOracleTextSearchTerm('')
+            return
+        }
+
+        const timeoutID = setTimeout(() => setOracleTextSearchTerm(pendingOracleTextSearchTerm), 250)
+
+        return () => clearTimeout(timeoutID)
+    }, [pendingOracleTextSearchTerm])
 
     const availableSortTypes = React.useMemo(() => {
         return SORT_TYPES.filter(sort => {
@@ -139,8 +164,8 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
                     id="name"
                     name="name"
                     size={10}
-                    value={nameSearchTerm}
-                    onChangeText={setNameSearchTerm}
+                    value={pendingNameSearchTerm}
+                    onChangeText={setPendingNameSearchTerm}
                 />
                 <TextInput
                     label={'Card text'}
@@ -148,8 +173,8 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
                     id="name"
                     name="name"
                     size={10}
-                    value={oracleTextSearchTerm}
-                    onChangeText={setOracleTextSearchTerm}
+                    value={pendingOracleTextSearchTerm}
+                    onChangeText={setPendingOracleTextSearchTerm}
                 />
                 {ALL_COLOR_KEYS.map(color => <button key={color} className={`search-symbol${!colorFilters.includes(color) ? ' search-symbol-inactive' : ''}`} onClick={() => filterColor(color)}><img src={COLOR_DATA[color].svg_uri} /></button>)}
                 {/* <div className='filter'>
