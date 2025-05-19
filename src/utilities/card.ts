@@ -82,3 +82,51 @@ export const getCardColorPriority = (cardData: CardData) => {
 
     return COLOR_COMBINATION_ORDER_PRIORITY[COLOR_COMBINATIONS_MAP[cardData.colors.join('')]]
 }
+
+export const getCardDroppedFromOutside = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+
+    if (e.dataTransfer.files.length === 0) {
+        return
+    }
+
+    const fileName = e.dataTransfer.files[0].name
+    const scryfallMatch = fileName.match(/(?<=.+-.+-).+(?=\.jpg)/)
+    const marketPlaceMatch = fileName.match(/^\d+(?=\.jpg)/)
+
+    if (scryfallMatch) {
+        // scryfall match
+        const cardName = scryfallMatch[0]
+
+        const params = new URLSearchParams([['fuzzy', cardName]]);
+        const requestResult = await fetch(`https://api.scryfall.com/cards/named?${params}`)
+        const result = await requestResult.json()
+
+        const cardData = result
+
+        if (!cardData.status) {
+            return cardData as CardData
+        }
+    }
+
+    if (marketPlaceMatch) {
+        // cardmarket or tcgplayer match
+        const cardName = marketPlaceMatch[0]
+
+        const cardMarketRequestResult = await fetch(`https://api.scryfall.com/cards/cardmarket/${cardName}`)
+        const cardMarketResult = await cardMarketRequestResult.json()
+        const cardMarketCardData = cardMarketResult
+        if (!cardMarketCardData.status) {
+            return cardMarketCardData as CardData
+        }
+
+        const tcgPlayerRequestResult = await fetch(`https://api.scryfall.com/cards/tcgplayer/${cardName}`)
+        const tcgPlayerResult = await tcgPlayerRequestResult.json()
+        const tcgPlayerCardData = tcgPlayerResult
+        if (!tcgPlayerCardData.status) {
+            return tcgPlayerCardData as CardData
+        }
+    }
+
+    return
+}

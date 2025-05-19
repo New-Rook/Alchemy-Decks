@@ -22,10 +22,6 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
     const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
 
-    // if (groupName === '1') {
-    //     console.log('me 1', isOver)
-    // }
-
     const numberOfCards = React.useMemo(() => {
         return cardNames.reduce((total, cardName) => total + (deckCards[cardName].boards[board] ?? 0), 0)
     }, [cardNames, deckCards])
@@ -44,11 +40,6 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
             hasThisGroupCategory: cardNames.includes(draggedCardName)
         }
     }, [enableDragAndDrop, active])
-
-    // console.log({ isOverAdd, isOverOverwrite })
-    // console.log('active', active)
-    // console.log('over', over)
-    // console.log('cardIsFromThisGroup', cardIsFromThisGroup)
 
     const getDraggedClassName = (operation: string) => {
         if (!draggedCard.isNotFromThisGroup) {

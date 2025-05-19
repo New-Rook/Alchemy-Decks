@@ -48,6 +48,10 @@ export const omitFromPartialRecord = <K extends string | number | symbol, V>(rec
     return newObj
 }
 
+export const typedKeys = <K extends string | number | symbol, V>(obj: Record<K, V>) => {
+    return Object.keys(obj) as K[]
+}
+
 // Text input specific
 
 export const numbersOnlyTextInputValidator = (text: string) => {

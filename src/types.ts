@@ -178,3 +178,5 @@ export type GroupByColorMode = 'multicolored-in-one' | 'multicolored-expanded' |
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
 
 export type CategoryUpdateOperation = 'add' | 'overwrite'
+
+export type BoardCards = Record<string, number>
