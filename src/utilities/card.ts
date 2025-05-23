@@ -1,5 +1,6 @@
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
-import { CardData } from "../types";
+import { CardData, Color } from "../types";
+import { toUniqueArray } from "./general";
 
 export const getCardBaseData = (card: CardData) => {
     if (card.card_faces) {
@@ -26,15 +27,34 @@ export const getCardAllCardName = (card: CardData) => {
 }
 
 export const getCardFrontImage = (card: CardData) => {
+    if (card.image_uris) {
+        return card.image_uris
+    }
+
     return getCardBaseData(card).image_uris
 }
 
+export const getCardColors = (card: CardData) => {
+    if (card.card_faces) {
+        if (card.colors) {
+            return card.color_identity
+        }
+        return toUniqueArray(card.card_faces.reduce<Color[]>((colors, cardFace) => [...colors, ...cardFace.colors], []))
+    }
+
+    return card.colors
+}
+
 export const getCardImages = (card: CardData) => {
+    if (card.image_uris) {
+        return [card.image_uris]
+    }
+
     if (card.card_faces) {
         return card.card_faces.map(cardFace => cardFace.image_uris)
     }
 
-    return [card.image_uris]
+    return []
 }
 
 export const getLastCardType = (cardData: CardData) => {

@@ -14,6 +14,14 @@ export const numberToDecimalPoints = (num: number, decimalPoints: number) => {
     return parseFloat(num.toFixed(decimalPoints))
 }
 
+export const stringLowerCaseIncludes = (text: string, testString: string) => {
+    return text.toLocaleLowerCase().includes(testString.toLocaleLowerCase())
+}
+
+export const invertBoolean = (value: boolean, invert: boolean) => {
+    return invert ? !value : value
+}
+
 // Takes an array and removes a given element, returning a new array
 export const omitFromArray = <T>(array: T[], element: T) => {
     const index = array.indexOf(element)
@@ -25,6 +33,14 @@ export const omitFromArray = <T>(array: T[], element: T) => {
     const arrayShallowCopy = [...array]
     arrayShallowCopy.splice(index, 1)
     return arrayShallowCopy
+}
+
+export const toUniqueArray = <T>(array: T[]) => {
+    return Array.from(new Set(array))
+}
+
+export const splitArray = <T>(array: T[], predicate: (element: T) => boolean) => {
+
 }
 
 // Takes a record and removes a given key, returning a new object

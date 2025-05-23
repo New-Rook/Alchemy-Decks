@@ -6,7 +6,8 @@ export const getInitialUserData = (id: string): UserData => {
         settings: {
             editorPrefereces: {
                 viewType: 'grid'
-            }
+            },
+            currency: 'eur'
         }
     }
 }

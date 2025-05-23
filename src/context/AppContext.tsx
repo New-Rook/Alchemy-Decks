@@ -1,13 +1,16 @@
-import React, { createContext } from "react";
-import { BaseCardData, CardData, CardDictionary, Deck, Decks } from "../types";
-import { COLOR_ORDER_PRIORITY } from "../data/search";
+import React, { createContext, useContext } from "react";
+import { CardData, CardDictionary, SortType } from "../types";
+import { SORT_TYPES } from "../data/search";
+import { UserContext } from "./UserContext";
 
 type AppContextType = {
-    currentDeckID: string
+    // currentDeckID: string
     // decks: Decks
     // createDeck: (name: string, format?: string) => void
     // allCards: CardData[]
     cardDictionary: CardDictionary // Card name to card data
+    getCardPriceDisplay: (cardData: CardData) => string
+    availableSortTypes: SortType[]
 }
 
 export const AppContext = createContext<AppContextType>({} as AppContextType)
@@ -15,8 +18,9 @@ export const AppContext = createContext<AppContextType>({} as AppContextType)
 const USD_TO_EUR_CONVERSION = 0.87
 
 export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
-    const [currentDeckID, setCurrentDeckID] = React.useState('')
+    // const [currentDeckID, setCurrentDeckID] = React.useState('')
     const [cardDictionary, setCardDictionary] = React.useState<CardDictionary>({})
+    const { userData } = useContext(UserContext)
 
     React.useEffect(() => {
         const getBulkData = async () => {
@@ -64,7 +68,50 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
         setTimeout(getBulkData, 1000)
     }, [])
 
-    return <AppContext.Provider value={{ currentDeckID, cardDictionary }}>
+    const getCardPriceDisplay = React.useCallback((cardData: CardData) => {
+        if (!userData) {
+            return '---'
+        }
+
+        if (userData.settings.currency === 'eur') {
+            if (cardData.prices.eur !== '0.00') {
+                return `€${cardData.prices.eur}`
+            }
+            if (cardData.prices.eur_foil !== '0.00') {
+                return `€${cardData.prices.eur_foil}`
+            }
+        }
+        else {
+            if (cardData.prices.usd !== '0.00') {
+                return `$${cardData.prices.usd}`
+            }
+            if (cardData.prices.usd_foil !== '0.00') {
+                return `$${cardData.prices.usd_foil}`
+            }
+        }
+
+        return '---'
+    }, [userData?.settings.currency])
+
+    const availableSortTypes = React.useMemo(() => {
+        if (!userData) {
+            return []
+        }
+
+        return SORT_TYPES.filter(sort => {
+            if (sort === 'price-eur') {
+                return userData?.settings.currency === 'eur'
+            }
+
+            if (sort === 'price-usd') {
+                return userData?.settings.currency === 'usd'
+            }
+
+            return true
+        })
+    }, [userData?.settings.currency])
+
+    return <AppContext.Provider value={{ cardDictionary, getCardPriceDisplay, availableSortTypes }}>
         {children}
     </AppContext.Provider>
 }

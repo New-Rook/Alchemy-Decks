@@ -4,6 +4,7 @@ export type UserData = {
     editorPrefereces: {
       viewType: ViewType
     }
+    currency: CurrencyType
   }
 }
 
@@ -79,6 +80,8 @@ export interface BaseCardData {
   name: string
   oracle_text: string
   type_line: string
+  power: string
+  toughness: string
 }
 
 export type DeckCollectionUse = {
@@ -180,3 +183,17 @@ export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
 export type CategoryUpdateOperation = 'add' | 'overwrite'
 
 export type BoardCards = Record<string, number>
+
+export type ColorSearchType = 'exact' | 'at-most' | 'at-least'
+
+export type CardTypeFilter = { cardType: string, invert: boolean }
+
+export type StatFilter = {
+  stat: 'mana-value' | 'power' | 'toughness',
+  operation: 'equal' | 'not-equal' | 'greater-than' | 'greater-than-or-equal' | 'less-than' | 'less-than-or-equal'
+  value: number
+}
+
+export type SearchTermFilter = { text: string, invert: boolean }
+
+export type SearchFilterOperation = 'or' | 'and'

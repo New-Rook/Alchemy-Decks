@@ -3,20 +3,20 @@ import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { useBooleanState } from '../hooks/useBooleanState'
 import { Board, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
-import { getCardDroppedFromOutside } from '../utilities/card'
+import { getCardAllCardName, getCardDroppedFromOutside } from '../utilities/card'
 import { SearchWindow } from './SearchWindow'
 import { DeckPageTopBar } from './DeckPage/DeckPageTopBar'
 import { useObjectRecordState } from '../hooks/useObjectRecordState'
 import { CardGroup } from './DeckPage/CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../utilities/groupers'
 import { Dropdown } from '../components/Dropdown'
-import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_TYPES, SORT_TYPES } from '../data/search'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_TYPES, searchRegex, SORT_TYPES } from '../data/search'
 import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
-import { omitFromPartialRecord, omitFromRecord, typedKeys } from '../utilities/general'
+import { omitFromPartialRecord, omitFromRecord, stringStartsAndEndsWith, typedKeys } from '../utilities/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 import { useDeckScroll } from './DeckPage/useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
@@ -128,19 +128,39 @@ export const DeckPage = () => {
     //     updateDeckCard(cardName, 'boards', newCardBoards)
     // }
 
+    const legalCards = React.useMemo(() => {
+        return Object.values(cardDictionary).filter(card => card.legalities[deckMetaData.format] !== 'not_legal')
+    }, [cardDictionary, deckMetaData.format])
+
     const searchCard = async () => {
-        try {
-            const params = new URLSearchParams([['q', cardSearchTerm]]);
-            const requestResult = await fetch(`https://api.scryfall.com/cards/search?${params}`)
-            const result = await requestResult.json()
-            const cards: CardData[] = result.data
-            const data = cards.filter(cardData => !cardData.digital)
-            console.log(data)
-            setCardSearchResults(data)
+        // try {
+        //     const params = new URLSearchParams([['q', cardSearchTerm]]);
+        //     const requestResult = await fetch(`https://api.scryfall.com/cards/search?${params}`)
+        //     const result = await requestResult.json()
+        //     const cards: CardData[] = result.data
+        //     const data = cards.filter(cardData => !cardData.digital)
+        //     console.log(data)
+        //     setCardSearchResults(data)
+        // }
+        // catch (err) {
+        //     console.log('error: no results')
+        // }
+
+        const searchTerms = cardSearchTerm.match(searchRegex)
+
+        if (!searchTerms) {
+            return
         }
-        catch (err) {
-            console.log('error: no results')
-        }
+
+        const searchResults = legalCards.filter(card => {
+            const cardNames = getCardAllCardName(card).toLocaleLowerCase()
+            return searchTerms.every(text => {
+                const regex = new RegExp(stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase())
+                return regex.test(cardNames)
+            })
+        })
+
+        setCardSearchResults(searchResults)
     }
 
     React.useEffect(() => {
@@ -154,7 +174,7 @@ export const DeckPage = () => {
             return
         }
 
-        const timeoutID = setTimeout(searchCard, 1000)
+        const timeoutID = setTimeout(searchCard, 250)
 
         return () => clearTimeout(timeoutID)
     }, [searchWindowVisible, cardSearchTerm])

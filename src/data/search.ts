@@ -1,4 +1,6 @@
-import { Color, ColorData, Format, GroupBy, GroupByColorMode, SortType, ViewType } from "../types";
+import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, SortType, ViewType } from "../types";
+
+export const searchRegex = /\w+|"[\w ]+"/g
 
 export const COLOR_DATA: Record<Color, ColorData> = {
     W: {
@@ -103,6 +105,7 @@ export const SORT_TYPES: SortType[] = ['name', 'mana-value', 'color', 'type', 'p
 export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color', 'category', 'none']
 export const GROUP_BY_COLOR_MODES: GroupByColorMode[] = ['multicolored-in-one', 'multicolored-expanded', 'all-monocolored']
 export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
+export const COLOR_SEARCH_TYPES: ColorSearchType[] = ['exact', 'at-most', 'at-least']
 
 export const COLOR_COMBINATIONS_MAP: Record<string, string> = {
     "WU": "WU",
