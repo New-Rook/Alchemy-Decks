@@ -1,4 +1,4 @@
-import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, SortType, ViewType } from "../types";
+import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
 
 export const searchRegex = /\w+|"[\w ]+"/g
 
@@ -106,6 +106,9 @@ export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color'
 export const GROUP_BY_COLOR_MODES: GroupByColorMode[] = ['multicolored-in-one', 'multicolored-expanded', 'all-monocolored']
 export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
 export const COLOR_SEARCH_TYPES: ColorSearchType[] = ['exact', 'at-most', 'at-least']
+
+export const STAT_FILTER_STATS: StatFilterStat[] = ['mana-value', 'power', 'toughness']
+export const STAT_FILTER_OPERATIONS: StatFilterOperation[] = ['equal', 'not-equal', 'greater-than', 'greater-than-or-equal', 'less-than', 'less-than-or-equal']
 
 export const COLOR_COMBINATIONS_MAP: Record<string, string> = {
     "WU": "WU",

@@ -1,17 +1,18 @@
 import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
-import { Board, CardData, CardTypeFilter, Color, ColorSearchType, DeckCards, Format, SearchFilterOperation, SearchTermFilter, SortType, StatFilter } from '../types'
-import { ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, searchRegex } from '../data/search'
+import { Board, CardData, CardTypeFilter, Color, ColorSearchType, DeckCards, Format, SearchFilterOperation, SearchTermFilter, SortType, StatFilter, StatFilterOperation, StatFilterStat } from '../types'
+import { ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
 import { getCardAllCardName, getCardAllOracleText, getCardColors, getCardFrontImage } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
-import { invertBoolean, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
+import { invertBoolean, numbersOnlyTextInputValidator, splitArray, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
 import { useAdvancedState } from '../hooks/useAdvancedState'
 import { CARD_SORTERS } from '../utilities/sorters'
 import { Checkbox } from '../components/Checkbox'
 import { Dropdown } from '../components/Dropdown'
-import { checkCardTypeFilter, checkStatFilter, nextSearchFilterOperation } from '../utilities/search'
+import { checkCardTypeFilter, checkOracleTextSearchTermFilter, checkStatFilter, nextSearchFilterOperation, searchTermFilterToRegexes } from '../utilities/search'
 import { TextInputWithSuggestions } from '../components/TextInputWithSuggestions'
+import './SearchWindow.css'
 
 type Props = {
     back: () => void
@@ -47,7 +48,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
     const [colorSearchType, setColorSearchType] = useAdvancedState<ColorSearchType>('exact', resetPageIndex)
     const [cardTypeFilters, setCardTypeFilters] = useAdvancedState<CardTypeFilter[]>([{ cardType: '', invert: false }], resetPageIndex)
     const [cardTypeFilterOperation, setCardTypeFilterOperation] = useAdvancedState<SearchFilterOperation>('or', resetPageIndex)
-    const [statFilters, setStatFilters] = useAdvancedState<StatFilter[]>([], resetPageIndex)
+    const [statFilters, setStatFilters] = useAdvancedState<StatFilter[]>([{ stat: 'mana-value', operation: 'equal', value: '' }], resetPageIndex)
     const [statFilterOperation, setStatFilterOperation] = useAdvancedState<SearchFilterOperation>('or', resetPageIndex)
 
     const [pendingNameSearchTerm, setPendingNameSearchTerm] = React.useState('')
@@ -139,31 +140,25 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
         // if (oracleTextSearchTerm.length === 0) {
         //     return searchTermNameFilteredCards
         // }
-        if (oracleTextSearchTermFilters.every(filter => !filter.text)) {
-            return searchTermNameFilteredCards
-        }
+        // if (oracleTextSearchTermFilters.every(filter => !filter.text)) {
+        //     return searchTermNameFilteredCards
+        // }
 
         const nonEmptyOracleTextSearchTermFilters =
             oracleTextSearchTermFilters.filter(filter => !!filter.text)
 
-        const regexes = nonEmptyOracleTextSearchTermFilters.map(filter => {
-            if (!filter.text.trim()) {
-                return []
-            }
-            const searchTerms = filter.text.trim().match(searchRegex)
-            if (!searchTerms) {
-                return []
-            }
-            return searchTerms.map(text =>
-                new RegExp(stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase())
-            )
-        })
+        if (nonEmptyOracleTextSearchTermFilters.length === 0) {
+            return searchTermNameFilteredCards
+        }
+
+        const [positiveFilters, negativeFilters] = splitArray(nonEmptyOracleTextSearchTermFilters, (filter) => !filter.invert)
+
+        const positiveRegexes = positiveFilters.map(searchTermFilterToRegexes)
+        const negativeRegexes = negativeFilters.map(searchTermFilterToRegexes)
 
         return searchTermNameFilteredCards.filter(card => {
-            return nonEmptyOracleTextSearchTermFilters.some((filter, index) => {
-                const cardOracleTexts = getCardAllOracleText(card).toLocaleLowerCase()
-                return invertBoolean(regexes[index].every(regex => regex.test(cardOracleTexts)), filter.invert)
-            })
+            return (positiveRegexes.length === 0 || positiveFilters.some((filter, index) => checkOracleTextSearchTermFilter(card, filter, positiveRegexes[index])))
+                && negativeFilters.every((filter, index) => checkOracleTextSearchTermFilter(card, filter, negativeRegexes[index]))
         })
     }, [searchTermNameFilteredCards, oracleTextSearchTermFilters])
 
@@ -197,27 +192,37 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
     }, [searchTermOracleTextFilteredCards, colorFilters, searchByColorIdentity, colorlessFilter, colorSearchType])
 
     const cardTypeFilteredCards = React.useMemo(() => {
-        if (cardTypeFilters.length === 0) {
+        const nonEmptyCardTypeFilters = cardTypeFilters.filter(filter => !!filter.cardType)
+
+        if (nonEmptyCardTypeFilters.length === 0) {
             return colorFilteredCards
         }
 
-        return colorFilteredCards.filter((card) =>
-            cardTypeFilterOperation === 'or'
-                ? cardTypeFilters.some(filter => checkCardTypeFilter(card, filter))
-                : cardTypeFilters.every(filter => checkCardTypeFilter(card, filter))
+        const [positiveFilters, negativeFilters] = splitArray(nonEmptyCardTypeFilters, (filter) => !filter.invert)
 
+        return colorFilteredCards.filter((card) =>
+            (positiveFilters.length > 0 && cardTypeFilterOperation === 'or'
+                ? positiveFilters.some(filter => checkCardTypeFilter(card, filter))
+                : positiveFilters.every(filter => checkCardTypeFilter(card, filter)))
+            && negativeFilters.every(filter => checkCardTypeFilter(card, filter))
         )
     }, [colorFilteredCards, cardTypeFilters, cardTypeFilterOperation])
 
     const statFilteredCards = React.useMemo(() => {
-        if (statFilters.length === 0) {
+        // if (statFilters.length === 0) {
+        //     return cardTypeFilteredCards
+        // }
+
+        const nonEmptyStatFilters = statFilters.filter(filter => !!filter.value)
+
+        if (nonEmptyStatFilters.length === 0) {
             return cardTypeFilteredCards
         }
 
         return cardTypeFilteredCards.filter((card) =>
             statFilterOperation === 'or'
-                ? statFilters.some(filter => checkStatFilter(card, filter))
-                : statFilters.every(filter => checkStatFilter(card, filter))
+                ? nonEmptyStatFilters.some(filter => checkStatFilter(card, filter))
+                : nonEmptyStatFilters.every(filter => checkStatFilter(card, filter))
         )
     }, [cardTypeFilteredCards, statFilters, statFilterOperation])
 
@@ -231,7 +236,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
         return sortedCards.slice(minIndex, minIndex + PAGINATION_LIMIT)
     }, [sortedCards, searchWindowPageIndex])
 
-    const maxPaginationIndex = React.useMemo(() => Math.floor(colorFilteredCards.length / PAGINATION_LIMIT), [colorFilteredCards])
+    const maxPaginationIndex = React.useMemo(() => Math.floor(sortedCards.length / PAGINATION_LIMIT), [sortedCards])
 
     const filterColor = (color: Color) => {
         setColorlessFilter(false)
@@ -292,19 +297,37 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
         setPendingOracleTextSearchTerm(newPendingOracleTextSearchTerms)
     }
 
-    // const addStatFilter = () => {
-    //     setCardTypeFilters([...cardTypeFilters, {
-    //         cardType: '',
-    //         invert: false
-    //     }])
-    // }
+    const addStatFilter = () => {
+        setStatFilters([...statFilters, {
+            stat: 'mana-value',
+            operation: 'equal',
+            value: ''
+        }])
+    }
 
-    // const removeStatFilter = (index: number) => {
-    //     setCardTypeFilters([...cardTypeFilters, {
-    //         cardType: '',
-    //         invert: false
-    //     }])
-    // }
+    const removeStatFilter = (index: number) => {
+        const newStatFilters = [...statFilters]
+        newStatFilters.splice(index, 1)
+        setStatFilters(newStatFilters)
+    }
+
+    const updateStatFilterStat = (index: number, stat: StatFilterStat) => {
+        const newStatFilters = [...statFilters]
+        newStatFilters[index].stat = stat
+        setStatFilters(newStatFilters)
+    }
+
+    const updateStatFilterOperation = (index: number, operation: StatFilterOperation) => {
+        const newStatFilters = [...statFilters]
+        newStatFilters[index].operation = operation
+        setStatFilters(newStatFilters)
+    }
+
+    const updateStatFilterValue = (index: number, value: string) => {
+        const newStatFilters = [...statFilters]
+        newStatFilters[index].value = value
+        setStatFilters(newStatFilters)
+    }
 
     return (
         <div className='card-search-window'>
@@ -368,26 +391,27 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
                         </div>
                     )}
                 </div>
-                <button onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}></button>
+                <button onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{cardTypeFilterOperation}</button>
 
-                {/* <div className='flex-column'>
+                <div className='flex-column'>
                     Card stats
-                    {cardTypeFilters.map((filter, index) =>
+                    {statFilters.map((filter, index) =>
                         <div className='flex-row'>
-                            <button onClick={() => invertCardTypeFilter(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }}>-</button>
-                            <TextInputWithSuggestions
-                                label={'Card text'}
-                                value={filter.cardType}
-                                onChangeText={(text) => setCardTypeFilterType(index, text)}
-                                suggestions={['Creature', 'Enchantment', 'Artifact']}
+                            <Dropdown options={STAT_FILTER_STATS} value={filter.stat} onSelect={(stat) => updateStatFilterStat(index, stat)} />
+                            <Dropdown options={STAT_FILTER_OPERATIONS} value={filter.operation} onSelect={(operation) => updateStatFilterOperation(index, operation)} />
+                            <TextInput
+                                value={filter.value}
+                                onChangeText={(text) => updateStatFilterValue(index, text)}
+                                validator={numbersOnlyTextInputValidator}
                             />
                             {index === cardTypeFilters.length - 1
-                                ? <button onClick={addCardTypeFilter}>+</button>
-                                : <button onClick={() => removeCardTypeFilter(index)} >X</button>}
+                                ? <button onClick={addStatFilter}>+</button>
+                                : <button onClick={() => removeStatFilter(index)}>X</button>}
                         </div>
                     )}
                 </div>
-                <button onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}></button> */}
+                <button onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{statFilterOperation}</button>
+
 
                 <div className='filter' >
                     <label htmlFor="sort-direction">Sort direction</label>
@@ -402,7 +426,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
                     </div>
                 }
             </div>
-            <div className='flex-row flex-center flex-gap' style={{ marginTop: '4em' }}>
+            <div className='flex-row flex-center flex-gap' style={{ marginTop: '12em' }}>
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex - 1)} disabled={searchWindowPageIndex === 0}>{'<'}</button>
                 <div>{searchWindowPageIndex + 1}</div>
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex + 1)} disabled={searchWindowPageIndex === maxPaginationIndex}>{'>'}</button>
@@ -410,6 +434,10 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
             <div className='card-search-window-results'>
                 {paginatedCards.map((cardData, index) => {
                     return <div className='deck-card' key={index}
+                        // style={{transition: 'left 0.5s'}}
+                        // style={{ right: `${0.1 * (index + 1)}em` }}
+                        // style={{ right: `1em`, transition: `right ${0.1 * (index + 1)}s` }}
+                        style={{ animation: `${0.02 * (index + 1)}s linear fade-in forwards` }}
                         onClick={() => addDeckCardQuantity(cardData.name, 1, 'mainboard')}
                         onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1, 'mainboard') }}>
                         <img src={getCardFrontImage(cardData)?.normal} className='deck-card-image' />
@@ -426,3 +454,5 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
         </div>
     )
 }
+
+

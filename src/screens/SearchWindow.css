@@ -1,0 +1,17 @@
+/* .search-card {
+    animation: 0.25s linear fade-in forwards;
+} */
+
+@keyframes fade-in {
+    from {
+        /* scale: 1; */
+        opacity: 0%;
+        right: 1em;
+    }
+
+    to {
+        /* scale: 1.5; */
+        opacity: 100%;
+        right: 0
+    }
+}

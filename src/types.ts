@@ -188,10 +188,13 @@ export type ColorSearchType = 'exact' | 'at-most' | 'at-least'
 
 export type CardTypeFilter = { cardType: string, invert: boolean }
 
+export type StatFilterStat = 'mana-value' | 'power' | 'toughness'
+export type StatFilterOperation = 'equal' | 'not-equal' | 'greater-than' | 'greater-than-or-equal' | 'less-than' | 'less-than-or-equal'
+
 export type StatFilter = {
-  stat: 'mana-value' | 'power' | 'toughness',
-  operation: 'equal' | 'not-equal' | 'greater-than' | 'greater-than-or-equal' | 'less-than' | 'less-than-or-equal'
-  value: number
+  stat: StatFilterStat,
+  operation: StatFilterOperation
+  value: string
 }
 
 export type SearchTermFilter = { text: string, invert: boolean }

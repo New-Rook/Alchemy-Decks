@@ -39,8 +39,20 @@ export const toUniqueArray = <T>(array: T[]) => {
     return Array.from(new Set(array))
 }
 
-export const splitArray = <T>(array: T[], predicate: (element: T) => boolean) => {
+export const splitArray = <T>(array: T[], predicate: (element: T) => boolean): [T[], T[]] => {
+    const filteredArray: T[] = []
+    const otherArray: T[] = []
 
+    array.forEach(element => {
+        if (predicate(element)) {
+            filteredArray.push(element)
+        }
+        else {
+            otherArray.push(element)
+        }
+    })
+
+    return [filteredArray, otherArray]
 }
 
 // Takes a record and removes a given key, returning a new object
