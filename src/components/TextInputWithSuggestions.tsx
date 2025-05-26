@@ -10,6 +10,8 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const TextInputWithSuggestions = ({ label, onChangeText, validator, suggestions, value, ...props }: Props) => {
     const [currentSuggestions, setCurrentSuggestions] = React.useState<string[]>()
+    const [isFocused, setIsFocused] = React.useState(false)
+    const ref = React.useRef(false)
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const text = e.target.value
@@ -29,7 +31,28 @@ export const TextInputWithSuggestions = ({ label, onChangeText, validator, sugge
 
     const suggestionsToShow = currentSuggestions ? currentSuggestions : suggestions
 
-    return <div className="flex-column">
+    React.useEffect(() => {
+        const closeMenu = () => {
+            if (!ref.current) {
+                setTimeout(() => setIsFocused(false), 50)
+            }
+        }
+
+        window.addEventListener('mouseup', closeMenu)
+
+        return () => window.removeEventListener('mouseup', closeMenu)
+    }, [])
+
+    const onFocus = () => {
+        ref.current = true
+        setIsFocused(true)
+    }
+
+    const onBlur = () => {
+        ref.current = false
+    }
+
+    return <div>
         {label}
         <input
             {...props}
@@ -37,13 +60,15 @@ export const TextInputWithSuggestions = ({ label, onChangeText, validator, sugge
             size={10}
             value={value}
             onChange={onChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
         />
         <div style={{
             position: 'absolute',
             display: 'flex',
             flexDirection: 'column'
         }}>
-            {suggestionsToShow.map(suggestion =>
+            {isFocused && suggestionsToShow.map(suggestion =>
                 <button key={suggestion} onClick={() => selectOption(suggestion)}>{suggestion}</button>
             )}
         </div>
