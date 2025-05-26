@@ -18,6 +18,8 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     const [cardArtWindowVisible, showCardArtWindow, hideCardArtWindow] = useBooleanState()
 
+    const updateSelectedCardsRef = React.useRef<() => void>(null)
+
     const moveSelectedCardsToBoard = (board: Board) => {
         const newDeckCards = { ...deckCards }
 
@@ -110,6 +112,23 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
         setQuantityUpdateText('')
         setSelectedCards({})
     }
+
+    React.useEffect(() => {
+        const triggerUpdateSelectedCards = (event: KeyboardEvent) => {
+            if (event.key === 'Enter' && updateSelectedCardsRef.current) {
+                updateSelectedCardsRef.current()
+            }
+        }
+
+        window.addEventListener('keyup', triggerUpdateSelectedCards)
+
+        return () => window.removeEventListener('keyup', triggerUpdateSelectedCards)
+    }, [])
+
+    React.useEffect(() => {
+        updateSelectedCardsRef.current = updateSelectedCards
+    }, [updateSelectedCards])
+
 
     return <div style={{
         position: 'sticky',
