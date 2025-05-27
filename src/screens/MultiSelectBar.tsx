@@ -1,7 +1,7 @@
 import React from "react"
 import { TextInput } from "../components/TextInput"
 import { Board, CardArtData, DeckCards, DeckStats } from "../types"
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator } from "../utilities/general"
+import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../utilities/general"
 import { CartArtWindow } from "./CartArtWindow"
 import { useBooleanState } from "../hooks/useBooleanState"
 
@@ -43,7 +43,18 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
         Object.keys(selectedCards).forEach((cardName) => {
             if (Number.isInteger(quantity)) {
-                newDeckCards[cardName].boards[selectedCards[cardName]] = parseInt(quantityUpdateText)
+                const board = selectedCards[cardName]
+                if (quantity === 0) {
+                    if (Object.keys(deckCards[cardName].boards).length === 1) {
+                        delete newDeckCards[cardName]
+                        return
+                    }
+
+                    newDeckCards[cardName].boards = omitFromPartialRecord(deckCards[cardName].boards, board)
+                }
+                else {
+                    newDeckCards[cardName].boards[board] = quantity
+                }
             }
             if (category) {
                 if (!newDeckCards[cardName].categories) {
@@ -142,10 +153,10 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
     }}>
         <TextInput label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
         <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
-        <button onClick={updateSelectedCards}>Update cards</button>
+        <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button>
         <button onClick={removeSelectedCardsCategories}>Remove categories</button>
         <button onClick={removeSelectedCards}>Remove cards</button>
-        <button onClick={showCardArtWindow}>Change card art</button>
+        <button onClick={showCardArtWindow} disabled={Object.keys(selectedCards).length > 150}>Change card art</button>
         <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
         <button onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</button>
         <button onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</button>
