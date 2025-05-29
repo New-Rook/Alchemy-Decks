@@ -19,11 +19,12 @@ type Props = {
     format: Format
     deckCards: DeckCards
     addDeckCardQuantity: (cardName: string, quantity: number, board: Board) => void
+    availableCards?: string[]
 }
 
 const PAGINATION_LIMIT = 40
 
-export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: Props) => {
+export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, availableCards }: Props) => {
     const { cardDictionary, getCardPriceDisplay, availableSortTypes } = useContext(AppContext)
 
     const [searchWindowPageIndex, setSearchWindowPageIndex] = React.useState(0)
@@ -118,9 +119,17 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format }: P
         setColorlessFilter(!colorlessFilter)
     }
 
+    const allCards = React.useMemo(() => {
+        if (availableCards) {
+            return availableCards.map(cardName => cardDictionary[cardName])
+        }
+
+        return Object.values(cardDictionary)
+    }, [cardDictionary, availableCards])
+
     const legalCards = React.useMemo(() => {
-        return Object.values(cardDictionary).filter(card => card.legalities[format] === 'legal' || card.legalities[format] === 'restricted' || (card.legalities[format] === 'banned' && showBannedCards))
-    }, [cardDictionary, format, showBannedCards])
+        return allCards.filter(card => card.legalities[format] === 'legal' || card.legalities[format] === 'restricted' || (card.legalities[format] === 'banned' && showBannedCards))
+    }, [format, showBannedCards])
 
     const searchTermNameFilteredCards = React.useMemo(() => {
         const searchTerms = nameSearchTerm.match(searchRegex)

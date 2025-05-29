@@ -64,6 +64,7 @@ export type DeckCard = {
   //   considering?: number
   // }
   boards: Partial<Record<Board, number>>
+  commanderNumber?: number
 }
 
 export type Board = 'mainboard' | 'sideboard' | 'considering'
@@ -84,6 +85,11 @@ export interface BaseCardData {
   toughness: string
 }
 
+export type RelatedCardData = {
+  component: string
+  name: string
+}
+
 export type DeckCollectionUse = {
   cards: string[]
 }
@@ -93,7 +99,7 @@ export type GlobalCategories = {
 }
 
 export interface CardData extends BaseCardData {
-  all_parts?: { id: string; uri: string }[]
+  all_parts?: RelatedCardData[]
   card_faces?: BaseCardData[]
   id: string
   lang: string

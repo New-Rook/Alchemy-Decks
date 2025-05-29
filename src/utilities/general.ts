@@ -35,6 +35,22 @@ export const omitFromArray = <T>(array: T[], element: T) => {
     return arrayShallowCopy
 }
 
+// Mutable remove array element
+export const removeFromArray = <T>(array: T[], ...elements: T[]) => {
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        const index = array.indexOf(element)
+
+        if (index === -1) {
+            continue
+        }
+
+        array.splice(index, 1)
+    }
+
+    return array
+}
+
 export const toUniqueArray = <T>(array: T[]) => {
     return Array.from(new Set(array))
 }

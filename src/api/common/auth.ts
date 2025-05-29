@@ -52,7 +52,7 @@ export const signIn = async (email: string, password: string) => {
 export const logout = async () => {
     await signOut(auth).then(() => {
         // Sign-out successful.
-    }).catch((error) => {
+    }).catch(() => {
         // An error happened.
     });
 }

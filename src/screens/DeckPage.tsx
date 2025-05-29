@@ -15,13 +15,15 @@ import { TEST_DECK_CARDS } from '../data/dev'
 import { Checkbox } from '../components/Checkbox'
 import { CARD_SORTERS } from '../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
-import { omitFromPartialRecord, omitFromRecord, stringStartsAndEndsWith, typedKeys } from '../utilities/general'
+import { COMMANDER_BACKGROUND_REGEX, COMMANDER_CHOOSE_A_BACKGROUND_REGEX, COMMANDER_DOCTORS_COMPANION_REGEX, COMMANDER_FRIENDS_FOREVER_REGEX, COMMANDER_GROUP_NAME, COMMANDER_PARTNER_REGEX, COMMANDER_PARTNER_WITH_REGEX, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
+import { omitFromPartialRecord, omitFromRecord, removeFromArray, splitArray, stringStartsAndEndsWith, typedKeys } from '../utilities/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 import { useDeckScroll } from './DeckPage/useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
 import { MultiSelectBar } from './MultiSelectBar'
 import { useDeckStats } from './DeckPage/useDeckStats'
+import { useCommanders } from './DeckPage/useCommanders'
+import { CommanderCardGroup } from './DeckPage/CommanderCardGroup'
 
 export const DeckPage = () => {
     const { cardDictionary } = useContext(AppContext)
@@ -32,6 +34,7 @@ export const DeckPage = () => {
     const {
         objectRecord: deckCards,
         setObjectRecord: setDeckCards,
+        updateObject: addDeckCard,
         updateObjectProperty: updateDeckCard,
         deleteObject: deleteDeckCard,
         deleteObjectProperty: deleteDeckCardProperty
@@ -47,10 +50,15 @@ export const DeckPage = () => {
     const [cardSearchResults, setCardSearchResults] = React.useState<CardData[]>([])
     const [sortAscending, setSortAscending] = React.useState(true)
 
+    const [includeCommandersInOtherGroups, setIncludeCommandersInOtherGroups] = React.useState(false)
+    // const [onlyShowCommanderArTheTop, setIncludeCommanderInGroups] = React.useState(true)
+
     const [selectedCards, setSelectedCards] = React.useState<Record<string, Board>>({})
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
     const [deckMetaDataWindowVisible, showDeckMetaDataWindow, hideDeckMetaDataWindow] = useBooleanState()
+    const [commanderPickWindowVisible, showCommanderPickWindow, hideCommanderPickWindow] = useBooleanState()
+    const [commanderPickIndex, setCommanderPickIndex] = React.useState(0)
 
     const dragSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 10 } }))
 
@@ -72,6 +80,19 @@ export const DeckPage = () => {
     const mainboard = React.useMemo(() => getBoardCards('mainboard'), [getBoardCards])
     const sideboard = React.useMemo(() => getBoardCards('sideboard'), [getBoardCards])
     const considering = React.useMemo(() => getBoardCards('considering'), [getBoardCards])
+
+    const commanders = React.useMemo(() => {
+        return Object.keys(mainboard)
+            .filter(cardName => !!deckCards[cardName].commanderNumber)
+            .sort((cardName1, cardName2) => (deckCards[cardName1].commanderNumber ?? 0) - (deckCards[cardName2].commanderNumber ?? 0))
+    }, [deckCards, mainboard])
+
+    const {
+        availableCommanders,
+        setFirstCommander,
+        setSecondCommander,
+        removeSecondCommander
+    } = useCommanders(deckMetaData.format, commanders, setDeckCards)
 
     React.useEffect(() => {
         if (!searchWindowVisible) {
@@ -117,6 +138,19 @@ export const DeckPage = () => {
             updateDeckCard(cardName, 'boards', { ...deckCards[cardName]?.boards, [board]: newQuantity })
         }
     }, [deckCards, updateDeckCard, deleteDeckCard])
+
+    const pickCommander = React.useCallback((cardName: string) => {
+        if (commanderPickIndex === 0) {
+            setFirstCommander(cardName)
+        } else if (commanderPickIndex === 1) {
+            setSecondCommander(cardName)
+        }
+    }, [setFirstCommander, setSecondCommander, commanderPickIndex])
+
+    const openCommanderPickModal = (index: number) => {
+        showCommanderPickWindow()
+        setCommanderPickIndex(index)
+    }
 
     // const moveCardBoard = (cardName: string, fromBoard: Board, toBoard: Board) => {
     //     const newCardBoards = { ...deckCards[cardName].boards }
@@ -192,10 +226,14 @@ export const DeckPage = () => {
         }
     }
 
-    const getCardGroups = React.useCallback((boardCardMap: Record<string, number>) => {
+    const getCardGroups = React.useCallback((boardCardMap: Record<string, number>, excludeCommander = false) => {
         let groups: CardGroupData[] = []
 
         const boardCards = Object.keys(boardCardMap)
+
+        if (excludeCommander) {
+            removeFromArray(boardCards, ...commanders)
+        }
 
         switch (groupBy) {
             case 'category':
@@ -224,9 +262,9 @@ export const DeckPage = () => {
         groups.forEach(group => group.cards.sort((cardA, cardB) => CARD_SORTERS[sortType](cardDictionary[cardA], cardDictionary[cardB], sortAscending)))
 
         return groups
-    }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType, sortAscending])
+    }, [deckCards, cardDictionary, groupBy, groupByColorMode, groupByTypeLastCardTypeOnly, sortType, sortAscending, commanders])
 
-    const mainboardCardGroups = React.useMemo(() => getCardGroups(mainboard), [getCardGroups, mainboard])
+    const mainboardCardGroups = React.useMemo(() => getCardGroups(mainboard, !includeCommandersInOtherGroups), [getCardGroups, mainboard, includeCommandersInOtherGroups])
     const sideboardCardGroups = React.useMemo(() => getCardGroups(sideboard), [getCardGroups, sideboard])
     const consideringCardGroups = React.useMemo(() => getCardGroups(considering), [getCardGroups, considering])
 
@@ -312,8 +350,24 @@ export const DeckPage = () => {
             {groupBy === 'color' && <Dropdown label={'Color group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} />}
             {groupBy === 'type' && <Checkbox label="Group only by last card type" checked={groupByTypeLastCardTypeOnly} onCheck={setGroupByTypeLastCardTypeOnly} />}
             <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
+            {deckMetaData.format === 'commander' && <Checkbox label={`Include ${commanders.length === 1 ? COMMANDER_GROUP_NAME : MULTI_COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
 
-            {searchWindowVisible && <SearchWindow back={hideSearchWindow} format={deckMetaData.format} deckCards={deckCards} addDeckCardQuantity={addDeckCardQuantity} />}
+            {(searchWindowVisible || commanderPickWindowVisible) &&
+                <SearchWindow
+                    back={commanderPickWindowVisible ? hideCommanderPickWindow : hideSearchWindow}
+                    format={deckMetaData.format}
+                    deckCards={deckCards}
+                    addDeckCardQuantity={commanderPickWindowVisible ? pickCommander : addDeckCardQuantity}
+                    availableCards={
+                        commanderPickWindowVisible
+                            ? commanderPickIndex === 0
+                                ? availableCommanders.legalCommanders
+                                : availableCommanders.partnerCommanders
+                            : undefined
+                    }
+                />
+            }
+
             {deckMetaDataWindowVisible && <DeckMetaDataWindow back={hideDeckMetaDataWindow} save={setDeckMetaData} deckMetaData={deckMetaData} legalityWarnings={deckStats.legalityWarnings} />}
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
@@ -321,6 +375,21 @@ export const DeckPage = () => {
                     {typedKeys(boards).filter(board => boards[board].groups.length > 0).map(board =>
                         <div key={board} ref={boardRefs[board]} className='flex-column' onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
                             {boards[board].name}
+                            {board === 'mainboard' && deckMetaData.format === 'commander' &&
+                                <CommanderCardGroup
+                                    commanders={commanders}
+                                    deckCards={deckCards}
+                                    addDeckCardQuantity={addDeckCardQuantity}
+                                    enableDragAndDrop={groupBy === 'category'}
+                                    selectedCards={selectedCards}
+                                    selectCard={selectCard}
+                                    board={board}
+                                    legalityWarnings={deckStats.legalityWarnings}
+                                    openCommanderPickModal={openCommanderPickModal}
+                                    secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
+                                    removeSecondCommander={removeSecondCommander}
+                                />
+                            }
                             {boards[board].groups.map(group =>
                                 <CardGroup
                                     key={group.name}
