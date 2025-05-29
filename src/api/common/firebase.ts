@@ -9,13 +9,13 @@ import { getAuth } from "firebase/auth"
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyAk4NdRevn0Hx3vivn8vDODOrMAxOXBmog",
-    authDomain: "zoro-deck-builder.firebaseapp.com",
-    projectId: "zoro-deck-builder",
-    storageBucket: "zoro-deck-builder.firebasestorage.app",
-    messagingSenderId: "927918497021",
-    appId: "1:927918497021:web:b85c038d522cc27ec8f294",
-    measurementId: "G-W82QYXFQHR"
+    apiKey: "AIzaSyAJp2R7woQJKd04e-n5YVU3OFbQosetm-A",
+    authDomain: "alchemydecks-staging.firebaseapp.com",
+    projectId: "alchemydecks-staging",
+    storageBucket: "alchemydecks-staging.firebasestorage.app",
+    messagingSenderId: "1056856553816",
+    appId: "1:1056856553816:web:4e246d37affd5f8946cd2d",
+    measurementId: "G-K6ERHYCKHY"
 }
 
 // Initialize Firebase
