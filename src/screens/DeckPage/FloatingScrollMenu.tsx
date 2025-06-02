@@ -1,5 +1,5 @@
-import { ALL_BOARDS } from "../data/editor"
-import { Board } from "../types"
+import { ALL_BOARDS } from "../../data/editor"
+import { Board } from "../../types"
 
 type Props = {
     scrollToBoard: (board: Board) => void

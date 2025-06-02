@@ -1,9 +1,9 @@
 import React from 'react'
-import { DeckMetaData } from '../types'
-import { TextInput } from '../components/TextInput'
-import { Dropdown } from '../components/Dropdown'
-import { VISIBILITY_TYPES } from '../data/editor'
-import { FORMATS } from '../data/search'
+import { DeckMetaData } from '../../types'
+import { TextInput } from '../../components/TextInput'
+import { Dropdown } from '../../components/Dropdown'
+import { VISIBILITY_TYPES } from '../../data/editor'
+import { FORMATS } from '../../data/search'
 
 type Props = {
     back: () => void

@@ -1,29 +1,29 @@
 import { useContext } from 'react'
 import React from 'react'
-import { AppContext } from '../context/AppContext'
-import { useBooleanState } from '../hooks/useBooleanState'
-import { Board, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, SortType, ViewType } from '../types'
-import { getCardAllCardName, getCardDroppedFromOutside } from '../utilities/card'
-import { SearchWindow } from './SearchWindow'
-import { DeckPageTopBar } from './DeckPage/DeckPageTopBar'
-import { useObjectRecordState } from '../hooks/useObjectRecordState'
-import { CardGroup } from './DeckPage/CardGroup'
-import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../utilities/groupers'
-import { Dropdown } from '../components/Dropdown'
-import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_TYPES, searchRegex, SORT_TYPES } from '../data/search'
-import { TEST_DECK_CARDS } from '../data/dev'
-import { Checkbox } from '../components/Checkbox'
-import { CARD_SORTERS } from '../utilities/sorters'
+import { AppContext } from '../../context/AppContext'
+import { useBooleanState } from '../../hooks/useBooleanState'
+import { Board, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, SortType, ViewType } from '../../types'
+import { getCardAllCardName, getCardDroppedFromOutside } from '../../utilities/card'
+import { SearchWindow } from '../SearchWindow'
+import { DeckPageTopBar } from './DeckPageTopBar'
+import { useObjectRecordState } from '../../hooks/useObjectRecordState'
+import { CardGroup } from './CardGroup'
+import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../../utilities/groupers'
+import { Dropdown } from '../../components/Dropdown'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_TYPES, searchRegex, SORT_TYPES } from '../../data/search'
+import { TEST_DECK_CARDS } from '../../data/dev'
+import { Checkbox } from '../../components/Checkbox'
+import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { COMMANDER_BACKGROUND_REGEX, COMMANDER_CHOOSE_A_BACKGROUND_REGEX, COMMANDER_DOCTORS_COMPANION_REGEX, COMMANDER_FRIENDS_FOREVER_REGEX, COMMANDER_GROUP_NAME, COMMANDER_PARTNER_REGEX, COMMANDER_PARTNER_WITH_REGEX, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../data/editor'
-import { omitFromPartialRecord, omitFromRecord, removeFromArray, splitArray, stringStartsAndEndsWith, typedKeys } from '../utilities/general'
+import { COMMANDER_BACKGROUND_REGEX, COMMANDER_CHOOSE_A_BACKGROUND_REGEX, COMMANDER_DOCTORS_COMPANION_REGEX, COMMANDER_FRIENDS_FOREVER_REGEX, COMMANDER_GROUP_NAME, COMMANDER_PARTNER_REGEX, COMMANDER_PARTNER_WITH_REGEX, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
+import { omitFromPartialRecord, omitFromRecord, removeFromArray, splitArray, stringStartsAndEndsWith, typedKeys } from '../../utilities/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
-import { useDeckScroll } from './DeckPage/useDeckScroll'
+import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
 import { MultiSelectBar } from './MultiSelectBar'
-import { useDeckStats } from './DeckPage/useDeckStats'
-import { useCommanders } from './DeckPage/useCommanders'
-import { CommanderCardGroup } from './DeckPage/CommanderCardGroup'
+import { useDeckStats } from './useDeckStats'
+import { useCommanders } from './useCommanders'
+import { CommanderCardGroup } from './CommanderCardGroup'
 
 export const DeckPage = () => {
     const { cardDictionary } = useContext(AppContext)
@@ -34,7 +34,7 @@ export const DeckPage = () => {
     const {
         objectRecord: deckCards,
         setObjectRecord: setDeckCards,
-        updateObject: addDeckCard,
+        // updateObject: addDeckCard,
         updateObjectProperty: updateDeckCard,
         deleteObject: deleteDeckCard,
         deleteObjectProperty: deleteDeckCardProperty

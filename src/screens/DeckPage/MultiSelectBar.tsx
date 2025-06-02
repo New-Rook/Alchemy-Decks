@@ -1,9 +1,9 @@
 import React from "react"
-import { TextInput } from "../components/TextInput"
-import { Board, CardArtData, DeckCards, DeckStats } from "../types"
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../utilities/general"
+import { TextInput } from "../../components/TextInput"
+import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
+import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../../utilities/general"
 import { CartArtWindow } from "./CartArtWindow"
-import { useBooleanState } from "../hooks/useBooleanState"
+import { useBooleanState } from "../../hooks/useBooleanState"
 
 type Props = {
     deckCards: DeckCards

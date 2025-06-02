@@ -1,4 +1,4 @@
-import { DeckStats } from "../types"
+import { DeckStats } from "../../types"
 
 type Props = {
     deckStats: DeckStats

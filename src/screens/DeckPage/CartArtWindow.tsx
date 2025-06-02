@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
-import { Board, CardArtData, CardData, DeckCards } from '../types'
-import { TextInput } from '../components/TextInput'
-import { getCardFrontImage, getCardImages } from '../utilities/card'
-import { LoadingWheel } from '../components/LoadingWheel'
-import { AppContext } from '../context/AppContext'
+import { Board, CardArtData, CardData, DeckCards } from '../../types'
+import { TextInput } from '../../components/TextInput'
+import { getCardFrontImage, getCardImages } from '../../utilities/card'
+import { LoadingWheel } from '../../components/LoadingWheel'
+import { AppContext } from '../../context/AppContext'
 
 type Props = {
     back: () => void

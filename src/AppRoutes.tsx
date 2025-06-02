@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router"
-import { DeckPage } from "./screens/DeckPage"
+import { DeckPage } from "./screens/DeckPage/DeckPage"
 import { HomePage } from "./screens/HomePage"
 import { LoginPage } from "./screens/LoginPage"
 import { MainLayout } from "./screens/MainLayout"
