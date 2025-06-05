@@ -1,4 +1,4 @@
-import { Board, CategoryUpdateOperation, DeckVisibility } from "../types"
+import { Board, CategoryUpdateOperation, DeckVisibility, LabelledValue } from "../types"
 
 export const NO_GROUP_NAME = 'All cards'
 export const NO_CATEGORY_NAME = 'No category'
@@ -9,7 +9,11 @@ export const DRAG_AND_DROP_OVERWRITE_OPERATION_NAME: CategoryUpdateOperation = '
 
 export const CATEGORY_UPDATE_OPERATIONS: CategoryUpdateOperation[] = ['add', 'overwrite']
 
-export const VISIBILITY_TYPES: DeckVisibility[] = ['private', 'link-only', 'public']
+export const VISIBILITY_TYPES: LabelledValue<DeckVisibility>[] = [
+    { label: 'Private', value: 'private' },
+    { label: 'Link only', value: 'link-only' },
+    { label: 'Public', value: 'public' }
+]
 
 export const ALL_BOARDS: Board[] = ['mainboard', 'sideboard', 'considering']
 

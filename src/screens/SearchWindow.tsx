@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { Board, CardData, CardTypeFilter, Color, ColorSearchType, DeckCards, Format, SearchFilterOperation, SearchTermFilter, SortType, StatFilter, StatFilterOperation, StatFilterStat } from '../types'
-import { ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
+import { ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, SEARCH_FILTER_OPERATION_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
 import { getCardAllCardName, getCardAllOracleText, getCardColors, getCardFrontImage } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
 import { invertBoolean, numbersOnlyTextInputValidator, splitArray, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
@@ -400,7 +400,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                         </div>
                     )}
                 </div>
-                <button onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{cardTypeFilterOperation}</button>
+                <button onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[cardTypeFilterOperation].label}</button>
 
                 <div className='flex-column'>
                     Card stats
@@ -419,7 +419,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                         </div>
                     )}
                 </div>
-                <button onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{statFilterOperation}</button>
+                <button onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[statFilterOperation].label}</button>
 
 
                 <div className='filter' >

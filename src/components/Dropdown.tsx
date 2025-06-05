@@ -1,6 +1,8 @@
+import { LabelledValue } from "../types"
+
 interface Props<T> {
     label?: string
-    options: T[]
+    options: LabelledValue<T>[]
     value: T
     onSelect: (value: T) => void
 }
@@ -14,7 +16,7 @@ export const Dropdown = <T extends string | number>({ label, options, value, onS
     return <div className="flex-column">
         {label}
         <select value={value} onChange={onChange}>
-            {options.map(option => <option key={option} value={option}>{option}</option>)}
+            {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
     </div>
 }

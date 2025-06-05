@@ -26,10 +26,10 @@ import { useCommanders } from './useCommanders'
 import { CommanderCardGroup } from './CommanderCardGroup'
 
 export const DeckPage = () => {
-    const { cardDictionary } = useContext(AppContext)
+    const { cardDictionary, availableSortTypes } = useContext(AppContext)
 
     const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
-    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>({ name: 'Test deck', description: 'This is a description test', format: 'standard', visibility: 'private' })
+    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>({ name: 'Riku of two reflections, big spells and big ramp)', description: 'This is a description test', format: 'standard', visibility: 'private' })
 
     const {
         objectRecord: deckCards,
@@ -51,7 +51,6 @@ export const DeckPage = () => {
     const [sortAscending, setSortAscending] = React.useState(true)
 
     const [includeCommandersInOtherGroups, setIncludeCommandersInOtherGroups] = React.useState(false)
-    // const [onlyShowCommanderArTheTop, setIncludeCommanderInGroups] = React.useState(true)
 
     const [selectedCards, setSelectedCards] = React.useState<Record<string, Board>>({})
 
@@ -108,20 +107,6 @@ export const DeckPage = () => {
         groupByColorMode,
         groupByTypeLastCardTypeOnly
     })
-
-    const availableSortTypes = React.useMemo(() => {
-        return SORT_TYPES.filter(sort => {
-            if (sort === 'price-eur') {
-                return currencyType === 'eur'
-            }
-
-            if (sort === 'price-usd') {
-                return currencyType === 'usd'
-            }
-
-            return true
-        })
-    }, [currencyType])
 
     const addDeckCardQuantity = React.useCallback((cardName: string, quantity: number, board: Board) => {
         const newQuantity = Math.max((deckCards[cardName]?.boards[board] ?? 0) + quantity, 0)
@@ -419,7 +404,14 @@ export const DeckPage = () => {
                 setSelectedCards={setSelectedCards}
             />}
 
-            <FloatingScrollMenu scrollToBoard={scrollToBoard} scrollToLastKnownPosition={scrollToLastKnownPosition} />
+            <FloatingScrollMenu boardActive={{
+                mainboard: mainboardCardGroups.length > 0,
+                sideboard: sideboardCardGroups.length > 0,
+                considering: consideringCardGroups.length > 0
+            }}
+                scrollToBoard={scrollToBoard}
+                scrollToLastKnownPosition={scrollToLastKnownPosition}
+            />
         </div>
     )
 }
