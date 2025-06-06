@@ -4,6 +4,7 @@ import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
 import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../../utilities/general"
 import { CartArtWindow } from "./CartArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
+import { IconButton } from "../../components/IconButton"
 
 type Props = {
     deckCards: DeckCards
@@ -141,26 +142,27 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
     }, [updateSelectedCards])
 
 
-    return <div style={{
+    return <div className="flex-row flex-gap flex-wrap align-end base-padding-vertical" style={{
         position: 'sticky',
         bottom: 0,
         zIndex: 2,
-        backgroundColor: 'white',
-        flexDirection: 'row',
-        display: 'flex',
-        gap: '2em',
-        padding: '0.5em'
+        backgroundColor: 'white'
     }}>
-        <TextInput label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
-        <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
-        <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button>
-        <button onClick={removeSelectedCardsCategories}>Remove categories</button>
-        <button onClick={removeSelectedCards}>Remove cards</button>
-        <button onClick={showCardArtWindow} disabled={Object.keys(selectedCards).length > 150}>Change card art</button>
-        <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
-        <button onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</button>
-        <button onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</button>
-        <button onClick={deselectAllCards}>Deselect cards</button>
+        {/* <div className="flex-row flex-gap align-end"> */}
+        <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+        <TextInput type={'search'} label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
+        {/* <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button> */}
+        <IconButton iconName={"check"} onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</IconButton>
+        <IconButton iconName={"reset_shutter_speed"} onClick={removeSelectedCardsCategories}>Remove categories</IconButton>
+        <IconButton iconName={"delete"} onClick={removeSelectedCards}>Remove cards</IconButton>
+        <IconButton iconName={"brush"} onClick={showCardArtWindow} disabled={Object.keys(selectedCards).length > 150}>Change card art</IconButton>
+        {/* </div> */}
+        {/* <div className="flex-row flex-gap"> */}
+        <IconButton iconName={"move_up"} onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</IconButton>
+        <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</IconButton>
+        <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</IconButton>
+        <IconButton iconName={"close"} onClick={deselectAllCards}>Deselect cards</IconButton>
+        {/* </div> */}
         {cardArtWindowVisible && <CartArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
     </div>
 }

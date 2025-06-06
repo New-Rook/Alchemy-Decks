@@ -1,4 +1,4 @@
-import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, LabelledValue, SearchFilterOperation, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
+import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, GroupByTypeMode, LabelledValue, SearchFilterOperation, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
 
 export const searchRegex = /\w+|"[\w ]+"/g
 
@@ -115,6 +115,10 @@ export const GROUP_BY_COLOR_MODES: LabelledValue<GroupByColorMode>[] = [
     { label: 'Multicolored expanded', value: 'multicolored-expanded' },
     { label: 'All monocolored', value: 'all-monocolored' }
 ]
+export const GROUP_BY_TYPE_MODES: LabelledValue<GroupByTypeMode>[] = [
+    { label: 'All types', value: 'all-types' },
+    { label: 'Only last type', value: 'only-last-type' },
+]
 export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
 export const COLOR_SEARCH_TYPES: LabelledValue<ColorSearchType>[] = [
     { label: 'Exact', value: 'exact' },
@@ -128,12 +132,12 @@ export const STAT_FILTER_STATS: LabelledValue<StatFilterStat>[] = [
     { label: 'Toughness', value: 'toughness' }
 ]
 export const STAT_FILTER_OPERATIONS: LabelledValue<StatFilterOperation>[] = [
-    { label: 'Equal', value: 'equal' },
-    { label: 'Not equal', value: 'not-equal' },
-    { label: 'Greater than', value: 'greater-than' },
-    { label: 'Greater than or equal to', value: 'greater-than-or-equal' },
-    { label: 'Less than', value: 'less-than' },
-    { label: 'Less than or equal to', value: 'less-than-or-equal' }
+    { label: '=', value: 'equal' },
+    { label: '≠', value: 'not-equal' },
+    { label: '>', value: 'greater-than' },
+    { label: '>=', value: 'greater-than-or-equal' },
+    { label: '<', value: 'less-than' },
+    { label: '<=', value: 'less-than-or-equal' }
 ]
 export const SEARCH_FILTER_OPERATION_DATA: Record<SearchFilterOperation, { label: string }> = {
     and: { label: 'And' },

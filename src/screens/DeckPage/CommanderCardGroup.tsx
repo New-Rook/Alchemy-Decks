@@ -21,9 +21,9 @@ type Props = {
 
 export const CommanderCardGroup = ({ commanders, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board, legalityWarnings, openCommanderPickModal, secondCommanderPickAvailable, removeSecondCommander }: Props) => {
     return (
-        <div className="flex-column" style={{ position: 'relative' }}>
+        <div className="card-group flex-column flex-gap-small position-relative">
             {commanders.length === 1 ? COMMANDER_GROUP_NAME : MULTI_COMMANDER_GROUP_NAME}
-            <div className="card-group">
+            <div className="card-group-content">
                 <div>
                     {commanders[0]
                         ? <Card

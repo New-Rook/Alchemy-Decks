@@ -183,6 +183,7 @@ export type CardGroupData = {
 }
 
 export type GroupByColorMode = 'multicolored-in-one' | 'multicolored-expanded' | 'all-monocolored'
+export type GroupByTypeMode = 'all-types' | 'only-last-type'
 
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
 

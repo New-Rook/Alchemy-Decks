@@ -72,9 +72,9 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
     }, [groupName, draggedCard.hasThisGroupCategory])
 
     return (
-        <div className="flex-column" style={{ position: 'relative' }}>
-            {groupLabel} ({numberOfCards})
-            <div className="card-group">
+        <div className="card-group flex-column flex-gap-small position-relative">
+            <span className="card-group-title flex-row flex-gap-small align-center">{groupLabel} ({numberOfCards})</span>
+            <div className="card-group-content">
                 {cardNames.map(cardName =>
                     <Card
                         key={cardName}

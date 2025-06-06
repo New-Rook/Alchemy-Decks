@@ -1,13 +1,13 @@
 import React, { useContext } from "react"
 import { basicLandRegex, NUMBER_NAME_MAP } from "../../data/general"
-import { BoardCards, DeckCards, DeckMetaData, DeckStats, GroupByColorMode } from "../../types"
+import { BoardCards, DeckCards, DeckMetaData, DeckStats, GroupByColorMode, GroupByTypeMode } from "../../types"
 import { getCardAllOracleText } from "../../utilities/card"
 import { numberToDecimalPoints } from "../../utilities/general"
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from "../../utilities/groupers"
 import { AppContext } from "../../context/AppContext"
 
 // export const useDeckStats = (deckMetaData: DeckMetaData, deckCards: DeckCards, mainboard: BoardCards, sideboard: BoardCards, groupByColorMode: GroupByColorMode, groupByTypeLastCardTypeOnly: boolean) => {
-export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, groupByColorMode, groupByTypeLastCardTypeOnly }: { deckMetaData: DeckMetaData, deckCards: DeckCards, mainboard: BoardCards, sideboard: BoardCards, groupByColorMode: GroupByColorMode, groupByTypeLastCardTypeOnly: boolean }) => {
+export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, groupByColorMode, groupByTypeMode }: { deckMetaData: DeckMetaData, deckCards: DeckCards, mainboard: BoardCards, sideboard: BoardCards, groupByColorMode: GroupByColorMode, groupByTypeMode: GroupByTypeMode }) => {
     const { cardDictionary } = useContext(AppContext)
 
     const deckStats = React.useMemo<DeckStats>(() => {
@@ -69,7 +69,7 @@ export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, gr
             const colors = groupCardsByColor(mainboardCards, cardDictionary, groupByColorMode)
             const manaValues = groupCardsByManaValue(mainboardCards, cardDictionary)
             const subTypes = groupCardsBySubType(mainboardCards, cardDictionary)
-            const types = groupCardsByType(mainboardCards, cardDictionary, groupByTypeLastCardTypeOnly)
+            const types = groupCardsByType(mainboardCards, cardDictionary, groupByTypeMode)
 
             return { categories, colors, manaValues, subTypes, types }
         }

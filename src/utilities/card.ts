@@ -36,6 +36,14 @@ export const getCardFrontImage = (card: CardData) => {
 
 export const getCardColors = (card: CardData) => {
     if (card.card_faces) {
+        return toUniqueArray(card.card_faces.reduce<Color[]>((colors, cardFace) => [...colors, ...cardFace.colors], []))
+    }
+
+    return card.colors
+}
+
+export const getCardColorsForSearch = (card: CardData) => {
+    if (card.card_faces) {
         if (card.colors) {
             return card.color_identity
         }

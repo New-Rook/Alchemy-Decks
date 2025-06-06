@@ -5,7 +5,7 @@ export const LoadingWheel = ({ className, ...props }: React.HTMLAttributes<HTMLD
     const pixelSize = 200
     const iconSize = 60
     return <div {...props}
-        className={`${className} loading-wheel`}
+        className={`loading-wheel ${className ?? ''}`}
         style={{
             position: 'relative',
             width: `${pixelSize}px`,

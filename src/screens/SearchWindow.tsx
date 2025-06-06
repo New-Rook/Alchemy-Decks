@@ -3,7 +3,7 @@ import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { Board, CardData, CardTypeFilter, Color, ColorSearchType, DeckCards, Format, SearchFilterOperation, SearchTermFilter, SortType, StatFilter, StatFilterOperation, StatFilterStat } from '../types'
 import { ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, SEARCH_FILTER_OPERATION_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
-import { getCardAllCardName, getCardAllOracleText, getCardColors, getCardFrontImage } from '../utilities/card'
+import { getCardAllCardName, getCardAllOracleText, getCardColorsForSearch, getCardFrontImage } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
 import { invertBoolean, numbersOnlyTextInputValidator, splitArray, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
 import { useAdvancedState } from '../hooks/useAdvancedState'
@@ -181,7 +181,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
         }
 
         return searchTermOracleTextFilteredCards.filter(card => {
-            const cardColors = searchByColorIdentity ? card.color_identity : getCardColors(card)
+            const cardColors = searchByColorIdentity ? card.color_identity : getCardColorsForSearch(card)
             if (colorlessFilter) {
                 return cardColors.length === 0
             }
@@ -343,6 +343,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
             <div className='top-bar'>
                 <button onClick={back}>Back to deck</button>
                 <TextInput
+                    type={'search'}
                     label={'Name'}
                     value={pendingNameSearchTerm}
                     onChangeText={setPendingNameSearchTerm}
@@ -359,7 +360,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                         <div className='flex-row'>
                             <button onClick={() => invertOracleTextSearchTermText(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }}>-</button>
                             <TextInput
-                                // label={'Card text'}
+                                type={'search'}
                                 value={filter.text}
                                 onChangeText={(text) => setOracleTextSearchTermText(index, text)}
                             />
@@ -409,6 +410,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                             <Dropdown options={STAT_FILTER_STATS} value={filter.stat} onSelect={(stat) => updateStatFilterStat(index, stat)} />
                             <Dropdown options={STAT_FILTER_OPERATIONS} value={filter.operation} onSelect={(operation) => updateStatFilterOperation(index, operation)} />
                             <TextInput
+                                type={'search'}
                                 value={filter.value}
                                 onChangeText={(text) => updateStatFilterValue(index, text)}
                                 validator={numbersOnlyTextInputValidator}

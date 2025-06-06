@@ -89,6 +89,7 @@ export const CartArtWindow = ({ back, save, deckCards, selectedCards }: Props) =
     return (
         <div className='card-search-window'>
             <TextInput
+                type={'search'}
                 label={'Set name'}
                 value={setName}
                 onChangeText={setSetName}

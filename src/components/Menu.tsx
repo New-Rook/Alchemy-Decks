@@ -4,10 +4,12 @@ import './Menu.css'
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
     expandOnHover?: boolean
     titleProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
+    expandedTitleProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
     titleChildren?: React.ReactNode
+    contentProps?: React.HTMLAttributes<HTMLDivElement>
 }
 
-export const Menu = ({ expandOnHover, titleProps, titleChildren, children, ...props }: Props) => {
+export const Menu = ({ expandOnHover, titleProps, expandedTitleProps, titleChildren, contentProps, children, ...props }: Props) => {
     const [expanded, setExpanded] = React.useState(false)
     const ref = React.useRef(false)
 
@@ -27,14 +29,15 @@ export const Menu = ({ expandOnHover, titleProps, titleChildren, children, ...pr
         return () => window.removeEventListener('mouseup', closeMenu)
     }, [])
 
-    return <div {...props} onMouseEnter={expandOnHover ? toggleExpanded : undefined}
+    return <div {...props}
+        onMouseEnter={expandOnHover ? toggleExpanded : undefined}
         onMouseLeave={expandOnHover ? toggleExpanded : undefined}>
         <button
-            {...titleProps}
+            {...(expanded ? expandedTitleProps : titleProps)}
             onClick={!expandOnHover ? toggleExpanded : undefined}
             onMouseEnter={() => ref.current = true}
             onMouseLeave={() => ref.current = false}
         >{titleChildren}</button>
-        {expanded && <div className="menu-content" >{children}</div>}
+        {expanded && <div {...contentProps} className={`menu-content ${contentProps?.className ?? ''}`} >{children}</div>}
     </div>
 }

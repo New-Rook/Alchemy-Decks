@@ -32,7 +32,7 @@ export const LoginPage = () => {
                 label="Password"
                 value={password}
                 onChangeText={setPassword}
-                password
+                type={'password'}
             />
             <button onClick={handleLogin}>Log in</button>
             <NavButton to="/forgot-password" options={{ state: { email } }} >Forgot password</NavButton>

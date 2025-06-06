@@ -2,10 +2,9 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
     onChangeText: (text: string) => void
     validator?: (text: string) => boolean
-    password?: boolean
 }
 
-export const TextInput = ({ label, onChangeText, validator, password, ...props }: Props) => {
+export const TextInput = ({ label, onChangeText, validator, type = 'text', ...props }: Props) => {
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const text = e.target.value
 
@@ -20,7 +19,7 @@ export const TextInput = ({ label, onChangeText, validator, password, ...props }
         {label}
         <input
             {...props}
-            type={password ? 'password' : 'text'}
+            type={type}
             size={10}
             onChange={onChange}
         />
