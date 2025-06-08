@@ -2,7 +2,7 @@ import React from "react"
 import { TextInput } from "../../components/TextInput"
 import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
 import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../../utilities/general"
-import { CartArtWindow } from "./CartArtWindow"
+import { CardArtWindow } from "./CardArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
 import { IconButton } from "../../components/IconButton"
 
@@ -163,6 +163,6 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
         <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</IconButton>
         <IconButton iconName={"close"} onClick={deselectAllCards}>Deselect cards</IconButton>
         {/* </div> */}
-        {cardArtWindowVisible && <CartArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
+        {cardArtWindowVisible && <CardArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
     </div>
 }

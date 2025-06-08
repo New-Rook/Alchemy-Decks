@@ -1,10 +1,13 @@
+import { Label } from "./Label"
+
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
+    containerProps?: React.HTMLAttributes<HTMLDivElement>
     label?: string
     onChangeText: (text: string) => void
     validator?: (text: string) => boolean
 }
 
-export const TextInput = ({ label, onChangeText, validator, type = 'text', ...props }: Props) => {
+export const TextInput = ({ containerProps, label, onChangeText, validator, type = 'text', ...props }: Props) => {
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const text = e.target.value
 
@@ -15,8 +18,8 @@ export const TextInput = ({ label, onChangeText, validator, type = 'text', ...pr
         onChangeText(text)
     }
 
-    return <div className="flex-column">
-        {label}
+    return <div {...containerProps} className={`flex-column ${containerProps?.className ?? ''}`}>
+        <Label>{label}</Label>
         <input
             {...props}
             type={type}

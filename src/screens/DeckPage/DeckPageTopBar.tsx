@@ -39,7 +39,7 @@ export const DeckPageTopBar = ({
                         onChangeText={setCardSearchTerm}
                     />
                 </div>
-                <button onClick={showSearchWindow}>Full search</button>
+                <IconButton iconName="search" onClick={showSearchWindow}>Full search</IconButton>
                 <div className="flex-row flex-gap right-placed-item">
                     <div className="flex-column">
                         Deck size

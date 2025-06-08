@@ -1,18 +1,25 @@
 import React from "react"
-import { LabelledValue } from "../types"
+import { InputSize, LabelledValue } from "../types"
 import { Icon } from "./Icon"
 import { IconButton } from "./IconButton"
 import { Menu } from "./Menu"
+import { Label } from "./Label"
 
 interface Props<T> {
     label?: string
     options: LabelledValue<T>[]
     value: T
     onSelect: (value: T) => void
-    size?: 'medium' | 'large'
+    size?: 'small' | 'medium' | 'large'
 }
 
 const titleStyleClassNames = 'dropdown flex-row flex-gap-small space-between'
+
+const styleMap: Record<InputSize, string> = {
+    small: "dropdown-small",
+    medium: "",
+    large: "dropdown-large"
+}
 
 export const Dropdown = <T extends string | number>({ label, options, value, onSelect, size = 'medium' }: Props<T>) => {
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -31,10 +38,10 @@ export const Dropdown = <T extends string | number>({ label, options, value, onS
     }, [options, value])
 
     return <div className="flex-column">
-        <label>{label}</label>
-        <Menu titleProps={{ className: `${titleStyleClassNames} ${size === 'large' ? 'dropdown-large' : ''}` }}
-            expandedTitleProps={{ className: `${titleStyleClassNames} ${size === 'large' ? 'dropdown-large' : ''} dropdown-expanded` }}
-            contentProps={{ className: `dropdown-content ${size === 'large' ? 'dropdown-large' : ''}` }}
+        <Label>{label}</Label>
+        <Menu titleProps={{ className: `${titleStyleClassNames} ${styleMap[size]}` }}
+            expandedTitleProps={{ className: `${titleStyleClassNames} ${styleMap[size]} dropdown-expanded` }}
+            contentProps={{ className: `dropdown-content ${styleMap[size]}` }}
             titleChildren={
                 <>
                     {currentValueLabel}

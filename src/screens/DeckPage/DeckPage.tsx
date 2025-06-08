@@ -340,7 +340,7 @@ export const DeckPage = () => {
                 {groupBy === 'type' && <Dropdown label={'Group mode'} options={GROUP_BY_TYPE_MODES} value={groupByTypeMode} onSelect={setGroupByTypeMode} />}
                 <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
             </div>
-            {deckMetaData.format === 'commander' && <Checkbox label={`Include ${commanders.length === 1 ? COMMANDER_GROUP_NAME : MULTI_COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
+            {deckMetaData.format === 'commander' && <Checkbox label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
 
             {(searchWindowVisible || commanderPickWindowVisible) &&
                 <SearchWindow

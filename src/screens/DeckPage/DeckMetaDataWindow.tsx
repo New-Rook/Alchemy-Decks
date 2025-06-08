@@ -4,6 +4,7 @@ import { TextInput } from '../../components/TextInput'
 import { Dropdown } from '../../components/Dropdown'
 import { VISIBILITY_TYPES } from '../../data/editor'
 import { FORMATS } from '../../data/search'
+import { Modal } from '../../components/Modal'
 
 type Props = {
     back: () => void
@@ -21,7 +22,7 @@ export const DeckMetaDataWindow = ({ back, save, deckMetaData, legalityWarnings 
     }
 
     return (
-        <div className='card-search-window'>
+        <Modal className='flex-column'>
             <div className='flex-column'>
                 <TextInput
                     label={'Deck name'}
@@ -60,9 +61,11 @@ export const DeckMetaDataWindow = ({ back, save, deckMetaData, legalityWarnings 
                     </p>
                 )}
             </div>
-            <button onClick={back}>Back to deck</button>
-            <button onClick={saveChanges}>Save</button>
-        </div>
+            <div className='flex-row flex-end flex-gap flex-wrap'>
+                <button onClick={back}>Back to deck</button>
+                <button onClick={saveChanges}>Save</button>
+            </div>
+        </Modal>
     )
 }
 

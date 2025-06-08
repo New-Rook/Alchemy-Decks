@@ -209,3 +209,6 @@ export type SearchTermFilter = { text: string, invert: boolean }
 export type SearchFilterOperation = 'or' | 'and'
 
 export type LabelledValue<T> = { label: string, value: T }
+
+export type InputSize = 'small' | 'medium' | 'large'
+export type IconSize = 'small' | 'medium' | 'large'

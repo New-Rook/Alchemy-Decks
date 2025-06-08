@@ -10,9 +10,12 @@ import { useAdvancedState } from '../hooks/useAdvancedState'
 import { CARD_SORTERS } from '../utilities/sorters'
 import { Checkbox } from '../components/Checkbox'
 import { Dropdown } from '../components/Dropdown'
-import { checkCardTypeFilter, checkOracleTextSearchTermFilter, checkStatFilter, nextSearchFilterOperation, searchTermFilterToRegexes } from '../utilities/search'
+import { checkCardTypeFilter, checkOracleTextSearchTermFilter, checkStatFilter, nextSearchFilterOperation, searchTermFilterToRegexes, STICKERS_ATTRACTIONS_REGEX } from '../utilities/search'
 import { TextInputWithSuggestions } from '../components/TextInputWithSuggestions'
 import './SearchWindow.css'
+import { IconButton } from '../components/IconButton'
+import { Label } from '../components/Label'
+import { Expandable } from '../components/Expandable'
 
 type Props = {
     back: () => void
@@ -43,6 +46,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
     // const [oracleTextSearchTermOperation, setOracleTextSearchTermOperation] = useAdvancedState<SearchFilterOperation>('or', resetPageIndex)
     const [nameSearchTerm, setNameSearchTerm] = useAdvancedState('', resetPageIndex)
     const [showBannedCards, setShowBannedCards] = useAdvancedState(false, resetPageIndex)
+    const [showStickersAndAttractions, setShowStickersAndAttractions] = useAdvancedState(false, resetPageIndex)
     const [showPrices, setShowPrices] = React.useState(false)
     const [showNotes, setShowNotes] = React.useState(false)
     const [searchByColorIdentity, setSearchByColorIdentity] = useAdvancedState(false, resetPageIndex)
@@ -128,8 +132,19 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
     }, [cardDictionary, availableCards])
 
     const legalCards = React.useMemo(() => {
-        return allCards.filter(card => card.legalities[format] === 'legal' || card.legalities[format] === 'restricted' || (card.legalities[format] === 'banned' && showBannedCards))
-    }, [format, showBannedCards])
+        return allCards.filter(card => {
+            const legal = card.legalities[format] === 'legal'
+                || card.legalities[format] === 'restricted'
+                || (card.legalities[format] === 'banned' && showBannedCards)
+
+            if (legal) {
+                return showStickersAndAttractions
+                    || !STICKERS_ATTRACTIONS_REGEX.test(card.type_line)
+            }
+
+            return false
+        })
+    }, [format, showBannedCards, showStickersAndAttractions])
 
     const searchTermNameFilteredCards = React.useMemo(() => {
         const searchTerms = nameSearchTerm.match(searchRegex)
@@ -340,111 +355,124 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
 
     return (
         <div className='card-search-window'>
-            <div className='top-bar'>
-                <button onClick={back}>Back to deck</button>
+            <div className='search-window-top-bar'>
+                <IconButton iconName={'chevron_left'} onClick={back} />
+
+                <div className='flex-column flex-gap'>
+                    <div className='flex-row flex-gap'>
+                        {ALL_COLOR_KEYS.map(color => <button key={color} className={`search-symbol${!colorFilters.includes(color) ? ' search-symbol-inactive' : ''}`} onClick={() => filterColor(color)}><img src={COLOR_DATA[color].svg_uri} /></button>)}
+                        {<button className={`search-symbol${!colorlessFilter ? ' search-symbol-inactive' : ''}`} onClick={toggleColorlessFilter}><img src={COLORLESS_DATA.svg_uri} /></button>}
+                    </div>
+                    <div className='flex-row flex-gap'>
+                        <Dropdown options={COLOR_SEARCH_TYPES} value={colorSearchType} onSelect={setColorSearchType} size={'small'} />
+                        <Checkbox label="Color identity" checked={searchByColorIdentity} onCheck={setSearchByColorIdentity} />
+                    </div>
+                </div>
+
                 <TextInput
+                    containerProps={{ className: 'flex-gap-small' }}
                     type={'search'}
                     label={'Name'}
                     value={pendingNameSearchTerm}
                     onChangeText={setPendingNameSearchTerm}
                 />
-                {/* <TextInput
-                    label={'Card text'}
-                    value={pendingOracleTextSearchTerm}
-                    onChangeText={setPendingOracleTextSearchTerm}
-                /> */}
 
-                <div className='flex-column'>
-                    Card text
+                <div className='flex-column flex-gap-small'>
+                    <Label>Card text</Label>
                     {pendingOracleTextSearchTerm.map((filter, index) =>
                         <div className='flex-row'>
-                            <button onClick={() => invertOracleTextSearchTermText(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }}>-</button>
+                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'negative-filter' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }} />
                             <TextInput
                                 type={'search'}
                                 value={filter.text}
                                 onChangeText={(text) => setOracleTextSearchTermText(index, text)}
                             />
                             {index === pendingOracleTextSearchTerm.length - 1
-                                ? <button onClick={addOracleTextSearchTerm}>+</button>
-                                : <button onClick={() => removeOracleTextSearchTerm(index)}>X</button>}
+                                ? <IconButton iconName={'add'} className='border-rounded-right' size={'small'} onClick={addOracleTextSearchTerm} />
+                                : <IconButton iconName={'close'} className='border-rounded-right' size={'small'} onClick={() => removeOracleTextSearchTerm(index)} />}
                         </div>
                     )}
                 </div>
 
-                {ALL_COLOR_KEYS.map(color => <button key={color} className={`search-symbol${!colorFilters.includes(color) ? ' search-symbol-inactive' : ''}`} onClick={() => filterColor(color)}><img src={COLOR_DATA[color].svg_uri} /></button>)}
-                {<button className={`search-symbol${!colorlessFilter ? ' search-symbol-inactive' : ''}`} onClick={toggleColorlessFilter}><img src={COLORLESS_DATA.svg_uri} /></button>}
-                <Checkbox label="Color identity" checked={searchByColorIdentity} onCheck={setSearchByColorIdentity} />
-                {/* <div className='filter'>
-                    <label htmlFor="format-select">Format</label>
-                    <select id="format-select" value={format} onChange={(e) => setFormat(e.target.value as Format)}>
-                        {FORMATS.map(format => <option key={format} value={format}>{format}</option>)}
-                    </select>
-                </div> */}
-                <Checkbox label="Show prices" checked={showPrices} onCheck={setShowPrices} />
-                <Checkbox label="Show banned cards" checked={showBannedCards} onCheck={setShowBannedCards} />
-                <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
-                <Dropdown label={'Type'} options={COLOR_SEARCH_TYPES} value={colorSearchType} onSelect={setColorSearchType} />
-                <div className='flex-column'>
-                    Card types
+                <div className='flex-column flex-gap-small'>
+                    <Label>Card types</Label>
                     {cardTypeFilters.map((filter, index) =>
                         <div className='flex-row'>
-                            <button onClick={() => invertCardTypeFilter(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }}>-</button>
+                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'negative-filter' : ''}`} size={'small'} onClick={() => invertCardTypeFilter(index)} />
                             <TextInputWithSuggestions
-                                // label={'Card text'}
+                                className='input-medium'
                                 value={filter.cardType}
                                 onChangeText={(text) => setCardTypeFilterType(index, text)}
                                 suggestions={['Creature', 'Enchantment', 'Artifact']}
                             />
                             {index === cardTypeFilters.length - 1
-                                ? <button onClick={addCardTypeFilter}>+</button>
-                                : <button onClick={() => removeCardTypeFilter(index)}>X</button>}
+                                // ? <button onClick={addCardTypeFilter}>+</button>
+                                ? <IconButton iconName={'add'} className='border-rounded-right' size={'small'} onClick={addCardTypeFilter} />
+                                : <IconButton iconName={'close'} className='border-rounded-right' size={'small'} onClick={() => removeCardTypeFilter(index)} />
+                            }
+                            {index === 0 && <button className='flex-row flex-center base-width-4 base-offset-left' onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[cardTypeFilterOperation].label}</button>}
                         </div>
                     )}
                 </div>
-                <button onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[cardTypeFilterOperation].label}</button>
 
-                <div className='flex-column'>
-                    Card stats
+                <div className='flex-column flex-gap-small'>
+                    <Label>Card stats</Label>
                     {statFilters.map((filter, index) =>
-                        <div className='flex-row'>
+                        <div className='flex-row flex-gap-small'>
                             <Dropdown options={STAT_FILTER_STATS} value={filter.stat} onSelect={(stat) => updateStatFilterStat(index, stat)} />
                             <Dropdown options={STAT_FILTER_OPERATIONS} value={filter.operation} onSelect={(operation) => updateStatFilterOperation(index, operation)} />
                             <TextInput
                                 type={'search'}
+                                className='input-tiny'
                                 value={filter.value}
                                 onChangeText={(text) => updateStatFilterValue(index, text)}
                                 validator={numbersOnlyTextInputValidator}
                             />
-                            {index === cardTypeFilters.length - 1
-                                ? <button onClick={addStatFilter}>+</button>
-                                : <button onClick={() => removeStatFilter(index)}>X</button>}
+                            {index === statFilters.length - 1
+                                ? <IconButton iconName={'add'} size='small' onClick={addStatFilter} />
+                                : <IconButton iconName={'close'} size='small' onClick={() => removeStatFilter(index)} />
+                            }
+                            {index === 0 && <button className='flex-row flex-center base-width-4' onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[statFilterOperation].label}</button>}
                         </div>
                     )}
                 </div>
-                <button onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[statFilterOperation].label}</button>
 
-
-                <div className='filter' >
-                    <label htmlFor="sort-direction">Sort direction</label>
-                    <button onClick={() => setSortAscending(!sortAscending)}>{sortAscending ? 'Ascending' : 'Descending'}</button>
+                <div className='flex-column'>
+                    <Checkbox label="Show stickers/attractions" checked={showStickersAndAttractions} onCheck={setShowStickersAndAttractions} />
+                    <Checkbox label="Show banned cards" checked={showBannedCards} onCheck={setShowBannedCards} />
+                    <Checkbox label="Show prices" checked={showPrices} onCheck={setShowPrices} />
                 </div>
-                <button onClick={() => setShowNotes(!showNotes)}>Notes</button>
+
+                <div className='flex-row flex-gap-small align-end'>
+                    <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
+                    <IconButton iconName={sortAscending ? 'arrow_upward' : 'arrow_downward'} size={'small'} onClick={() => setSortAscending(!sortAscending)} />
+                </div>
+
+                {/* <br /> */}
+                <Expandable titleProps={{ className: 'button-no-hover' }} titleChildren={'Notes'}>
+                    <div>
+                        <p>For ease of searching, adventure cards and omen cards appear when you filter the color of the adventure or omen. However, note that the color of an adventure card or omen card is the color of the creature part of the card.</p>
+                        <p>Card text you type will be checked against cards' oracle text which may not be exactly the same as the text printed on the card.</p>
+                        <p>Card prices are estimates and not accurate. Always check the price of the cards in the relevant marketplace.</p>
+                    </div>
+                </Expandable>
+                {/* <button onClick={() => setShowNotes(!showNotes)}>Notes</button>
                 {showNotes &&
                     <div>
                         <p>For ease of searching, adventure cards and omen cards appear when you filter the color of the adventure or omen. However, note that the color of an adventure card or omen card is the color of the creature part of the card.</p>
                         <p>Card text you type will be checked against cards' oracle text which may not be exactly the same as the text printed on the card.</p>
                         <p>Card prices are estimates and not accurate. Always check the price of the cards in the relevant marketplace.</p>
                     </div>
-                }
+                } */}
             </div>
-            <div className='flex-row flex-center flex-gap' style={{ marginTop: '12em' }}>
+            <div className='flex-row flex-center flex-gap'>
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex - 1)} disabled={searchWindowPageIndex === 0}>{'<'}</button>
                 <div>{searchWindowPageIndex + 1}</div>
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex + 1)} disabled={searchWindowPageIndex === maxPaginationIndex}>{'>'}</button>
             </div>
             <div className='card-search-window-results'>
                 {paginatedCards.map((cardData, index) => {
-                    return <div className='deck-card' key={index}
+                    return <div className='deck-card card-preview' key={index}
                         // style={{transition: 'left 0.5s'}}
                         // style={{ right: `${0.1 * (index + 1)}em` }}
                         // style={{ right: `1em`, transition: `right ${0.1 * (index + 1)}s` }}

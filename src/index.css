@@ -72,6 +72,22 @@ input[type='password'] {
   font-size: calc(1.75 * var(--base-size));
 }
 
+input[type='search'].input-tiny {
+  width: calc(4 * var(--base-size))
+}
+
+input[type='search'].input-small {
+  width: calc(8 * var(--base-size))
+}
+
+input[type='search'].input-medium {
+  width: calc(12 * var(--base-size))
+}
+
+.input-small {
+  width: calc(8 * var(--base-size))
+}
+
 /* input[type='password'] {
   width: 8em;
   height: 1.5em;
@@ -132,10 +148,10 @@ input[type='password'] {
   cursor: pointer;
 }
 
-.filter {
+/* .filter {
   display: flex;
   flex-direction: column;
-}
+} */
 
 .no-padding.no-padding {
   padding: 0;
@@ -205,14 +221,13 @@ input[type='password'] {
 
 /* Layout */
 
-.top-bar {
+.search-window-top-bar {
   background-color: var(--theme-color-secondary);
-  height: 5vh;
-  margin-bottom: 1em;
+  margin-bottom: var(--base-size);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 1em;
-  gap: 1em;
+  gap: calc(2 * var(--base-size));
   flex-wrap: wrap;
 }
 
@@ -355,23 +370,25 @@ input[type='password'] {
 }
 
 .card-search-window {
-  --margin: 2em;
-  position: absolute;
+  /* --margin: 2em; */
+  position: fixed;
   z-index: 1;
-  margin: var(--margin) auto;
-  display: flex;
-  gap: 1em;
-  border: 2px solid black;
-  flex-direction: column;
-  /* width: calc(100% - calc(2 * var(--margin))); */
-  width: 95vw;
-  height: calc(100vh - calc(2 * var(--margin)));
-  align-items: center;
-  /* flex-wrap: wrap; */
   top: 0;
   left: 0;
   right: 0;
+  /* margin: var(--margin) auto; */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: scroll;
+  align-items: center;
+  gap: var(--base-size);
+  border: 2px solid black;
   background-color: white;
+  /* width: calc(100% - calc(2 * var(--margin))); */
+  /* width: 95vw; */
+  /* height: calc(100vh - calc(2 * var(--margin))); */
+  /* flex-wrap: wrap; */
 }
 
 .search-symbol {
@@ -405,7 +422,7 @@ input[type='password'] {
   padding: 0 2em;
   align-items: flex-start;
   flex-wrap: wrap;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
 }
 
 .card-count-edit-row {
@@ -449,6 +466,11 @@ input[type='password'] {
   /* width: 1em;
   height: 1em; */
   padding: var(--base-size);
+  /* height: 2em; */
+}
+
+.icon-button-small {
+  padding: calc(0.5 * var(--base-size));
 }
 
 .space-between {
@@ -464,7 +486,7 @@ input[type='password'] {
 }
 
 .text-medium {
-  font-size: calc(1.5 * var(--base-size));
+  font-size: calc(1.25 * var(--base-size));
 }
 
 .text-small {
@@ -525,14 +547,52 @@ input[type='password'] {
   }
 }
 
-.modal {}
+/* .modal {
+  --width: 50%;
+  position: fixed;
+  z-index: 1;
+  border: 2px solid black;
+  height: 100%;
+  width: var(--width);
+  align-items: center;
+  top: 0;
+  left: 50%;
+  margin-left: calc(-0.5 * var(--width));
+  background-color: white;
+  overflow-y: scroll;
+} */
+
+.modal {
+  position: fixed;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid black;
+  background-color: white;
+  padding: var(--base-size);
+}
+
+.modal-full-screen {
+  --width: 100%;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
 
 .dropdown {
   width: calc(12 * var(--base-size));
   border-radius: var(--border-radius-small)
 }
 
-.dropdown-large {
+.dropdown-small,
+.dropdown-content.dropdown-small {
+  width: calc(10 * var(--base-size));
+}
+
+.dropdown-large,
+.dropdown-content.dropdown-large {
   width: calc(16 * var(--base-size));
 }
 
@@ -544,10 +604,6 @@ input[type='password'] {
   width: calc(12 * var(--base-size));
 }
 
-.dropdown-content.dropdown-large {
-  width: calc(16 * var(--base-size));
-}
-
 .dropdown-option {
   text-align: start;
   border-radius: 0;
@@ -557,6 +613,23 @@ input[type='password'] {
 .dropdown-content> :last-child {
   border-radius: 0 0 var(--border-radius-small) var(--border-radius-small);
 }
+
+.border-rounded-left {
+  border-radius: var(--border-radius-small) 0 0 var(--border-radius-small);
+}
+
+.border-rounded-right {
+  border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+}
+
+.negative-filter {
+  background-color: red;
+}
+
+.base-width-4 {
+  width: calc(4 * var(--base-size));
+}
+
 
 /* -- Base tags -- */
 
