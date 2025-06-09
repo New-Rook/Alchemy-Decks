@@ -22,6 +22,8 @@
   --border-radius-small: 4px;
 
   --danger-color: #d42b2b;
+
+  --card-group-gap: var(--base-size);
 }
 
 /* .drop-card {
@@ -241,6 +243,20 @@ input[type='search'].input-medium {
   flex-wrap: wrap;
 }
 
+.board-view-grid {
+  display: flex;
+  flex-direction: row;
+  gap: calc(1.5 * var(--base-size)) calc(3 * var(--base-size));
+  flex-wrap: wrap;
+}
+
+.board-view-stacked {
+  display: flex;
+  flex-direction: row;
+  gap: calc(1.5 * var(--base-size));
+  flex-wrap: wrap;
+}
+
 .card-group-title {
   font-size: 1.5em;
 }
@@ -250,10 +266,38 @@ input[type='search'].input-medium {
   height: 1.1em;
 }
 
-.card-group-content {
+.card-group-content-text {
   display: flex;
   flex-direction: row;
-  gap: 1em;
+  gap: var(--card-group-gap);
+  flex-wrap: wrap;
+}
+
+.card-group-content-grid {
+  display: flex;
+  flex-direction: row;
+  gap: var(--card-group-gap);
+  flex-wrap: wrap;
+}
+
+.card-group-content-stacked {
+  display: flex;
+  flex-direction: column;
+  width: calc(15 * var(--base-size));
+  /* gap: var(--card-group-gap); */
+  /* flex-wrap: wrap; */
+}
+
+.card-group-content-stacked>div {
+  /* grid-column: 1;
+  grid-row: 1; */
+  /* position: absolute; */
+}
+
+.card-group-content-grid-stacked {
+  display: flex;
+  flex-direction: row;
+  gap: var(--card-group-gap);
   flex-wrap: wrap;
 }
 
@@ -261,7 +305,8 @@ input[type='search'].input-medium {
 
 .deck-card {
   position: relative;
-  width: min(15rem, 40%);
+  /* width: min(calc(15 * var(--base-size)), 40%); */
+  width: calc(15 * var(--base-size));
   scale: 1;
   transition:
     scale 0.1s,
@@ -496,11 +541,23 @@ input[type='search'].input-medium {
 /* Text status */
 
 .text-danger {
-  color: var(--danger-color)
+  color: var(--danger-color);
 }
 
 .base-offset-left {
   margin-left: var(--base-size);
+}
+
+.group-elevated {
+  z-index: 100;
+}
+
+.card-elevated {
+  z-index: 2;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
 }
 
 /* Icons */
@@ -531,11 +588,17 @@ input[type='search'].input-medium {
   }
 
   .card-group {
-    align-items: center;
+    /* align-items: center; */
   }
 
   .card-group-content {
-    justify-content: center;
+    /* justify-content: center; */
+    /* gap: 1em; */
+  }
+
+  .deck-card {
+    flex-grow: 1;
+    max-width: calc((100% - var(--card-group-gap)) / 2);
   }
 
   .icon-button-with-text {
@@ -622,8 +685,8 @@ input[type='search'].input-medium {
   border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
 }
 
-.negative-filter {
-  background-color: red;
+.background-danger {
+  background-color: var(--danger-color);
 }
 
 .base-width-4 {

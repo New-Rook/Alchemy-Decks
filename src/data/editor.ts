@@ -32,3 +32,5 @@ export const COMMANDER_DOCTORS_COMPANION_REGEX = /Doctor's companion/
 export const CREATURE_REGEX = /Creature/
 export const LEGENDARY_REGEX = /Legendary/
 export const CAN_BE_YOUR_COMMANDER_REGEX = /can be your commander/
+
+export const CARD_GROUP_STACKED_OFFSET_STYLE = '3 * var(--base-size)'

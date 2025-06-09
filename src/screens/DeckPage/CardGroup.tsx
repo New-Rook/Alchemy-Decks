@@ -1,9 +1,10 @@
 import React from "react"
-import { Board, DeckCards } from "../../types"
+import { Board, DeckCards, ViewType } from "../../types"
 import { Card } from "./Card"
 import { useDroppable } from "@dnd-kit/core"
 import './CardGroup.css'
-import { DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { cardGroupStyleMap, getCardGroupViewStyle } from "../../styling/editor"
 
 type Props = {
     groupName: string
@@ -16,11 +17,14 @@ type Props = {
     selectCard: (cardName: string, board: Board) => void
     board: Board
     legalityWarnings: Record<string, string>
+    viewType: ViewType
 }
 
-export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board, legalityWarnings }: Props) => {
+export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board, legalityWarnings, viewType }: Props) => {
     const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
+
+    const [isHovering, setIsHovering] = React.useState(false)
 
     const numberOfCards = React.useMemo(() => {
         return cardNames.reduce((total, cardName) => total + (deckCards[cardName].boards[board] ?? 0), 0)
@@ -72,10 +76,12 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
     }, [groupName, draggedCard.hasThisGroupCategory])
 
     return (
-        <div className="card-group flex-column flex-gap-small position-relative">
+        <div className={`card-group flex-column flex-gap-small position-relative ${isHovering ? 'group-elevated' : ''}`}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}>
             <span className="card-group-title flex-row flex-gap-small align-center">{groupLabel} ({numberOfCards})</span>
-            <div className="card-group-content">
-                {cardNames.map(cardName =>
+            <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, cardNames.length)}>
+                {cardNames.map((cardName, index) =>
                     <Card
                         key={cardName}
                         groupName={groupName}
@@ -87,6 +93,8 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         selected={selectedCards[cardName] === board}
                         board={board}
                         legalityWarning={legalityWarnings[cardName]}
+                        viewType={viewType}
+                        index={index}
                     />
                 )}
             </div>

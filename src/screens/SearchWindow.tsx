@@ -381,7 +381,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                     <Label>Card text</Label>
                     {pendingOracleTextSearchTerm.map((filter, index) =>
                         <div className='flex-row'>
-                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'negative-filter' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }} />
+                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }} />
                             <TextInput
                                 type={'search'}
                                 value={filter.text}
@@ -398,7 +398,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                     <Label>Card types</Label>
                     {cardTypeFilters.map((filter, index) =>
                         <div className='flex-row'>
-                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'negative-filter' : ''}`} size={'small'} onClick={() => invertCardTypeFilter(index)} />
+                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertCardTypeFilter(index)} />
                             <TextInputWithSuggestions
                                 className='input-medium'
                                 value={filter.cardType}

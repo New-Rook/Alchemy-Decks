@@ -10,7 +10,7 @@ import { useObjectRecordState } from '../../hooks/useObjectRecordState'
 import { CardGroup } from './CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../../utilities/groupers'
 import { Dropdown } from '../../components/Dropdown'
-import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, SORT_TYPES } from '../../data/search'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, SORT_TYPES, VIEW_TYPES } from '../../data/search'
 import { TEST_DECK_CARDS } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
@@ -335,6 +335,7 @@ export const DeckPage = () => {
                 setPinned={setTopBarPinned}
             />
             <div className='flex-row flex-gap flex-end flex-wrap'>
+                <Dropdown label={'View'} options={VIEW_TYPES} value={viewType} onSelect={setViewType} />
                 <Dropdown label={'Group by'} options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
                 {groupBy === 'color' && <Dropdown label={'Group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} size={'large'} />}
                 {groupBy === 'type' && <Dropdown label={'Group mode'} options={GROUP_BY_TYPE_MODES} value={groupByTypeMode} onSelect={setGroupByTypeMode} />}
@@ -363,7 +364,7 @@ export const DeckPage = () => {
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
                     {typedKeys(boards).filter(board => boards[board].groups.length > 0).map(board =>
-                        <div key={board} ref={boardRefs[board]} className='flex-column flex-gap' onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
+                        <div key={board} ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
                             {boards[board].name}
                             {board === 'mainboard' && deckMetaData.format === 'commander' &&
                                 <CommanderCardGroup
@@ -378,6 +379,7 @@ export const DeckPage = () => {
                                     openCommanderPickModal={openCommanderPickModal}
                                     secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
                                     removeSecondCommander={removeSecondCommander}
+                                    viewType={viewType}
                                 />
                             }
                             {boards[board].groups.map(group =>
@@ -393,6 +395,7 @@ export const DeckPage = () => {
                                     selectCard={selectCard}
                                     board={board}
                                     legalityWarnings={deckStats.legalityWarnings}
+                                    viewType={viewType}
                                 />
                             )}
                         </div>
@@ -419,4 +422,11 @@ export const DeckPage = () => {
             />
         </div>
     )
+}
+
+const boardStyleMap: Record<ViewType, string> = {
+    text: '',
+    grid: 'board-view-grid',
+    stacked: 'board-view-stacked',
+    'grid-stacked': ''
 }

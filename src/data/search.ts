@@ -102,6 +102,12 @@ export const GUEST_SORT_TYPES: LabelledValue<SortType>[] = [
     { label: 'Price EUR', value: 'price-eur' },
     { label: 'Price USD', value: 'price-usd' }
 ]
+export const VIEW_TYPES: LabelledValue<ViewType>[] = [
+    { label: 'Text', value: 'text' },
+    { label: 'Grid', value: 'grid' },
+    { label: 'Stacked', value: 'stacked' },
+    { label: 'Grid-stacked', value: 'grid-stacked' }
+]
 export const GROUP_TYPES: LabelledValue<GroupBy>[] = [
     { label: 'Mana value', value: 'mana-value' },
     { label: 'Type', value: 'type' },
@@ -119,7 +125,6 @@ export const GROUP_BY_TYPE_MODES: LabelledValue<GroupByTypeMode>[] = [
     { label: 'All types', value: 'all-types' },
     { label: 'Only last type', value: 'only-last-type' },
 ]
-export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
 export const COLOR_SEARCH_TYPES: LabelledValue<ColorSearchType>[] = [
     { label: 'Exact', value: 'exact' },
     { label: 'At most', value: 'at-most' },

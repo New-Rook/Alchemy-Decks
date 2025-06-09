@@ -1,8 +1,8 @@
-import { Board, CategoryUpdateOperation, DeckCard } from "../../types"
+import { Board, CategoryUpdateOperation, DeckCard, ViewType } from "../../types"
 import { AppContext } from "../../context/AppContext"
 import { getCardFrontImage } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
-import { DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
 import './Card.css'
 import React from "react"
@@ -17,13 +17,44 @@ type Props = {
     selectCard: (cardName: string, board: Board) => void
     board: Board
     legalityWarning: string
+    viewType: ViewType
+    index: number
 }
 
 const SLIDE_BACK_STYLE = {
     transition: 'transform 0.25s'
 }
 
-export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enableDragAndDrop, selected, selectCard, board, legalityWarning }: Props) => {
+const getViewStyle = (viewType: ViewType, index: number): React.HTMLAttributes<HTMLDivElement>['style'] => {
+    if (viewType === 'stacked') {
+        // return {
+        //     translate: `0 calc(-10 * ${index} * var(--base-size))`,
+        //     zIndex: index + 1
+        // }
+        return {
+            position: 'absolute',
+            top: `calc(${index} * ${CARD_GROUP_STACKED_OFFSET_STYLE})`,
+            zIndex: index + 1,
+            width: '100%',
+            transition: `top ${index * 0.1}s`,
+        }
+    }
+
+    return { top: 0, transition: `top ${index * 0.1}s` }
+}
+
+export const Card = ({ groupName,
+    cardName,
+    deckCard,
+    addDeckCardQuantity,
+    enableDragAndDrop,
+    selected,
+    selectCard,
+    board,
+    legalityWarning,
+    viewType,
+    index
+}: Props) => {
     const { cardDictionary } = React.useContext(AppContext)
 
     const { attributes, listeners, setNodeRef, transform, isDragging, node, over } = useDraggable({
@@ -100,7 +131,7 @@ export const Card = ({ groupName, cardName, deckCard, addDeckCardQuantity, enabl
     }, [isDragging, over])
 
     return (
-        <div onClick={() => selectCard(cardName, board)} className={`deck-card`} key={cardName} ref={setNodeRef} style={{ ...style, zIndex: isDragging || isHovering ? 2 : undefined, transformStyle: 'preserve-3d', backgroundColor: legalityWarning ? 'red' : undefined }}  {...listeners} {...attributes}>
+        <div onClick={() => selectCard(cardName, board)} className={`deck-card ${isDragging || isHovering ? 'card-elevated' : ''} ${legalityWarning ? 'background-danger' : ''} preserve-3d`} key={cardName} ref={setNodeRef} style={{ ...style, ...getViewStyle(viewType, index) }}  {...listeners} {...attributes}>
             {/* <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
                 style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} /> */}
             {/* {cardDictionary[cardName].card_faces && <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' style={{ position: 'absolute', left: 0, rotate: flipped ? 'y 0deg' : 'y 180deg', transition: 'rotate 0.5s', translate: '0 0 -100px' }} draggable={false} />} */}
