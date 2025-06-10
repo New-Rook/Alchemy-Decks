@@ -57,7 +57,7 @@ export const DeckMetaDataWindow = ({ back, save, deckMetaData, legalityWarnings 
                 Warnings
                 {Object.keys(legalityWarnings).map(cardName =>
                     <p key={cardName} className='flex-row'>
-                        {cardName} {legalityWarnings[cardName]}
+                        {cardName}: {legalityWarnings[cardName]}
                     </p>
                 )}
             </div>

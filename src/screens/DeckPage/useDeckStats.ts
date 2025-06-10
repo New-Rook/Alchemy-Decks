@@ -57,7 +57,7 @@ export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, gr
                 }
                 else {
                     // Quantity higher than limit
-                    legalityWarnings[cardName] = `The number of copies of this card goes over the limit for ${deckMetaData.format}.`
+                    legalityWarnings[cardName] = `The number of copies of this card exceeds the limit for ${deckMetaData.format}.`
                 }
             }
         })

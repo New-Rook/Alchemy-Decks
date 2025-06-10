@@ -16,6 +16,7 @@ import './SearchWindow.css'
 import { IconButton } from '../components/IconButton'
 import { Label } from '../components/Label'
 import { Expandable } from '../components/Expandable'
+import { CardPreview } from './CardPreview'
 
 type Props = {
     back: () => void
@@ -472,17 +473,18 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
             </div>
             <div className='card-search-window-results'>
                 {paginatedCards.map((cardData, index) => {
-                    return <div className='deck-card card-preview' key={index}
-                        // style={{transition: 'left 0.5s'}}
-                        // style={{ right: `${0.1 * (index + 1)}em` }}
-                        // style={{ right: `1em`, transition: `right ${0.1 * (index + 1)}s` }}
-                        style={{ animation: `${0.02 * (index + 1)}s linear fade-in forwards` }}
-                        onClick={() => addDeckCardQuantity(cardData.name, 1, 'mainboard')}
-                        onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1, 'mainboard') }}>
-                        <img src={getCardFrontImage(cardData)?.normal} className='deck-card-image' />
-                        {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].boards.mainboard || deckCards[cardData.name].boards.sideboard ? 0 : ''}{deckCards[cardData.name].boards.sideboard ? ` + ${deckCards[cardData.name].boards.sideboard}` : ''}</div>}
-                        {showPrices && <div className='card-count'>{getCardPriceDisplay(cardData)}</div>}
-                    </div>
+                    // return <div className='deck-card card-preview' key={index}
+                    //     // style={{transition: 'left 0.5s'}}
+                    //     // style={{ right: `${0.1 * (index + 1)}em` }}
+                    //     // style={{ right: `1em`, transition: `right ${0.1 * (index + 1)}s` }}
+                    //     style={{ animation: `${0.02 * (index + 1)}s linear fade-in forwards` }}
+                    //     onClick={() => addDeckCardQuantity(cardData.name, 1, 'mainboard')}
+                    //     onContextMenu={(e) => { e.preventDefault(); addDeckCardQuantity(cardData.name, -1, 'mainboard') }}>
+                    //     <img src={getCardFrontImage(cardData)?.normal} className='deck-card-image' />
+                    //     {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].boards.mainboard || deckCards[cardData.name].boards.sideboard ? 0 : ''}{deckCards[cardData.name].boards.sideboard ? ` + ${deckCards[cardData.name].boards.sideboard}` : ''}</div>}
+                    //     {showPrices && <div className='card-count'>{getCardPriceDisplay(cardData)}</div>}
+                    // </div>
+                    return <CardPreview cardName={cardData.name} deckCard={deckCards[cardData.name]} addDeckCardQuantity={addDeckCardQuantity} />
                 })}
             </div>
             <div className='flex-row flex-center flex-gap'>

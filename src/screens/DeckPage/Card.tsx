@@ -132,11 +132,11 @@ export const Card = ({
     }, [isDragging, over])
 
     return (
-        <div onClick={() => selectCard(cardName, board)} className={`deck-card ${isDragging || isHovering ? 'card-elevated' : ''} ${legalityWarning ? 'background-danger' : ''} preserve-3d`} key={cardName} ref={setNodeRef} style={{ ...style, ...getViewStyle(viewType, index) }}  {...listeners} {...attributes}>
+        <div onClick={() => selectCard(cardName, board)} className={`deck-card ${isDragging || isHovering ? 'card-elevated' : ''} ${legalityWarning ? 'deck-card-warning' : ''} preserve-3d`} key={cardName} ref={setNodeRef} style={{ ...style, ...getViewStyle(viewType, index) }}  {...listeners} {...attributes}>
             {/* <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
                 style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} /> */}
             {/* {cardDictionary[cardName].card_faces && <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' style={{ position: 'absolute', left: 0, rotate: flipped ? 'y 0deg' : 'y 180deg', transition: 'rotate 0.5s', translate: '0 0 -100px' }} draggable={false} />} */}
-            <div className='deck-card-selected' style={{ zIndex: 3 }} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
+            <div className={cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'} style={{ zIndex: 3 }} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
                 {selected && <input className='deck-card-selected-icon' type="checkbox" checked readOnly />}
                 {cardDictionary[cardName].card_faces && <button className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()}>Flip</button>}
             </div>
