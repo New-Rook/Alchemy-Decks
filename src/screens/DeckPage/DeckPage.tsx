@@ -334,7 +334,7 @@ export const DeckPage = () => {
                 pinned={topBarPinned}
                 setPinned={setTopBarPinned}
             />
-            <div className='flex-row flex-gap flex-end flex-wrap'>
+            <div className='flex-row flex-gap flex-end flex-wrap base-offset-bottom deck-top-bar-elevated'>
                 <Dropdown label={'View'} options={VIEW_TYPES} value={viewType} onSelect={setViewType} />
                 <Dropdown label={'Group by'} options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
                 {groupBy === 'color' && <Dropdown label={'Group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} size={'large'} />}

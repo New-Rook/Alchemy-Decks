@@ -24,6 +24,15 @@
   --danger-color: #d42b2b;
 
   --card-group-gap: var(--base-size);
+
+  /* z-index */
+  --deck-title-background-elevation: -1;
+  --card-group-elevation: 100;
+  --deck-top-bar-elevation: calc(var(--card-group-elevation) + 1);
+  --deck-card-hover-elevation: 1;
+  --modal-elevation: 150;
+  --menu-elevation: 1;
+  --category-drop-title-elevation: 1;
 }
 
 /* .drop-card {
@@ -351,16 +360,6 @@ input[type='search'].input-medium {
   object-fit: contain;
 }
 
-/* .deck-card:hover {
-  scale: 1.5;
-  z-index: 1;
-}
-
-.deck-card:active {
-  scale: 1;
-  z-index: 1;
-} */
-
 .stat-row {
   display: flex;
   flex-direction: row;
@@ -393,12 +392,16 @@ input[type='search'].input-medium {
   flex-direction: column;
   gap: calc(0.5 * var(--base-size));
   padding-block: var(--base-size);
+  z-index: calc(var(--deck-top-bar-elevation) + 1);
+}
+
+.deck-top-bar-elevated {
+  z-index: var(--deck-top-bar-elevation);
 }
 
 .top-bar-sticky {
   position: sticky;
   top: 0;
-  z-index: 2;
   background-color: white;
 }
 
@@ -417,7 +420,7 @@ input[type='search'].input-medium {
 .card-search-window {
   /* --margin: 2em; */
   position: fixed;
-  z-index: 1;
+  z-index: var(--modal-elevation);
   top: 0;
   left: 0;
   right: 0;
@@ -548,12 +551,16 @@ input[type='search'].input-medium {
   margin-left: var(--base-size);
 }
 
+.base-offset-bottom {
+  margin-bottom: var(--base-size);
+}
+
 .group-elevated {
-  z-index: 100;
+  z-index: var(--card-group-elevation);
 }
 
 .card-elevated {
-  z-index: 2;
+  z-index: var(--deck-card-hover-elevation);
 }
 
 .preserve-3d {
@@ -610,24 +617,9 @@ input[type='search'].input-medium {
   }
 }
 
-/* .modal {
-  --width: 50%;
-  position: fixed;
-  z-index: 1;
-  border: 2px solid black;
-  height: 100%;
-  width: var(--width);
-  align-items: center;
-  top: 0;
-  left: 50%;
-  margin-left: calc(-0.5 * var(--width));
-  background-color: white;
-  overflow-y: scroll;
-} */
-
 .modal {
   position: fixed;
-  z-index: 1;
+  z-index: var(--modal-elevation);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -647,6 +639,11 @@ input[type='search'].input-medium {
 .dropdown {
   width: calc(12 * var(--base-size));
   border-radius: var(--border-radius-small)
+}
+
+.dropdown-tiny,
+.dropdown-content.dropdown-tiny {
+  width: calc(8 * var(--base-size));
 }
 
 .dropdown-small,

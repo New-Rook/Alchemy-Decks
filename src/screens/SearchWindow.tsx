@@ -420,7 +420,7 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                     {statFilters.map((filter, index) =>
                         <div className='flex-row flex-gap-small'>
                             <Dropdown options={STAT_FILTER_STATS} value={filter.stat} onSelect={(stat) => updateStatFilterStat(index, stat)} />
-                            <Dropdown options={STAT_FILTER_OPERATIONS} value={filter.operation} onSelect={(operation) => updateStatFilterOperation(index, operation)} />
+                            <Dropdown options={STAT_FILTER_OPERATIONS} value={filter.operation} onSelect={(operation) => updateStatFilterOperation(index, operation)} size={'tiny'} />
                             <TextInput
                                 type={'search'}
                                 className='input-tiny'

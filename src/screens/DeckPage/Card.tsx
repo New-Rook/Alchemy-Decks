@@ -43,7 +43,8 @@ const getViewStyle = (viewType: ViewType, index: number): React.HTMLAttributes<H
     return { top: 0, transition: `top ${index * 0.1}s` }
 }
 
-export const Card = ({ groupName,
+export const Card = ({
+    groupName,
     cardName,
     deckCard,
     addDeckCardQuantity,

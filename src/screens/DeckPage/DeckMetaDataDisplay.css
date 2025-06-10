@@ -27,7 +27,7 @@
     height: 100%;
     object-fit: cover;
     top: 0;
-    z-index: -1;
+    z-index: var(--deck-title-background-elevation);
     /* opacity: 0.75; */
     /* mix-blend-mode: exclusion; */
 }

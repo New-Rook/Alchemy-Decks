@@ -23,7 +23,6 @@
 .expanded-card {
     position: absolute;
     top: 0;
-    z-index: 2;
     /* animation: 0.25s linear expand-card forwards; */
     transition:
         scale 0.5s,

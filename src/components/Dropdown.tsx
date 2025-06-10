@@ -10,12 +10,13 @@ interface Props<T> {
     options: LabelledValue<T>[]
     value: T
     onSelect: (value: T) => void
-    size?: 'small' | 'medium' | 'large'
+    size?: InputSize
 }
 
 const titleStyleClassNames = 'dropdown flex-row flex-gap-small space-between'
 
 const styleMap: Record<InputSize, string> = {
+    tiny: "dropdown-tiny",
     small: "dropdown-small",
     medium: "",
     large: "dropdown-large"

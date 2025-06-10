@@ -30,7 +30,7 @@
 .category-drop-add-title {
     background-color: blue;
     padding: 0.25em;
-    z-index: 3;
+    z-index: var(--category-drop-title-elevation);
 }
 
 .category-drop-overwrite {
@@ -44,5 +44,5 @@
 .category-drop-overwrite-title {
     background-color: purple;
     padding: 0.25em;
-    z-index: 3;
+    z-index: var(--category-drop-title-elevation);
 }
