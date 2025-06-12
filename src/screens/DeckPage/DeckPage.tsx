@@ -425,8 +425,8 @@ export const DeckPage = () => {
 }
 
 const boardStyleMap: Record<ViewType, string> = {
-    text: '',
+    text: 'board-view-stacked',
     grid: 'board-view-grid',
     stacked: 'board-view-stacked',
-    'grid-stacked': ''
+    'grid-stacked': 'board-view-grid'
 }
