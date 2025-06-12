@@ -10,13 +10,13 @@ import { useObjectRecordState } from '../../hooks/useObjectRecordState'
 import { CardGroup } from './CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../../utilities/groupers'
 import { Dropdown } from '../../components/Dropdown'
-import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, SORT_TYPES, VIEW_TYPES } from '../../data/search'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, SORT_TYPES, VIEW_TYPES } from '../../data/search'
 import { TEST_DECK_CARDS } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { COMMANDER_BACKGROUND_REGEX, COMMANDER_CHOOSE_A_BACKGROUND_REGEX, COMMANDER_DOCTORS_COMPANION_REGEX, COMMANDER_FRIENDS_FOREVER_REGEX, COMMANDER_GROUP_NAME, COMMANDER_PARTNER_REGEX, COMMANDER_PARTNER_WITH_REGEX, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
-import { omitFromPartialRecord, omitFromRecord, removeFromArray, splitArray, stringStartsAndEndsWith, typedKeys } from '../../utilities/general'
+import { omitFromPartialRecord, omitFromRecord, removeFromArray, splitArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
@@ -93,6 +93,18 @@ export const DeckPage = () => {
         setSecondCommander,
         removeSecondCommander
     } = useCommanders(deckMetaData.format, commanders, setDeckCards)
+
+    const commanderColorIdentity = React.useMemo(() => {
+        const colorCombination = commanders.reduce((colorIdentity, commander) => {
+            return colorIdentity += cardDictionary[commander].color_identity.join('')
+        }, '')
+
+        const uniqueColors = toUniqueArray(colorCombination.split('')).join('')
+
+        return COLOR_COMBINATIONS_MAP[uniqueColors]
+            ? COLOR_COMBINATIONS_MAP[uniqueColors]
+            : uniqueColors
+    }, [commanders])
 
     React.useEffect(() => {
         if (!searchWindowVisible) {
@@ -262,26 +274,36 @@ export const DeckPage = () => {
         }),
         [mainboardCardGroups, sideboardCardGroups, consideringCardGroups])
 
-    const getGroupLabel = React.useCallback((group: CardGroupData) => {
-        if (groupBy === 'color') {
-            const colorCombination = group.name
-            if (COLOR_ORDER_PRIORITY[colorCombination as Color]) {
-                return <img className='card-group-icon-title transparent-background' src={COLOR_DATA[colorCombination as Color].svg_uri} />
-            }
-
-            if (COLOR_COMBINATION_ORDER_PRIORITY[group.name]) {
-                return <div>
-                    {colorCombination.split('').map(color => <img key={color} className='card-group-icon-title transparent-background' src={COLOR_DATA[color as Color].svg_uri} />)}
-                </div>
-            }
-
-            if (group.name === COLORLESS_DATA.key) {
-                return <img className='card-group-icon-title transparent-background' src={COLORLESS_DATA.svg_uri} />
-            }
+    const getGroupColorLabel = React.useCallback((groupName: string) => {
+        const colorCombination = groupName
+        if (COLOR_ORDER_PRIORITY[colorCombination as Color]) {
+            return <img className='card-group-icon-title transparent-background' src={COLOR_DATA[colorCombination as Color].svg_uri} />
         }
 
-        return group.name
-    }, [groupBy])
+        if (COLOR_COMBINATION_ORDER_PRIORITY[groupName]) {
+            return <div className='flex-row align-end'>
+                {colorCombination.split('').map(color => <img key={color} className='card-group-icon-title transparent-background' src={COLOR_DATA[color as Color].svg_uri} />)}
+            </div>
+        }
+
+        if (groupName === COLORLESS_DATA.key) {
+            return <img className='card-group-icon-title transparent-background' src={COLORLESS_DATA.svg_uri} />
+        }
+
+        return groupName
+    }, [])
+
+    const getGroupLabel = React.useCallback((groupName: string) => {
+        if (groupBy === 'color') {
+            return getGroupColorLabel(groupName)
+        }
+
+        return groupName
+    }, [groupBy, getGroupColorLabel])
+
+    const commanderGroupLabel = React.useMemo(() => {
+        return getGroupColorLabel(commanderColorIdentity)
+    }, [commanderColorIdentity, getGroupColorLabel])
 
     const handleCardDragEnd = (event: DragEndEvent) => {
         if (groupBy === 'category' && event.active.id && event.over?.id) {
@@ -334,14 +356,14 @@ export const DeckPage = () => {
                 pinned={topBarPinned}
                 setPinned={setTopBarPinned}
             />
-            <div className='flex-row flex-gap flex-end flex-wrap base-offset-bottom deck-top-bar-elevated'>
+            <div className='flex-row flex-gap flex-end align-center flex-wrap base-offset-bottom deck-top-bar-elevated'>
+                {deckMetaData.format === 'commander' && <Checkbox containerProps={{ className: 'flex-item-left' }} label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
                 <Dropdown label={'View'} options={VIEW_TYPES} value={viewType} onSelect={setViewType} />
                 <Dropdown label={'Group by'} options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
                 {groupBy === 'color' && <Dropdown label={'Group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} size={'large'} />}
                 {groupBy === 'type' && <Dropdown label={'Group mode'} options={GROUP_BY_TYPE_MODES} value={groupByTypeMode} onSelect={setGroupByTypeMode} />}
                 <Dropdown label={'Sort by'} options={availableSortTypes} value={sortType} onSelect={setSortType} />
             </div>
-            {deckMetaData.format === 'commander' && <Checkbox label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
 
             {(searchWindowVisible || commanderPickWindowVisible) &&
                 <SearchWindow
@@ -356,6 +378,7 @@ export const DeckPage = () => {
                                 : availableCommanders.partnerCommanders
                             : undefined
                     }
+                    isCommanderPick={commanderPickWindowVisible}
                 />
             }
 
@@ -380,13 +403,14 @@ export const DeckPage = () => {
                                     secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
                                     removeSecondCommander={removeSecondCommander}
                                     viewType={viewType}
+                                    colorIdentityLabel={commanderGroupLabel}
                                 />
                             }
                             {boards[board].groups.map(group =>
                                 <CardGroup
                                     key={group.name}
                                     groupName={group.name}
-                                    groupLabel={getGroupLabel(group)}
+                                    groupLabel={getGroupLabel(group.name)}
                                     cardNames={group.cards}
                                     deckCards={deckCards}
                                     addDeckCardQuantity={addDeckCardQuantity}
@@ -396,6 +420,7 @@ export const DeckPage = () => {
                                     board={board}
                                     legalityWarnings={deckStats.legalityWarnings}
                                     viewType={viewType}
+                                    format={deckMetaData.format}
                                 />
                             )}
                         </div>

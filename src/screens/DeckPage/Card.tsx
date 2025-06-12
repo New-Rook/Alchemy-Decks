@@ -1,4 +1,4 @@
-import { Board, CategoryUpdateOperation, DeckCard, ViewType } from "../../types"
+import { Board, CategoryUpdateOperation, DeckCard, Format, ViewType } from "../../types"
 import { AppContext } from "../../context/AppContext"
 import { getCardFrontImage } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
@@ -6,6 +6,7 @@ import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_D
 // import { CSS } from "@dnd-kit/utilities"
 import './Card.css'
 import React from "react"
+import { IconButton } from "../../components/IconButton"
 
 type Props = {
     groupName: string
@@ -19,6 +20,8 @@ type Props = {
     legalityWarning: string
     viewType: ViewType
     index: number
+    format: Format
+    isCommander?: boolean
 }
 
 const SLIDE_BACK_STYLE = {
@@ -54,7 +57,9 @@ export const Card = ({
     board,
     legalityWarning,
     viewType,
-    index
+    index,
+    format,
+    isCommander
 }: Props) => {
     const { cardDictionary } = React.useContext(AppContext)
 
@@ -64,17 +69,24 @@ export const Card = ({
 
     const [flipped, setFlipped] = React.useState(false)
     const [isPendingHoveringState, setIsPendingHoveringState] = React.useState(false)
-    const [isHovering, setIsHovering] = React.useState(false)
+    const [isHoveringImage, setIsHoveringImage] = React.useState(false)
+    const [isHoveringCard, setIsHoveringCard] = React.useState(false)
     const [windowHalvesPosition, setWindowHalvesPosition] = React.useState({ right: false, bottom: false })
+
+    const numberOfCopies = deckCard.boards[board]
+
+    const isCommanderAndSingleCopy = React.useMemo(() => {
+        return format === 'commander' && numberOfCopies === 1
+    }, [format, numberOfCopies])
 
     React.useEffect(() => {
         if (!isPendingHoveringState || isDragging) {
-            setIsHovering(false)
+            setIsHoveringImage(false)
             return
         }
 
         const timeoutID = setTimeout(() => {
-            setIsHovering(true)
+            setIsHoveringImage(true)
             if (node.current) {
                 const rect = node.current.getBoundingClientRect()
                 const isOnRightHalf = rect.left > window.innerWidth / 2
@@ -102,13 +114,22 @@ export const Card = ({
         return deckCard.print?.uris[0] ?? getCardFrontImage(cardDictionary[cardName]).normal
     }, [cardDictionary, cardName, flipped, deckCard])
 
+    const cardClassName = React.useMemo(() => {
+        return `deck-card 
+            ${isDragging || isHoveringImage ? 'card-elevated' : ''} 
+            ${selected ? 'deck-card-selected' : legalityWarning
+                ? 'deck-card-warning' : ''
+            } 
+            preserve-3d`
+    }, [isDragging, isHoveringImage, legalityWarning, selected])
+
     const expandedCardClassName = React.useMemo(() => {
-        if (!isHovering || isDragging) {
+        if (!isHoveringImage || isDragging) {
             return ''
         }
 
         return 'expanded-card-active ' + (windowHalvesPosition.right ? 'expanded-card-active-right' : 'expanded-card-active-left')
-    }, [isHovering, isDragging, windowHalvesPosition])
+    }, [isHoveringImage, isDragging, windowHalvesPosition])
 
     const dragData = React.useMemo(() => {
         if (!isDragging) {
@@ -132,21 +153,20 @@ export const Card = ({
     }, [isDragging, over])
 
     return (
-        <div onClick={() => selectCard(cardName, board)} className={`deck-card ${isDragging || isHovering ? 'card-elevated' : ''} ${legalityWarning ? 'deck-card-warning' : ''} preserve-3d`} key={cardName} ref={setNodeRef} style={{ ...style, ...getViewStyle(viewType, index) }}  {...listeners} {...attributes}>
-            {/* <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
-                style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} /> */}
-            {/* {cardDictionary[cardName].card_faces && <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' style={{ position: 'absolute', left: 0, rotate: flipped ? 'y 0deg' : 'y 180deg', transition: 'rotate 0.5s', translate: '0 0 -100px' }} draggable={false} />} */}
+        <div onClick={() => selectCard(cardName, board)}
+            className={cardClassName}
+            key={cardName}
+            ref={setNodeRef}
+            style={{ ...style, ...getViewStyle(viewType, index) }}
+            onMouseEnter={isCommanderAndSingleCopy ? () => setIsHoveringCard(true) : undefined}
+            onMouseLeave={isCommanderAndSingleCopy ? () => setIsHoveringCard(false) : undefined}
+            {...listeners} {...attributes}>
+            {/* Top left */}
             <div className={cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'} style={{ zIndex: 3 }} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
-                {selected && <input className='deck-card-selected-icon' type="checkbox" checked readOnly />}
-                {cardDictionary[cardName].card_faces && <button className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()}>Flip</button>}
+                {cardDictionary[cardName].card_faces && <IconButton iconName="cached" className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()} />}
             </div>
 
-            {/* <div className={`deck-card`} key={cardName}
-            {...(enableDragAndDrop ? { ref: setNodeRef, style, ...listeners, ...attributes } : {})}> */}
-            {/* {cardDictionary[cardName].card_faces && flipped ? <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' draggable={false} /> : <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' draggable={false} />} */}
-            {/* {cardDictionary[cardName].card_faces && flipped ? <img src={cardDictionary[cardName].card_faces[1].image_uris.normal} className='deck-card-image' draggable={false} /> : <img src={getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)}
-                style={{ rotate: flipped ? 'y 180deg' : 'y 0deg', transition: 'rotate 0.5s' }} draggable={false} />} */}
-            {/* {<img src={cardDictionary[cardName].card_faces && flipped ? cardDictionary[cardName].card_faces[1].image_uris.normal : getCardImages(cardDictionary[cardName]).normal} className='deck-card-image' draggable={false} />} */}
+            {/* Main image + categories */}
             <div className='flex-row deck-card-image'>
                 {isDragging && <div style={{ position: 'absolute', backgroundColor: 'white' }} className={`flex-row flex-gap overflow-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
                     <p key={category} style={{ color: dragData?.operation === 'overwrite' && category !== dragData.category ? 'red' : undefined }}>{category}</p>
@@ -155,23 +175,24 @@ export const Card = ({
                 </div>}
                 <img src={imageSource} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)} draggable={false} />
             </div>
-            {/* <img src={imageSource} className={`deck-card-image expanded-card ${expandedCardClassName}`} draggable={false} /> */}
+
+            {/* Expanded card */}
             <div className={`flex-column expanded-card ${expandedCardClassName}`}>
-                {/* {!windowHalvesPosition.bottom && <img src={imageSource} className={`deck-card-image`} draggable={false} />} */}
-                {isHovering && <div className={`flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`} style={{ position: 'absolute', backgroundColor: 'white' }}>
+                {isHoveringImage && <div className={`flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`} style={{ position: 'absolute', backgroundColor: 'white' }}>
                     {deckCard.categories && <div className="flex-row flex-gap overflow-wrap">{deckCard.categories.map(category => <p key={category}>{category}</p>)}</div>}
-                    <div style={{ color: 'red' }}>{legalityWarning}</div>
+                    <div className="text-danger">{legalityWarning}</div>
                 </div>}
-                {/* {windowHalvesPosition.bottom && <img src={imageSource} className={`deck-card-image`} draggable={false} />} */}
                 <img src={imageSource} className={`deck-card-image`} draggable={false} />
             </div>
-            <div className='card-count-container flex-column' style={{ zIndex: 3 }} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-                <div className='card-count'>x{deckCard.boards[board]}</div>
+
+            {/* Top right */}
+            {((!isCommanderAndSingleCopy || isHoveringCard) && !isCommander) && <div className='card-count-container flex-column' style={{ zIndex: 3 }} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                <div className='card-count'>x{numberOfCopies}</div>
                 <div className='flex-row'>
                     <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, -1, board)}>-</button>
                     <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, 1, board)}>+</button>
                 </div>
-            </div>
+            </div>}
         </div >
     )
 }

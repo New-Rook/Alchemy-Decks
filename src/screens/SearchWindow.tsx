@@ -24,11 +24,19 @@ type Props = {
     deckCards: DeckCards
     addDeckCardQuantity: (cardName: string, quantity: number, board: Board) => void
     availableCards?: string[]
+    isCommanderPick: boolean
 }
 
 const PAGINATION_LIMIT = 40
 
-export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, availableCards }: Props) => {
+export const SearchWindow = ({
+    back,
+    deckCards,
+    addDeckCardQuantity,
+    format,
+    availableCards,
+    isCommanderPick
+}: Props) => {
     const { cardDictionary, getCardPriceDisplay, availableSortTypes } = useContext(AppContext)
 
     const [searchWindowPageIndex, setSearchWindowPageIndex] = React.useState(0)
@@ -354,6 +362,13 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
         setStatFilters(newStatFilters)
     }
 
+    const addCardToDeck = React.useCallback((cardName: string, quantity: number, board: Board) => {
+        addDeckCardQuantity(cardName, quantity, board)
+        if (isCommanderPick) {
+            back()
+        }
+    }, [isCommanderPick, addDeckCardQuantity, back])
+
     return (
         <div className='card-search-window'>
             <div className='search-window-top-bar'>
@@ -484,7 +499,13 @@ export const SearchWindow = ({ back, deckCards, addDeckCardQuantity, format, ava
                     //     {!!deckCards[cardData.name] && <div className='card-count'>x{deckCards[cardData.name].boards.mainboard || deckCards[cardData.name].boards.sideboard ? 0 : ''}{deckCards[cardData.name].boards.sideboard ? ` + ${deckCards[cardData.name].boards.sideboard}` : ''}</div>}
                     //     {showPrices && <div className='card-count'>{getCardPriceDisplay(cardData)}</div>}
                     // </div>
-                    return <CardPreview cardName={cardData.name} deckCard={deckCards[cardData.name]} addDeckCardQuantity={addDeckCardQuantity} />
+                    return <CardPreview
+                        cardName={cardData.name}
+                        deckCard={deckCards[cardData.name]}
+                        addDeckCardQuantity={addCardToDeck}
+                        isCommander={isCommanderPick}
+                        style={{ animation: `${0.02 * (index + 1)}s linear fade-in forwards` }}
+                    />
                 })}
             </div>
             <div className='flex-row flex-center flex-gap'>

@@ -1,7 +1,7 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
 import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../../utilities/general"
+import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
 import { CardArtWindow } from "./CardArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
 import { IconButton } from "../../components/IconButton"
@@ -62,8 +62,7 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
                     newDeckCards[cardName].categories = []
                 }
                 // if (categoryUpdateOperation === 'add') {
-                const uniqueCategories = new Set([...newDeckCards[cardName].categories, category])
-                newDeckCards[cardName].categories = Array.from(uniqueCategories)
+                newDeckCards[cardName].categories = toUniqueArray([...newDeckCards[cardName].categories, category])
                 // }
                 // else {
                 //     newDeckCards[cardName].categories = categories

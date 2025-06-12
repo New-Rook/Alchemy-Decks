@@ -5,6 +5,7 @@ import { useDroppable } from "@dnd-kit/core"
 import './CardGroup.css'
 import { COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME } from "../../data/editor"
 import { cardGroupStyleMap, getCardGroupViewStyle } from "../../styling/editor"
+import { CommanderCardPlaceholder } from "./CommanderCardPlaceholder"
 
 type Props = {
     commanders: string[]
@@ -19,18 +20,34 @@ type Props = {
     secondCommanderPickAvailable: boolean
     removeSecondCommander: () => void
     viewType: ViewType
+    colorIdentityLabel: React.ReactNode
 }
 
-export const CommanderCardGroup = ({ commanders, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board, legalityWarnings, openCommanderPickModal, secondCommanderPickAvailable, removeSecondCommander, viewType }: Props) => {
+export const CommanderCardGroup = ({ commanders,
+    deckCards,
+    addDeckCardQuantity,
+    enableDragAndDrop,
+    selectedCards,
+    selectCard,
+    board,
+    legalityWarnings,
+    openCommanderPickModal,
+    secondCommanderPickAvailable,
+    removeSecondCommander,
+    viewType,
+    colorIdentityLabel
+}: Props) => {
     const [isHovering, setIsHovering] = React.useState(false)
 
     return (
-        <div className={`card-group flex-column flex-gap-small position-relative ${isHovering ? 'group-elevated' : ''}`}
+        <div className={`card-group commander-card-group flex-column flex-gap-small position-relative ${isHovering ? 'group-elevated' : ''}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}>
-            {commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME}
+            <span className="card-group-title flex-row flex-gap-small align-center">
+                {commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} {colorIdentityLabel}
+            </span>
             <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, commanders.length)}>
-                <div>
+                <div className="flex-column">
                     {commanders[0]
                         ? <Card
                             key={commanders[0]}
@@ -45,15 +62,15 @@ export const CommanderCardGroup = ({ commanders, deckCards, addDeckCardQuantity,
                             legalityWarning={legalityWarnings[commanders[0]]}
                             viewType={viewType}
                             index={0}
+                            format={'commander'}
+                            isCommander
                         />
-                        : <div className="deck-card" style={{ border: '4px solid black' }}>
-                            <button onClick={() => openCommanderPickModal(0)}>Choose a commander</button>
-                        </div>
+                        : <CommanderCardPlaceholder openCommanderPickModal={() => openCommanderPickModal(0)} />
                     }
                     {commanders[0] && <button onClick={() => openCommanderPickModal(0)}>Change commander</button>}
                 </div>
                 {secondCommanderPickAvailable &&
-                    <div>
+                    <div className="flex-column">
                         {commanders[1]
                             ? <Card
                                 key={commanders[1]}
@@ -68,10 +85,10 @@ export const CommanderCardGroup = ({ commanders, deckCards, addDeckCardQuantity,
                                 legalityWarning={legalityWarnings[commanders[1]]}
                                 viewType={viewType}
                                 index={1}
+                                format={'commander'}
+                                isCommander
                             />
-                            : <div className="deck-card" style={{ border: '4px solid black' }}>
-                                <button onClick={() => openCommanderPickModal(1)}>Choose a commander</button>
-                            </div>
+                            : <CommanderCardPlaceholder openCommanderPickModal={() => openCommanderPickModal(1)} />
                         }
                         {commanders[1] && <button onClick={() => openCommanderPickModal(1)}>Change commander</button>}
                         {commanders[1] && <button onClick={removeSecondCommander}>Remove commander</button>}

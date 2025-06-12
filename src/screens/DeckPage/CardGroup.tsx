@@ -1,5 +1,5 @@
 import React from "react"
-import { Board, DeckCards, ViewType } from "../../types"
+import { Board, DeckCards, Format, ViewType } from "../../types"
 import { Card } from "./Card"
 import { useDroppable } from "@dnd-kit/core"
 import './CardGroup.css'
@@ -18,9 +18,23 @@ type Props = {
     board: Board
     legalityWarnings: Record<string, string>
     viewType: ViewType
+    format: Format
 }
 
-export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeckCardQuantity, enableDragAndDrop, selectedCards, selectCard, board, legalityWarnings, viewType }: Props) => {
+export const CardGroup = ({
+    groupName,
+    groupLabel,
+    cardNames,
+    deckCards,
+    addDeckCardQuantity,
+    enableDragAndDrop,
+    selectedCards,
+    selectCard,
+    board,
+    legalityWarnings,
+    viewType,
+    format
+}: Props) => {
     const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
 
@@ -95,6 +109,7 @@ export const CardGroup = ({ groupName, groupLabel, cardNames, deckCards, addDeck
                         legalityWarning={legalityWarnings[cardName]}
                         viewType={viewType}
                         index={index}
+                        format={format}
                     />
                 )}
             </div>

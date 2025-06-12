@@ -211,4 +211,4 @@ export type SearchFilterOperation = 'or' | 'and'
 export type LabelledValue<T> = { label: string, value: T }
 
 export type InputSize = 'tiny' | 'small' | 'medium' | 'large'
-export type IconSize = 'small' | 'medium' | 'large'
+export type IconSize = 'small' | 'medium' | 'large' | 'giant'
