@@ -10,6 +10,6 @@ type Props = {
 export const FloatingScrollMenu = ({ boardActive, scrollToBoard, scrollToLastKnownPosition }: Props) => {
     return <div style={{ position: 'fixed', gap: '0.25em', bottom: '1%', right: '1%', display: 'flex', flexDirection: 'column' }}>
         {ALL_BOARDS.filter(board => boardActive[board]).map(board => <button key={board} onClick={() => scrollToBoard(board)}>Go to {board}</button>)}
-        <button onClick={scrollToLastKnownPosition}>Scroll back</button>
+        {ALL_BOARDS.some(board => boardActive[board]) && <button onClick={scrollToLastKnownPosition}>Scroll back</button>}
     </div>
 }

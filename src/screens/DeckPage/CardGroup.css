@@ -10,13 +10,13 @@
     flex-shrink: 0; */
     width: 50%;
     color: white;
-    font-size: 30px;
+    font-size: calc(2 * var(--base-size));
 }
 
 .category-drop-section-full-size {
     width: 100%;
     color: white;
-    font-size: 30px;
+    font-size: calc(2 * var(--base-size));
 }
 
 .category-drop-add {

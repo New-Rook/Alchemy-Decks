@@ -10,13 +10,13 @@ import { useObjectRecordState } from '../../hooks/useObjectRecordState'
 import { CardGroup } from './CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../../utilities/groupers'
 import { Dropdown } from '../../components/Dropdown'
-import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, SORT_TYPES, VIEW_TYPES } from '../../data/search'
+import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, VIEW_TYPES } from '../../data/search'
 import { TEST_DECK_CARDS } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { COMMANDER_BACKGROUND_REGEX, COMMANDER_CHOOSE_A_BACKGROUND_REGEX, COMMANDER_DOCTORS_COMPANION_REGEX, COMMANDER_FRIENDS_FOREVER_REGEX, COMMANDER_GROUP_NAME, COMMANDER_PARTNER_REGEX, COMMANDER_PARTNER_WITH_REGEX, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
-import { omitFromPartialRecord, omitFromRecord, removeFromArray, splitArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
+import { COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
+import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
@@ -25,6 +25,7 @@ import { useDeckStats } from './useDeckStats'
 import { useCommanders } from './useCommanders'
 import { CommanderCardGroup } from './CommanderCardGroup'
 import { DeckMetaDataDisplay } from './DeckMetaDataDisplay'
+import { DeckBoard } from './DeckBoard'
 
 export const DeckPage = () => {
     const { cardDictionary, availableSortTypes } = useContext(AppContext)
@@ -268,7 +269,7 @@ export const DeckPage = () => {
 
     const boards = React.useMemo<Record<Board, { name: string, groups: CardGroupData[] }>>(
         () => ({
-            mainboard: { name: '', groups: mainboardCardGroups },
+            mainboard: { name: 'Main deck', groups: mainboardCardGroups },
             sideboard: { name: 'Sideboard', groups: sideboardCardGroups },
             considering: { name: 'Considering', groups: consideringCardGroups }
         }),
@@ -387,43 +388,44 @@ export const DeckPage = () => {
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
                     {typedKeys(boards).filter(board => boards[board].groups.length > 0).map(board =>
-                        <div key={board} ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
-                            {boards[board].name}
-                            {board === 'mainboard' && deckMetaData.format === 'commander' &&
-                                <CommanderCardGroup
-                                    commanders={commanders}
-                                    deckCards={deckCards}
-                                    addDeckCardQuantity={addDeckCardQuantity}
-                                    enableDragAndDrop={groupBy === 'category'}
-                                    selectedCards={selectedCards}
-                                    selectCard={selectCard}
-                                    board={board}
-                                    legalityWarnings={deckStats.legalityWarnings}
-                                    openCommanderPickModal={openCommanderPickModal}
-                                    secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
-                                    removeSecondCommander={removeSecondCommander}
-                                    viewType={viewType}
-                                    colorIdentityLabel={commanderGroupLabel}
-                                />
-                            }
-                            {boards[board].groups.map(group =>
-                                <CardGroup
-                                    key={group.name}
-                                    groupName={group.name}
-                                    groupLabel={getGroupLabel(group.name)}
-                                    cardNames={group.cards}
-                                    deckCards={deckCards}
-                                    addDeckCardQuantity={addDeckCardQuantity}
-                                    enableDragAndDrop={groupBy === 'category'}
-                                    selectedCards={selectedCards}
-                                    selectCard={selectCard}
-                                    board={board}
-                                    legalityWarnings={deckStats.legalityWarnings}
-                                    viewType={viewType}
-                                    format={deckMetaData.format}
-                                />
-                            )}
-                        </div>
+                        <DeckBoard board={board} defaultExpanded={true} titleChildren={boards[board].name} titleProps={{ className: 'button-no-hover' }}>
+                            <div key={board} ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
+                                {board === 'mainboard' && deckMetaData.format === 'commander' &&
+                                    <CommanderCardGroup
+                                        commanders={commanders}
+                                        deckCards={deckCards}
+                                        addDeckCardQuantity={addDeckCardQuantity}
+                                        enableDragAndDrop={groupBy === 'category'}
+                                        selectedCards={selectedCards}
+                                        selectCard={selectCard}
+                                        board={board}
+                                        legalityWarnings={deckStats.legalityWarnings}
+                                        openCommanderPickModal={openCommanderPickModal}
+                                        secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
+                                        removeSecondCommander={removeSecondCommander}
+                                        viewType={viewType}
+                                        colorIdentityLabel={commanderGroupLabel}
+                                    />
+                                }
+                                {boards[board].groups.map(group =>
+                                    <CardGroup
+                                        key={group.name}
+                                        groupName={group.name}
+                                        groupLabel={getGroupLabel(group.name)}
+                                        cardNames={group.cards}
+                                        deckCards={deckCards}
+                                        addDeckCardQuantity={addDeckCardQuantity}
+                                        enableDragAndDrop={groupBy === 'category'}
+                                        selectedCards={selectedCards}
+                                        selectCard={selectCard}
+                                        board={board}
+                                        legalityWarnings={deckStats.legalityWarnings}
+                                        viewType={viewType}
+                                        format={deckMetaData.format}
+                                    />
+                                )}
+                            </div>
+                        </DeckBoard>
                     )}
                 </div>
             </DndContext>

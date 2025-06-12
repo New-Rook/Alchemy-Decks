@@ -15,6 +15,7 @@
   --base-size: 1rem;
   --theme-color: rgb(78, 207, 78);
   --theme-color-secondary: rgb(54, 127, 68);
+  --theme-color-tertiary: rgb(87, 153, 134);
   --theme-color-hover: #5edc6f;
   --theme-color-expandable-hover: #5edc6faa;
   --header-color: #253e45;
@@ -33,6 +34,7 @@
   --card-group-elevation: 100;
   --deck-top-bar-elevation: calc(var(--card-group-elevation) + 1);
   --deck-card-hover-elevation: 1;
+  --deck-card-data-elevation: 1;
   --modal-elevation: 150;
   --menu-elevation: 1;
   --category-drop-title-elevation: 1;
@@ -176,11 +178,11 @@ input[type='search'].input-medium {
 }
 
 .base-padding {
-  padding: calc(0.5* var(--base-size))
+  padding: calc(0.5 * var(--base-size));
 }
 
 .base-padding-vertical {
-  padding: calc(0.5* var(--base-size)) 0
+  padding: calc(0.5 * var(--base-size)) 0;
 }
 
 .overflow-wrap {
@@ -592,6 +594,28 @@ input[type='search'].input-medium {
   z-index: var(--deck-card-hover-elevation);
 }
 
+.deck-card-data-elevated {
+  z-index: var(--deck-card-data-elevation);
+}
+
+.deck-card-categories {
+  position: absolute;
+  background-color: var(--theme-color-tertiary);
+  border-radius: var(--base-border-radius);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.font-size-1-5 {
+  font-size: 1.5em;
+}
+
+.deck-card-category-add {
+  color: var(--theme-color-hover)
+}
+
 .preserve-3d {
   transform-style: preserve-3d;
 }
@@ -721,6 +745,10 @@ input[type='search'].input-medium {
 
 .border-rounded-right {
   border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+}
+
+.border-rounded-bottom {
+  border-radius: 0 0 var(--border-radius-small) var(--border-radius-small);
 }
 
 .background-danger {

@@ -1,6 +1,7 @@
 import React from "react"
 import { stringLowerCaseIncludes } from "../utilities/general"
 import './TextInputWithSuggestions.css'
+import './Menu.css'
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
@@ -119,17 +120,13 @@ export const TextInputWithSuggestions = ({ label, onChangeText, validator, sugge
             onFocus={onFocus}
             onBlur={onBlur}
         />
-        <div style={{
-            position: 'absolute',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
+        <div className="menu-content dropdown-content">
             {isFocused && currentSuggestions.map((suggestion, index) =>
                 <button
                     key={suggestion}
                     onMouseEnter={() => setHighlightedSuggestionIndex(index)}
                     onMouseLeave={() => setHighlightedSuggestionIndex(undefined)}
-                    className={`button-no-hover ${index === highlightedSuggestionIndex ? 'suggestion-highlighted' : ''}`}
+                    className={`dropdown-option button-no-hover ${index === currentSuggestions.length - 1 ? 'border-rounded-bottom' : ''} ${index === highlightedSuggestionIndex ? 'suggestion-highlighted' : ''}`}
                     onClick={() => selectOption(suggestion)}>
                     {suggestion}
                 </button>

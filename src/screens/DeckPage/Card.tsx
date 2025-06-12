@@ -162,31 +162,31 @@ export const Card = ({
             onMouseLeave={isCommanderAndSingleCopy ? () => setIsHoveringCard(false) : undefined}
             {...listeners} {...attributes}>
             {/* Top left */}
-            <div className={cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'} style={{ zIndex: 3 }} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
+            <div className={`deck-card-data-elevated ${cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'}`} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
                 {cardDictionary[cardName].card_faces && <IconButton iconName="cached" className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()} />}
             </div>
 
             {/* Main image + categories */}
             <div className='flex-row deck-card-image'>
-                {isDragging && <div style={{ position: 'absolute', backgroundColor: 'white' }} className={`flex-row flex-gap overflow-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
-                    <p key={category} style={{ color: dragData?.operation === 'overwrite' && category !== dragData.category ? 'red' : undefined }}>{category}</p>
+                {isDragging && <div className={`deck-card-categories ${deckCard.categories || dragData?.category ? 'base-padding' : ''} font-size-1-5 flex-row flex-gap flex-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
+                    <span key={category} style={{ color: dragData?.operation === 'overwrite' && category !== dragData.category ? 'red' : undefined }}>{category}</span>
                 )}
-                    {(dragData?.operation === 'add' || !dragData?.containsCategory) && dragData?.category !== NO_CATEGORY_NAME && <p style={{ color: 'green' }}>{dragData?.category}</p>}
+                    {(dragData?.operation === 'add' || !dragData?.containsCategory) && dragData?.category !== NO_CATEGORY_NAME && dragData?.category && <span className="deck-card-category-add">{dragData.category}</span>}
                 </div>}
                 <img src={imageSource} className='deck-card-image' onMouseEnter={() => setIsPendingHoveringState(true)} onMouseLeave={() => setIsPendingHoveringState(false)} draggable={false} />
             </div>
 
             {/* Expanded card */}
             <div className={`flex-column expanded-card ${expandedCardClassName}`}>
-                {isHoveringImage && <div className={`flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`} style={{ position: 'absolute', backgroundColor: 'white' }}>
-                    {deckCard.categories && <div className="flex-row flex-gap overflow-wrap">{deckCard.categories.map(category => <p key={category}>{category}</p>)}</div>}
+                {isHoveringImage && (deckCard.categories || legalityWarning) && <div className={`deck-card-categories base-padding flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`}>
+                    {deckCard.categories && <div className="flex-row flex-gap flex-wrap">{deckCard.categories.map(category => <span key={category}>{category}</span>)}</div>}
                     <div className="text-danger">{legalityWarning}</div>
                 </div>}
                 <img src={imageSource} className={`deck-card-image`} draggable={false} />
             </div>
 
             {/* Top right */}
-            {((!isCommanderAndSingleCopy || isHoveringCard) && !isCommander) && <div className='card-count-container flex-column' style={{ zIndex: 3 }} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+            {((!isCommanderAndSingleCopy || isHoveringCard) && !isCommander) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>x{numberOfCopies}</div>
                 <div className='flex-row'>
                     <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, -1, board)}>-</button>

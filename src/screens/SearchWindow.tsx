@@ -416,7 +416,6 @@ export const SearchWindow = ({
                         <div className='flex-row'>
                             <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertCardTypeFilter(index)} />
                             <TextInputWithSuggestions
-                                className='input-medium'
                                 value={filter.cardType}
                                 onChangeText={(text) => setCardTypeFilterType(index, text)}
                                 suggestions={['Creature', 'Enchantment', 'Artifact']}
