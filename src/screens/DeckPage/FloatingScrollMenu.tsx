@@ -1,15 +1,21 @@
+import React from "react"
 import { ALL_BOARDS } from "../../data/editor"
-import { Board } from "../../types"
+import { Board, BoardData } from "../../types"
+import { typedKeys } from "../../utilities/general"
 
 type Props = {
-    boardActive: Record<Board, boolean>
+    boards: Record<Board, BoardData>
     scrollToBoard: (board: Board) => void
     scrollToLastKnownPosition: () => void
 }
 
-export const FloatingScrollMenu = ({ boardActive, scrollToBoard, scrollToLastKnownPosition }: Props) => {
-    return <div style={{ position: 'fixed', gap: '0.25em', bottom: '1%', right: '1%', display: 'flex', flexDirection: 'column' }}>
-        {ALL_BOARDS.filter(board => boardActive[board]).map(board => <button key={board} onClick={() => scrollToBoard(board)}>Go to {board}</button>)}
-        {ALL_BOARDS.some(board => boardActive[board]) && <button onClick={scrollToLastKnownPosition}>Scroll back</button>}
+export const FloatingScrollMenu = ({ boards, scrollToBoard, scrollToLastKnownPosition }: Props) => {
+    const nonEmptyBoards = React.useMemo(() => {
+        return typedKeys(boards).filter(board => boards[board].groups.length > 0)
+    }, [boards])
+
+    return <div className="floating-scroll-menu">
+        {nonEmptyBoards.map(board => <button key={board} onClick={() => scrollToBoard(board)}>Go to {boards[board].name}</button>)}
+        {nonEmptyBoards.length > 0 && <button onClick={scrollToLastKnownPosition}>Scroll back</button>}
     </div>
 }

@@ -141,12 +141,7 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
     }, [updateSelectedCards])
 
 
-    return <div className="flex-row flex-gap flex-wrap align-end base-padding-vertical" style={{
-        position: 'sticky',
-        bottom: 0,
-        zIndex: 2,
-        backgroundColor: 'white'
-    }}>
+    return <div className="flex-row flex-gap flex-wrap align-end base-padding-vertical multi-select-bar">
         {/* <div className="flex-row flex-gap align-end"> */}
         <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
         <TextInput type={'search'} label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />

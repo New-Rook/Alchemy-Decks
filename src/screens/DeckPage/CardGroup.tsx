@@ -122,19 +122,19 @@ export const CardGroup = ({
                         format={format}
                     />
                 )}
+                {
+                    <div className="flex-row category-drop-container">
+                        {(dropSections === 'add' || dropSections === 'both') && <div className={`flex-row flex-center category-drop-section ${dropSections === 'add' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName('add')}`}
+                            ref={setAddNodeRef}>
+                            {draggedCard.isNotFromThisGroup && isOverAdd && <div className="category-drop-add-title flex-row"><Icon name={"add"} /></div>}
+                        </div>}
+                        {(dropSections === 'overwrite' || dropSections === 'both') && <div className={`flex-row flex-center ${dropSections === 'overwrite' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName('overwrite')}`}
+                            ref={setOverwriteNodeRef}>
+                            {draggedCard.isNotFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title flex-row"><Icon name={"flip"} /></div>}
+                        </div>}
+                    </div>
+                }
             </div>
-            {
-                <div className="flex-row category-drop-container">
-                    {(dropSections === 'add' || dropSections === 'both') && <div className={`flex-row flex-center category-drop-section ${dropSections === 'add' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName('add')}`}
-                        ref={setAddNodeRef}>
-                        {draggedCard.isNotFromThisGroup && isOverAdd && <div className="category-drop-add-title flex-row"><Icon name={"add"} /></div>}
-                    </div>}
-                    {(dropSections === 'overwrite' || dropSections === 'both') && <div className={`flex-row flex-center ${dropSections === 'overwrite' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName('overwrite')}`}
-                        ref={setOverwriteNodeRef}>
-                        {draggedCard.isNotFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title flex-row"><Icon name={"flip"} /></div>}
-                    </div>}
-                </div>
-            }
         </div>
     )
 }

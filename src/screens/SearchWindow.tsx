@@ -397,7 +397,7 @@ export const SearchWindow = ({
                     <Label>Card text</Label>
                     {pendingOracleTextSearchTerm.map((filter, index) =>
                         <div className='flex-row'>
-                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} style={{ backgroundColor: filter.invert ? 'red' : undefined }} />
+                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} />
                             <TextInput
                                 type={'search'}
                                 value={filter.text}

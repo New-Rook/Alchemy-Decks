@@ -38,7 +38,7 @@ export const MainLayout = () => {
         <div className="content">
             <Outlet />
         </div>
-        <div style={{ backgroundColor: 'darkgray', marginTop: '5em', padding: '1em', display: 'flex', flexDirection: 'column' }}>
+        <div className="copyright-section">
             <p>Portions of Alchemy Decks are unofficial Fan Content permitted under the Wizards of the Coast Fan Content Policy. The literal and graphical information presented on this site about Magic: The Gathering, including card images and mana symbols, is copyright Wizards of the Coast, LLC.</p>
             <p>All other content © 2025 Alchemy Decks.</p>
         </div>

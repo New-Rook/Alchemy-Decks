@@ -169,7 +169,7 @@ export const Card = ({
             {/* Main image + categories */}
             <div className='flex-row deck-card-image'>
                 {isDragging && <div className={`deck-card-categories ${deckCard.categories || dragData?.category ? 'base-padding' : ''} font-size-1-5 flex-row flex-gap flex-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
-                    <span key={category} style={{ color: dragData?.operation === 'overwrite' && category !== dragData.category ? 'red' : undefined }}>{category}</span>
+                    <span key={category} className={`${dragData?.operation === 'overwrite' && category !== dragData.category ? 'text-danger' : ''}`}>{category}</span>
                 )}
                     {(dragData?.operation === 'add' || !dragData?.containsCategory) && dragData?.category !== NO_CATEGORY_NAME && dragData?.category && <span className="deck-card-category-add">{dragData.category}</span>}
                 </div>}

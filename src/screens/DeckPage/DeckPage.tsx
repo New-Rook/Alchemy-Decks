@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../../context/AppContext'
 import { useBooleanState } from '../../hooks/useBooleanState'
-import { Board, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, GroupByTypeMode, SortType, ViewType } from '../../types'
+import { Board, BoardData, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, GroupByTypeMode, SortType, ViewType } from '../../types'
 import { getCardAllCardName, getCardDroppedFromOutside } from '../../utilities/card'
 import { SearchWindow } from '../SearchWindow'
 import { DeckPageTopBar } from './DeckPageTopBar'
@@ -267,9 +267,9 @@ export const DeckPage = () => {
     const sideboardCardGroups = React.useMemo(() => getCardGroups(sideboard), [getCardGroups, sideboard])
     const consideringCardGroups = React.useMemo(() => getCardGroups(considering), [getCardGroups, considering])
 
-    const boards = React.useMemo<Record<Board, { name: string, groups: CardGroupData[] }>>(
+    const boards = React.useMemo<Record<Board, BoardData>>(
         () => ({
-            mainboard: { name: 'Main deck', groups: mainboardCardGroups },
+            mainboard: { name: 'Main Deck', groups: mainboardCardGroups },
             sideboard: { name: 'Sideboard', groups: sideboardCardGroups },
             considering: { name: 'Considering', groups: consideringCardGroups }
         }),
@@ -439,11 +439,7 @@ export const DeckPage = () => {
                 setSelectedCards={setSelectedCards}
             />}
 
-            <FloatingScrollMenu boardActive={{
-                mainboard: mainboardCardGroups.length > 0,
-                sideboard: sideboardCardGroups.length > 0,
-                considering: consideringCardGroups.length > 0
-            }}
+            <FloatingScrollMenu boards={boards}
                 scrollToBoard={scrollToBoard}
                 scrollToLastKnownPosition={scrollToLastKnownPosition}
             />
