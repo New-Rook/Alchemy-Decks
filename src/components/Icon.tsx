@@ -7,7 +7,8 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const styleMap: Record<IconSize, string> = {
-    small: '',
+    tiny: 'icon-tiny',
+    small: 'icon-small',
     medium: '',
     large: 'icon-large',
     giant: 'icon-giant'

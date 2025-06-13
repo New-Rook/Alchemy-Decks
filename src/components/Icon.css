@@ -2,6 +2,14 @@
     font-size: 1.5em;
 }
 
+.icon-tiny {
+    font-size: 0.5em;
+}
+
+.icon-small {
+    font-size: 1em;
+}
+
 .icon-large {
     font-size: 3em;
 }

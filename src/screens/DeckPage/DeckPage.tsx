@@ -330,14 +330,14 @@ export const DeckPage = () => {
         }
     }
 
-    const selectCard = (cardName: string, board: Board) => {
-        if (selectedCards[cardName] === board) {
-            setSelectedCards((prevCards) => omitFromRecord(prevCards, cardName))
+    const selectCard = React.useCallback((cardName: string, board: Board) => {
+        setSelectedCards((prevCards) => {
+            if (prevCards[cardName] === board) {
+                return omitFromRecord(prevCards, cardName)
         }
-        else {
-            setSelectedCards((prevCards) => ({ ...prevCards, [cardName]: board }))
-        }
-    }
+            return { ...prevCards, [cardName]: board }
+        })
+    }, [])
 
     return (
         <div className='layout'>

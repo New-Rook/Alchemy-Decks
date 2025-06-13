@@ -33,4 +33,5 @@
 
 .content {
     padding-inline: var(--base-size);
+    min-height: 90vh;
 }

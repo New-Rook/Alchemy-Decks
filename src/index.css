@@ -26,6 +26,7 @@
 
   --danger-color: #d02727;
   --card-selected-color: var(--theme-color);
+  --card-count-color: rgba(144, 245, 252, 0.712);
 
   --card-group-gap: var(--base-size);
 
@@ -343,7 +344,6 @@ input[type='search'].input-medium {
 
 .deck-card-top-left-container {
   position: absolute;
-  z-index: 1;
   left: 8%;
   top: 11%;
   display: flex;
@@ -354,7 +354,6 @@ input[type='search'].input-medium {
 
 .deck-flip-card-top-left-container {
   position: absolute;
-  z-index: 1;
   left: 12.5%;
   top: 11%;
   display: flex;
@@ -401,19 +400,21 @@ input[type='search'].input-medium {
 
 .card-count-container {
   position: absolute;
-  z-index: 1;
   right: 8%;
   top: 11%;
 }
 
+/* .card-count-container * {} */
+
 .card-count {
-  background-color: #f9f9f9;
-  font-size: 2.5em;
+  font-size: calc(2.5 * var(--base-size));
   width: 1.3em;
   height: 1em;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: var(--card-count-color);
+  border-radius: var(--base-border-radius);
 }
 
 .deck-card-warning {
@@ -557,6 +558,10 @@ input[type='search'].input-medium {
   /* height: 2em; */
 }
 
+.icon-button-tiny {
+  padding: 0;
+}
+
 .icon-button-small {
   padding: calc(0.5 * var(--base-size));
 }
@@ -668,9 +673,11 @@ input[type='search'].input-medium {
 }
 
 .multi-select-bar {
-  position: sticky;
+  position: fixed;
   z-index: calc(var(--sticky-elevation) + 1);
+  left: 0;
   bottom: 0;
+  padding-inline: calc(2 * var(--base-size));
   background-color: white;
 }
 

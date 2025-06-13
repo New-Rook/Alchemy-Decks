@@ -9,6 +9,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const styleMap: Record<IconSize, string> = {
+    tiny: 'icon-button-tiny',
     small: "icon-button-small",
     medium: "icon-button",
     large: "",

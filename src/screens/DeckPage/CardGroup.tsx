@@ -40,6 +40,7 @@ export const CardGroup = ({
     const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
 
     const [isHovering, setIsHovering] = React.useState(false)
+    const [fullyShownCardName, setFullyShownCardName] = React.useState('')
 
     const numberOfCards = React.useMemo(() => {
         return cardNames.reduce((total, cardName) => total + (deckCards[cardName].boards[board] ?? 0), 0)
@@ -99,12 +100,37 @@ export const CardGroup = ({
         return 'both'
     }, [groupName, draggedCard.hasThisGroupCategory, draggedCard.hasCategory])
 
+    const showFullCard = React.useCallback((cardName: string) => {
+        // if (fullyShownCardName === cardName) {
+        //     selectCard(cardName, board)
+        // } else {
+        // console.log('show', cardName)
+        setFullyShownCardName(cardName)
+        // }
+    }, [])
+
+    // const hideFullCard = React.useCallback(() => {
+    //     setFullyShownCardName('')
+    // }, [])
+
+    // const selectCardMap = React.useMemo<Record<ViewType, (cardName: string, board: Board) => void>>(() => ({
+    //     text: selectCard,
+    //     grid: selectCard,
+    //     stacked: showFullCard,
+    //     'grid-stacked': showFullCard
+    // }), [selectCard, showFullCard])
+
+    const fullyShownCardIndex = React.useMemo(() => {
+        const indexFound = cardNames.indexOf(fullyShownCardName)
+        return indexFound > -1 ? indexFound : undefined
+    }, [cardNames, fullyShownCardName])
+
     return (
         <div className={`card-group flex-column flex-gap-small position-relative ${isHovering ? 'group-elevated' : ''}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}>
             <span className="card-group-title flex-row flex-gap-small align-center">{groupLabel} ({numberOfCards})</span>
-            <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, cardNames.length)}>
+            <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, cardNames.length, fullyShownCardIndex)}>
                 {cardNames.map((cardName, index) =>
                     <Card
                         key={cardName}
@@ -118,8 +144,9 @@ export const CardGroup = ({
                         board={board}
                         legalityWarning={legalityWarnings[cardName]}
                         viewType={viewType}
-                        index={index}
+                        index={fullyShownCardIndex !== undefined && index > fullyShownCardIndex ? index + 6 : index}
                         format={format}
+                        showFullCard={showFullCard}
                     />
                 )}
                 {
