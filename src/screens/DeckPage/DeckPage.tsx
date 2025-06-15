@@ -15,7 +15,7 @@ import { TEST_DECK_CARDS } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
+import { BOARD_DATA, COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
 import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
@@ -265,11 +265,11 @@ export const DeckPage = () => {
     const sideboardCardGroups = React.useMemo(() => getCardGroups(sideboard), [getCardGroups, sideboard])
     const consideringCardGroups = React.useMemo(() => getCardGroups(considering), [getCardGroups, considering])
 
-    const boards = React.useMemo<Record<Board, BoardData>>(
+    const boardGroups = React.useMemo<Record<Board, CardGroupData[]>>(
         () => ({
-            mainboard: { name: 'Main Deck', groups: mainboardCardGroups },
-            sideboard: { name: 'Sideboard', groups: sideboardCardGroups },
-            considering: { name: 'Considering', groups: consideringCardGroups }
+            mainboard: mainboardCardGroups,
+            sideboard: sideboardCardGroups,
+            considering: consideringCardGroups
         }),
         [mainboardCardGroups, sideboardCardGroups, consideringCardGroups])
 
@@ -387,8 +387,8 @@ export const DeckPage = () => {
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
-                    {typedKeys(boards).filter(board => boards[board].groups.length > 0).map(board =>
-                        <DeckBoard board={board} defaultExpanded={true} titleChildren={boards[board].name} titleProps={{ className: 'button-no-hover' }}>
+                    {typedKeys(boardGroups).filter(board => boardGroups[board].length > 0).map(board =>
+                        <DeckBoard board={board} defaultExpanded={true} titleChildren={BOARD_DATA[board].name} titleProps={{ className: 'button-no-hover' }}>
                             <div key={board} ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
                                 {board === 'mainboard' && deckMetaData.format === 'commander' &&
                                     <CommanderCardGroup
@@ -407,7 +407,7 @@ export const DeckPage = () => {
                                         colorIdentityLabel={commanderGroupLabel}
                                     />
                                 }
-                                {boards[board].groups.map(group =>
+                                {boardGroups[board].map(group =>
                                     <CardGroup
                                         key={group.name}
                                         groupName={group.name}
@@ -439,7 +439,7 @@ export const DeckPage = () => {
                 setSelectedCards={setSelectedCards}
             />}
 
-            <FloatingScrollMenu boards={boards}
+            <FloatingScrollMenu boardGroups={boardGroups}
                 scrollToBoard={scrollToBoard}
                 scrollToLastKnownPosition={scrollToLastKnownPosition}
             />

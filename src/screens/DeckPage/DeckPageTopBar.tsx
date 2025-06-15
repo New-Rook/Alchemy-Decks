@@ -53,10 +53,11 @@ export const DeckPageTopBar = ({
                         Deck price
                         {/* <div>{deckStats.mainboard.price}{deckStats.sideboard.price > 0 && ` + ${deckStats.sideboard.price}`}</div> */}
                         <div>
-                            {addCurrencyToText(deckStats.sideboard.price === 0
-                                ? deckStats.mainboard.price
-                                : `${(deckStats.mainboard.price + deckStats.sideboard.price).toFixed(2)} (${deckStats.mainboard.price} + ${deckStats.sideboard.price}))`,
-                                userData?.settings.currency ?? 'eur')}
+                            {addCurrencyToText((deckStats.mainboard.price + deckStats.sideboard.price).toFixed(2), userData?.settings.currency ?? 'eur')}
+                            {/* {deckStats.sideboard.price === 0
+                                ? addCurrencyToText(deckStats.mainboard.price, userData?.settings.currency ?? 'eur')
+                                : `${addCurrencyToText((deckStats.mainboard.price + deckStats.sideboard.price).toFixed(2), userData?.settings.currency ?? 'eur')} (${addCurrencyToText(deckStats.mainboard.price, userData?.settings.currency ?? 'eur')} + ${addCurrencyToText(deckStats.sideboard.price, userData?.settings.currency ?? 'eur')}))`
+                            } */}
                         </div>
                     </div>
                     <div className='flex-row flex-gap flex-center'>

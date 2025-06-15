@@ -68,7 +68,7 @@ export type DeckCard = {
 }
 
 export type Board = 'mainboard' | 'sideboard' | 'considering'
-export type BoardData = { name: string, groups: CardGroupData[] }
+export type BoardData = { name: string, icon: string }
 export type DeckCards = Record<string, DeckCard>
 export type CardDictionary = Record<string, CardData>
 

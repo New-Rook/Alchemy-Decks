@@ -1,4 +1,5 @@
-import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue } from "../types"
+import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue, BoardData } from "../types"
+import { typedKeys } from "../utilities/general"
 
 export const NO_GROUP_NAME = 'All cards'
 export const NO_CATEGORY_NAME = 'No category'
@@ -15,7 +16,22 @@ export const VISIBILITY_TYPES: LabelledValue<DeckVisibility>[] = [
     { label: 'Public', value: 'public' }
 ]
 
-export const ALL_BOARDS: Board[] = ['mainboard', 'sideboard', 'considering']
+export const BOARD_DATA: Record<Board, BoardData> = {
+    mainboard: {
+        name: "Main Deck",
+        icon: "splitscreen_top"
+    },
+    sideboard: {
+        name: "Sideboard",
+        icon: "splitscreen_bottom"
+    },
+    considering: {
+        name: "Considering",
+        icon: "indeterminate_question_box"
+    }
+}
+
+export const ALL_BOARDS: Board[] = typedKeys(BOARD_DATA)
 
 export const COMMANDER_GROUP_NAME = 'Commander'
 export const MULTI_COMMANDER_GROUP_NAME = 'Commanders'

@@ -1,21 +1,22 @@
 import React from "react"
-import { ALL_BOARDS } from "../../data/editor"
-import { Board, BoardData } from "../../types"
+import { BOARD_DATA } from "../../data/editor"
+import { Board, CardGroupData } from "../../types"
 import { typedKeys } from "../../utilities/general"
+import { IconButton } from "../../components/IconButton"
 
 type Props = {
-    boards: Record<Board, BoardData>
+    boardGroups: Record<Board, CardGroupData[]>
     scrollToBoard: (board: Board) => void
     scrollToLastKnownPosition: () => void
 }
 
-export const FloatingScrollMenu = ({ boards, scrollToBoard, scrollToLastKnownPosition }: Props) => {
+export const FloatingScrollMenu = ({ boardGroups, scrollToBoard, scrollToLastKnownPosition }: Props) => {
     const nonEmptyBoards = React.useMemo(() => {
-        return typedKeys(boards).filter(board => boards[board].groups.length > 0)
-    }, [boards])
+        return typedKeys(boardGroups).filter(board => boardGroups[board].length > 0)
+    }, [boardGroups])
 
     return <div className="floating-scroll-menu">
-        {nonEmptyBoards.map(board => <button key={board} onClick={() => scrollToBoard(board)}>Go to {boards[board].name}</button>)}
-        {nonEmptyBoards.length > 0 && <button onClick={scrollToLastKnownPosition}>Scroll back</button>}
+        {nonEmptyBoards.map(board => <IconButton key={board} iconName={BOARD_DATA[board].icon} onClick={() => scrollToBoard(board)}>Go to {BOARD_DATA[board].name}</IconButton>)}
+        {nonEmptyBoards.length > 0 && <IconButton iconName='arrow_back' onClick={scrollToLastKnownPosition}>Scroll back</IconButton>}
     </div>
 }

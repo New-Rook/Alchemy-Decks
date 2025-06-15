@@ -48,7 +48,13 @@ export const DeckMetaDataDisplay = ({
 
     const copyDeckListToClipboard = async () => {
         const decklistString = Object.keys(deckCards).reduce(
-            (decklist, cardName) => `${decklist}${decklist === '' ? '' : '\n'}${deckCards[cardName]} ${cardName}`
+            (decklist, cardName) => {
+                const deckCard = deckCards[cardName]
+                if (deckCard.boards.mainboard || deckCard.boards.sideboard) {
+                    return `${decklist}${decklist === '' ? '' : '\n'}${(deckCards[cardName].boards.mainboard ?? 0) + (deckCards[cardName].boards.sideboard ?? 0)} ${cardName}`
+                }
+                return decklist
+            }
             , '')
         await navigator.clipboard.writeText(decklistString)
     }
