@@ -10,7 +10,8 @@
     height: calc(40 * var(--base-size))
 }
 
-.deck-meta-data-text-container>p {
+.deck-meta-data-text-container>p,
+.deck-meta-data-text-container>div {
     margin: var(--base-size);
 }
 

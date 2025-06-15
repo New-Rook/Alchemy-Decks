@@ -218,7 +218,7 @@ export const Card = ({
 
             {/* Top right */}
             {((!isCommanderAndSingleCopy || isHoveringCard) && !isCommander) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-                <div className='card-count'><Icon name="close" size="small" />{numberOfCopies}</div>
+                <div className='card-count'>{numberOfCopies}</div>
                 <div className='flex-row'>
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} />
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, board)} iconName={"add"} />

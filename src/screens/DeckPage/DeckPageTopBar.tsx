@@ -5,6 +5,7 @@ import { getCardFrontImage } from "../../utilities/card"
 import { Icon } from "../../components/Icon"
 import { IconButton } from "../../components/IconButton"
 import { UserContext } from "../../context/UserContext"
+import { addCurrencyToText } from "../../utilities/general"
 
 type Props = {
     cardSearchTerm: string
@@ -17,6 +18,8 @@ type Props = {
     setPinned: (value: boolean) => void
 }
 
+const NUMBER_OF_CARD_SEARCH_RESULTS_TO_SHOW = 5
+
 export const DeckPageTopBar = ({
     cardSearchTerm,
     setCardSearchTerm,
@@ -28,6 +31,7 @@ export const DeckPageTopBar = ({
     setPinned
 }: Props) => {
     const { userData } = useContext(UserContext)
+
     return (
         <div className={`deck-top-bar ${pinned ? 'top-bar-sticky' : ''}`}>
             <div className='menu-bar align-end'>
@@ -49,11 +53,10 @@ export const DeckPageTopBar = ({
                         Deck price
                         {/* <div>{deckStats.mainboard.price}{deckStats.sideboard.price > 0 && ` + ${deckStats.sideboard.price}`}</div> */}
                         <div>
-                            {userData?.settings.currency === 'usd' && '$'}
-                            {deckStats.sideboard.price === 0
+                            {addCurrencyToText(deckStats.sideboard.price === 0
                                 ? deckStats.mainboard.price
-                                : `${(deckStats.mainboard.price + deckStats.sideboard.price).toFixed(2)} (${deckStats.mainboard.price} + ${deckStats.sideboard.price}))`}
-                            {userData?.settings.currency === 'eur' && '€'}
+                                : `${(deckStats.mainboard.price + deckStats.sideboard.price).toFixed(2)} (${deckStats.mainboard.price} + ${deckStats.sideboard.price}))`,
+                                userData?.settings.currency ?? 'eur')}
                         </div>
                     </div>
                     <div className='flex-row flex-gap flex-center'>
@@ -65,9 +68,19 @@ export const DeckPageTopBar = ({
                     </div>
                 </div>
             </div>
-            {cardSearchResults.slice(0, 5).map(cardData => <button key={cardData.name} className='card-search-result' onClick={() => addFromQuickSearch(cardData)}>
-                <img src={getCardFrontImage(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
-            </button>)}
+            <div className="card-search-results">
+                {cardSearchResults.slice(0, NUMBER_OF_CARD_SEARCH_RESULTS_TO_SHOW).map((cardData, index) =>
+                    <button key={cardData.name}
+                        className={`card-search-result 
+                            ${index === NUMBER_OF_CARD_SEARCH_RESULTS_TO_SHOW - 1
+                                ? 'border-rounded-bottom'
+                                : 'dropdown-option'
+                            }`}
+                        onClick={() => addFromQuickSearch(cardData)}>
+                        <img src={getCardFrontImage(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
+                    </button>
+                )}
+            </div>
         </div>
     )
 }

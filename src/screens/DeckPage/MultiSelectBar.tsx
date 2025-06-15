@@ -21,18 +21,28 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     const updateSelectedCardsRef = React.useRef<() => void>(null)
 
-    const moveSelectedCardsToBoard = (board: Board) => {
+    const moveSelectedCardsToBoard = (board: Board, moveMode: 'all' | 'one') => {
         const newDeckCards = { ...deckCards }
+        const newSelectedCards = { ...selectedCards }
 
         Object.keys(selectedCards).forEach((cardName) => {
             const currentBoard = selectedCards[cardName]
-            const quantity = newDeckCards[cardName].boards[currentBoard]
-            delete newDeckCards[cardName].boards[currentBoard]
-            newDeckCards[cardName].boards[board] = (newDeckCards[cardName].boards[board] ?? 0) + (quantity ?? 0)
+            const quantity = (newDeckCards[cardName].boards[currentBoard] ?? 0)
+            // If quantityToMove is non-zero, that many copies are moved, otherwise all copies are moved
+            const quantityBeingMoved = moveMode === 'all' ? quantity : 1
+            const newQuantity = quantity - quantityBeingMoved
+            if (newQuantity === 0) {
+                delete newDeckCards[cardName].boards[currentBoard]
+                delete newSelectedCards[cardName]
+            } else {
+                newDeckCards[cardName].boards[currentBoard] = newQuantity
+            }
+            newDeckCards[cardName].boards[board] = (newDeckCards[cardName].boards[board] ?? 0) + quantityBeingMoved
         })
 
         setDeckCards(newDeckCards)
-        setSelectedCards({})
+        // If move all copies to board, deselect cards
+        setSelectedCards(moveMode === 'all' ? {} : newSelectedCards)
     }
 
     const updateSelectedCards = () => {
@@ -152,9 +162,18 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
         <IconButton iconName={"brush"} onClick={showCardArtWindow} disabled={Object.keys(selectedCards).length > 150}>Change card art</IconButton>
         {/* </div> */}
         {/* <div className="flex-row flex-gap"> */}
-        <IconButton iconName={"move_up"} onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</IconButton>
-        <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</IconButton>
-        <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</IconButton>
+        <div className="flex-row">
+            <IconButton iconName={"move_up"} onClick={() => moveSelectedCardsToBoard('mainboard', 'all')}>Move all copies to Main Deck</IconButton>
+            <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('mainboard', 'one')}>Move 1 copy to Main Deck</IconButton>
+        </div>
+        <div className="flex-row">
+            <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard', 'all')}>Move to Sideboard</IconButton>
+            <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('sideboard', 'one')}>Move 1 copy to Sideboard</IconButton>
+        </div>
+        <div className="flex-row">
+            <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering', 'all')}>Move to Considering</IconButton>
+            <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('considering', 'one')}>Move 1 copy to Considering</IconButton>
+        </div>
         <IconButton iconName={"close"} onClick={deselectAllCards}>Deselect cards</IconButton>
         {/* </div> */}
         {cardArtWindowVisible && <CardArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}

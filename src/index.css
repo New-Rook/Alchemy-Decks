@@ -1,5 +1,6 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-family);
   line-height: 1.5;
   font-weight: 400;
 
@@ -23,6 +24,7 @@
   --border-radius-small: 4px;
   --card-border-radius: 12px;
   --card-size: calc(15 * var(--base-size));
+  --textarea-height: calc(6 * var(--base-size));
 
   --danger-color: #d02727;
   --card-selected-color: var(--theme-color);
@@ -104,6 +106,13 @@ input[type='search'].input-medium {
 
 .input-small {
   width: calc(8 * var(--base-size))
+}
+
+textarea {
+  height: var(--textarea-height);
+  font-size: var(--base-size);
+  font-family: var(--font-family);
+  resize: none;
 }
 
 /* input[type='password'] {
@@ -408,7 +417,6 @@ input[type='search'].input-medium {
 
 .card-count {
   font-size: calc(2.5 * var(--base-size));
-  width: 1.3em;
   height: 1em;
   display: flex;
   justify-content: center;
@@ -428,8 +436,8 @@ input[type='search'].input-medium {
 /* Card search */
 
 .deck-top-bar {
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   gap: calc(0.5 * var(--base-size));
   padding-block: var(--base-size);
   z-index: var(--sticky-elevation);
@@ -445,11 +453,18 @@ input[type='search'].input-medium {
   background-color: white;
 }
 
+.card-search-results {
+  position: absolute;
+  z-index: var(--sticky-elevation);
+  display: flex;
+  flex-direction: column;
+}
+
 .card-search-result {
   display: flex;
   align-items: center;
-  gap: 1em;
-  height: 8vh;
+  gap: var(--base-size);
+  height: calc(6* var(--base-size));
 }
 
 .card-search-result-image {
@@ -618,7 +633,7 @@ input[type='search'].input-medium {
   border-radius: var(--base-border-radius);
 }
 
-.full-width {
+.full-width.full-width {
   width: 100%;
 }
 
@@ -778,6 +793,10 @@ input[type='search'].input-medium {
 
 .border-rounded-right {
   border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+}
+
+.border-rounded-top {
+  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
 }
 
 .border-rounded-bottom {

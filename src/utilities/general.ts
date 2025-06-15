@@ -1,3 +1,5 @@
+import { CurrencyType } from "../types"
+
 export const validateNumberWithRange = (value: number, min: number, max: number) => {
     return value >= min && value <= max
 }
@@ -109,6 +111,24 @@ export const numbersLimitTextInputValidator = (limit: number) => {
     }
 }
 
+export const lengthLimitTextInputValidator = (limit: number) => {
+    return (text: string) => {
+        return text.length <= limit
+    }
+}
+
 export const combineTextInputValidators = (...validators: ((text: string) => boolean)[]) => {
     return (text: string) => validators.every(validator => validator(text))
+}
+
+export const addCurrencyToText = (text: string | number, currency: CurrencyType) => {
+    if (currency === 'eur') {
+        return `${text}€`
+    }
+
+    if (currency === 'usd') {
+        return `$${text}`
+    }
+
+    return text
 }

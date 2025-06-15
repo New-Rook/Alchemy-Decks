@@ -17,7 +17,6 @@ import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
 import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
-import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
 import { MultiSelectBar } from './MultiSelectBar'
@@ -57,7 +56,6 @@ export const DeckPage = () => {
     const [selectedCards, setSelectedCards] = React.useState<Record<string, Board>>({})
 
     const [searchWindowVisible, showSearchWindow, hideSearchWindow] = useBooleanState()
-    const [deckMetaDataWindowVisible, showDeckMetaDataWindow, hideDeckMetaDataWindow] = useBooleanState()
     const [commanderPickWindowVisible, showCommanderPickWindow, hideCommanderPickWindow] = useBooleanState()
     const [commanderPickIndex, setCommanderPickIndex] = React.useState(0)
 
@@ -338,7 +336,7 @@ export const DeckPage = () => {
         setSelectedCards((prevCards) => {
             if (prevCards[cardName] === board) {
                 return omitFromRecord(prevCards, cardName)
-        }
+            }
             return { ...prevCards, [cardName]: board }
         })
     }, [])
@@ -346,8 +344,8 @@ export const DeckPage = () => {
     return (
         <div className='layout'>
             <DeckMetaDataDisplay
-                showDeckMetaDataWindow={showDeckMetaDataWindow}
                 deckMetaData={deckMetaData}
+                setDeckMetaData={setDeckMetaData}
                 deckStats={deckStats}
                 deckCards={deckCards}
             />
@@ -386,8 +384,6 @@ export const DeckPage = () => {
                     isCommanderPick={commanderPickWindowVisible}
                 />
             }
-
-            {deckMetaDataWindowVisible && <DeckMetaDataWindow back={hideDeckMetaDataWindow} save={setDeckMetaData} deckMetaData={deckMetaData} legalityWarnings={deckStats.legalityWarnings} />}
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
