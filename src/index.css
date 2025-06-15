@@ -115,6 +115,11 @@ textarea {
   resize: none;
 }
 
+.expandable-textarea {
+  height: calc(var(--textarea-height) + var(--base-size));
+  overflow-y: auto;
+}
+
 /* input[type='password'] {
   width: 8em;
   height: 1.5em;

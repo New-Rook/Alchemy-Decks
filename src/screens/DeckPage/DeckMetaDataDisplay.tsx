@@ -72,7 +72,8 @@ export const DeckMetaDataDisplay = ({
                 <Expandable
                     className="no-margin"
                     titleProps={{ className: 'button-no-hover' }}
-                    titleChildren={'Description'}>
+                    titleChildren={'Description'}
+                    contentProps={{ className: 'expandable-textarea' }}>
                     {isEditMode ?
                         <TextArea value={draft.description} onChangeText={text => setDraft(prev => ({ ...prev, description: text }))} validator={lengthLimitTextInputValidator(1000)} />
                         : <p>{deckMetaData.description}</p>
