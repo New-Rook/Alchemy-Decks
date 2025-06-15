@@ -1,3 +1,7 @@
+.group-card-count {
+    padding-bottom: calc(0.3 * var(--base-size));
+}
+
 .category-drop-container {
     position: absolute;
     width: 100%;

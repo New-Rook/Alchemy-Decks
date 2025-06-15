@@ -129,7 +129,10 @@ export const CardGroup = ({
         <div className={`card-group flex-column flex-gap-small position-relative ${isHovering ? 'group-elevated' : ''}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}>
-            <span className="card-group-title flex-row flex-gap-small align-center">{groupLabel} ({numberOfCards})</span>
+            <div className="card-group-title flex-row flex-gap-small align-center">
+                <span className="flex-row flex-center">{groupLabel}</span>
+                <span className="group-card-count">({numberOfCards})</span>
+            </div>
             <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, cardNames.length, fullyShownCardIndex)}>
                 {cardNames.map((cardName, index) =>
                     <Card

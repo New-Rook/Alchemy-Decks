@@ -15,7 +15,7 @@ import { TEST_DECK_CARDS } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
+import { COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
 import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { DeckMetaDataWindow } from './DeckMetaDataWindow'
 import { useDeckScroll } from './useDeckScroll'
@@ -297,6 +297,10 @@ export const DeckPage = () => {
     const getGroupLabel = React.useCallback((groupName: string) => {
         if (groupBy === 'color') {
             return getGroupColorLabel(groupName)
+        }
+
+        if (groupBy === 'mana-value' && MANA_VALUE_SYMBOLS[groupName]) {
+            return <img className='card-group-icon-title transparent-background' src={MANA_VALUE_SYMBOLS[groupName].svg_uri} />
         }
 
         return groupName

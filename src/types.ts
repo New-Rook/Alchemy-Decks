@@ -139,7 +139,7 @@ export type CardArtData = {
 }
 
 export type Color = 'W' | 'U' | 'B' | 'R' | 'G'
-export type ColorData = {
+export type SymbolData = {
   name: string
   symbol: string
   english: string // For accessibility - equivalent to label

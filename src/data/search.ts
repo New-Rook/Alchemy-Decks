@@ -1,8 +1,8 @@
-import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, GroupByTypeMode, LabelledValue, SearchFilterOperation, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
+import { Color, SymbolData, ColorSearchType, Format, GroupBy, GroupByColorMode, GroupByTypeMode, LabelledValue, SearchFilterOperation, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
 
 export const searchRegex = /\w+|"[\w ]+"/g
 
-export const COLOR_DATA: Record<Color, ColorData> = {
+export const COLOR_DATA: Record<Color, SymbolData> = {
     W: {
         "name": "White",
         "symbol": "{W}",
@@ -35,7 +35,7 @@ export const COLOR_DATA: Record<Color, ColorData> = {
     }
 }
 
-export const COLORLESS_DATA: ColorData & { key: string } = {
+export const COLORLESS_DATA: SymbolData & { key: string } = {
     key: 'C',
     "name": "Colorless",
     "symbol": "{C}",
@@ -74,7 +74,7 @@ export const COLORLESS_ORDER_PRIORITY = NUMBER_OF_COLORS + NUMBER_OF_COLOR_COMBI
 export const LAND_ORDER_PRIORITY = COLORLESS_ORDER_PRIORITY + 1
 
 export const ALL_COLOR_KEYS: Color[] = Object.keys(COLOR_DATA) as Color[]
-export const ALL_COLORS: ColorData[] = Object.values(COLOR_DATA) as ColorData[]
+export const ALL_COLORS: SymbolData[] = Object.values(COLOR_DATA) as SymbolData[]
 
 export const FORMATS: LabelledValue<Format>[] = [
     { label: 'Standard', value: 'standard' },
