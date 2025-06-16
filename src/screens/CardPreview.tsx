@@ -63,10 +63,10 @@ export const CardPreview = ({ cardName, deckCard, addDeckCardQuantity, isCommand
 
             {/* Top right */}
             {!isCommander && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-                {deckCard && <div className='card-count'>x{deckCard.boards.mainboard}</div>}
+                {deckCard && <div className='card-count'>{deckCard.boards.mainboard}</div>}
                 <div className='flex-row'>
-                    <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, -1, 'mainboard')}>-</button>
-                    <button className='flex-button' onClick={() => addDeckCardQuantity(cardName, 1, 'mainboard')}>+</button>
+                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, 'mainboard')} iconName={"remove"} />
+                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, 'mainboard')} iconName={"add"} />
                 </div>
             </div>}
         </div >
