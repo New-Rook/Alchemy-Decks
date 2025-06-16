@@ -8,8 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "changeToStaging": "firebase use default",
-    "changeToProduction": "firebase use production"
+    "changeEnvironment:staging": "firebase use default",
+    "changeEnvironment:prod": "firebase use production",
+    "deploy": "firebase deploy --only hosting",
+    "deploy:staging": "npm run changeEnvironment:staging; npm run build; npm run deploy;",
+    "deploy:prod": "npm run changeEnvironment:prod; npm run build; npm run deploy;"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
