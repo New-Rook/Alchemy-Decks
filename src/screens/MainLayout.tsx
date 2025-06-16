@@ -13,7 +13,7 @@ export const MainLayout = () => {
     return <>
         <nav className="nav-bar">
             <NavButton to={'/'} className="nav-bar-button flex-row flex-center transparent-background">
-                <ImageIcon src={'/logo.jpg'} className="logo" />
+                <ImageIcon src={'/logo.png'} className="logo" />
                 <p>Alchemy Decks</p>
             </NavButton>
             {authStatus === 'authenticated' ?

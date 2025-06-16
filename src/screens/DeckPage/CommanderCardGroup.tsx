@@ -23,7 +23,8 @@ type Props = {
     colorIdentityLabel: React.ReactNode
 }
 
-export const CommanderCardGroup = ({ commanders,
+export const CommanderCardGroup = ({
+    commanders,
     deckCards,
     addDeckCardQuantity,
     enableDragAndDrop,
@@ -38,6 +39,16 @@ export const CommanderCardGroup = ({ commanders,
     colorIdentityLabel
 }: Props) => {
     const [isHovering, setIsHovering] = React.useState(false)
+    const [fullyShownCardName, setFullyShownCardName] = React.useState('')
+
+    const showFullCard = React.useCallback((cardName: string) => {
+        setFullyShownCardName(cardName)
+    }, [])
+
+    const fullyShownCardIndex = React.useMemo(() => {
+        const indexFound = commanders.indexOf(fullyShownCardName)
+        return indexFound > -1 ? indexFound : undefined
+    }, [commanders, fullyShownCardName])
 
     return (
         <div className={`card-group commander-card-group flex-column flex-gap-small position-relative ${isHovering ? 'group-elevated' : ''}`}
@@ -46,7 +57,7 @@ export const CommanderCardGroup = ({ commanders,
             <span className="card-group-title flex-row flex-gap-small align-center">
                 {commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} {colorIdentityLabel}
             </span>
-            <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, commanders.length)}>
+            <div className={`position-relative ${cardGroupStyleMap[viewType]}`} style={getCardGroupViewStyle(viewType, commanders.length, fullyShownCardIndex)}>
                 <div className="flex-column">
                     {commanders[0]
                         ? <Card
@@ -63,6 +74,7 @@ export const CommanderCardGroup = ({ commanders,
                             viewType={viewType}
                             index={0}
                             format={'commander'}
+                            showFullCard={showFullCard}
                             isCommander
                         />
                         : <CommanderCardPlaceholder openCommanderPickModal={() => openCommanderPickModal(0)} />
@@ -86,6 +98,7 @@ export const CommanderCardGroup = ({ commanders,
                                 viewType={viewType}
                                 index={1}
                                 format={'commander'}
+                                showFullCard={showFullCard}
                                 isCommander
                             />
                             : <CommanderCardPlaceholder openCommanderPickModal={() => openCommanderPickModal(1)} />
