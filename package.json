@@ -11,7 +11,7 @@
     "changeEnvironment:staging": "firebase use default",
     "changeEnvironment:prod": "firebase use production",
     "deploy": "firebase deploy --only hosting",
-    "deploy:staging": "npm run changeEnvironment:staging; npm run build; npm run deploy;",
+    "deploy:staging": "firebase use default; npm run build; firebase deploy --only hosting;",
     "deploy:prod": "npm run changeEnvironment:prod; npm run build; npm run deploy;",
     "disableEnvironment": "firebase hosting:disable"
   },
