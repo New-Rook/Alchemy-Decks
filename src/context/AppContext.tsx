@@ -1,7 +1,8 @@
 import React, { createContext, useContext } from "react";
-import { CardData, CardDictionary, SortType } from "../types";
-import { SORT_TYPES } from "../data/search";
+import { CardData, CardDictionary, LabelledValue, SortType } from "../types";
+import { GUEST_SORT_TYPES, SORT_TYPES } from "../data/search";
 import { UserContext } from "./UserContext";
+import { omitFromArray } from "../utilities/general";
 
 type AppContextType = {
     // currentDeckID: string
@@ -10,7 +11,7 @@ type AppContextType = {
     // allCards: CardData[]
     cardDictionary: CardDictionary // Card name to card data
     getCardPriceDisplay: (cardData: CardData) => string
-    availableSortTypes: SortType[]
+    availableSortTypes: LabelledValue<SortType>[]
 }
 
 export const AppContext = createContext<AppContextType>({} as AppContextType)
@@ -95,21 +96,21 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
 
     const availableSortTypes = React.useMemo(() => {
         if (!userData) {
-            return []
+            return GUEST_SORT_TYPES
         }
 
         return SORT_TYPES.filter(sort => {
-            if (sort === 'price-eur') {
-                return userData?.settings.currency === 'eur'
+            if (sort.value === 'price-eur') {
+                return userData.settings.currency === 'eur'
             }
 
-            if (sort === 'price-usd') {
-                return userData?.settings.currency === 'usd'
+            if (sort.value === 'price-usd') {
+                return userData.settings.currency === 'usd'
             }
 
             return true
         })
-    }, [userData?.settings.currency])
+    }, [userData])
 
     return <AppContext.Provider value={{ cardDictionary, getCardPriceDisplay, availableSortTypes }}>
         {children}

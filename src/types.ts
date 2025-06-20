@@ -68,6 +68,7 @@ export type DeckCard = {
 }
 
 export type Board = 'mainboard' | 'sideboard' | 'considering'
+export type BoardData = { name: string, icon: string }
 export type DeckCards = Record<string, DeckCard>
 export type CardDictionary = Record<string, CardData>
 
@@ -138,7 +139,7 @@ export type CardArtData = {
 }
 
 export type Color = 'W' | 'U' | 'B' | 'R' | 'G'
-export type ColorData = {
+export type SymbolData = {
   name: string
   symbol: string
   english: string // For accessibility - equivalent to label
@@ -183,6 +184,7 @@ export type CardGroupData = {
 }
 
 export type GroupByColorMode = 'multicolored-in-one' | 'multicolored-expanded' | 'all-monocolored'
+export type GroupByTypeMode = 'all-types' | 'only-last-type'
 
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
 
@@ -206,3 +208,8 @@ export type StatFilter = {
 export type SearchTermFilter = { text: string, invert: boolean }
 
 export type SearchFilterOperation = 'or' | 'and'
+
+export type LabelledValue<T> = { label: string, value: T }
+
+export type InputSize = 'tiny' | 'small' | 'medium' | 'large'
+export type IconSize = 'tiny' | 'small' | 'medium' | 'large' | 'giant'

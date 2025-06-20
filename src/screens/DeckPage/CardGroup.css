@@ -1,3 +1,7 @@
+.group-card-count {
+    padding-bottom: calc(0.3 * var(--base-size));
+}
+
 .category-drop-container {
     position: absolute;
     width: 100%;
@@ -10,13 +14,13 @@
     flex-shrink: 0; */
     width: 50%;
     color: white;
-    font-size: 30px;
+    font-size: calc(2 * var(--base-size));
 }
 
 .category-drop-section-full-size {
     width: 100%;
     color: white;
-    font-size: 30px;
+    font-size: calc(2 * var(--base-size));
 }
 
 .category-drop-add {
@@ -30,7 +34,7 @@
 .category-drop-add-title {
     background-color: blue;
     padding: 0.25em;
-    z-index: 3;
+    z-index: var(--category-drop-title-elevation);
 }
 
 .category-drop-overwrite {
@@ -44,5 +48,5 @@
 .category-drop-overwrite-title {
     background-color: purple;
     padding: 0.25em;
-    z-index: 3;
+    z-index: var(--category-drop-title-elevation);
 }

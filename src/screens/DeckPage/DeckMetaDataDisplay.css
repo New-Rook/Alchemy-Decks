@@ -1,0 +1,34 @@
+.deck-meta-data-container {
+    /* background-repeat: no-repeat;
+    background-size: contain;
+    background-blend-mode: color; */
+    /* height: 500px; */
+    /* color: var(--header-color); */
+    position: relative;
+    /* padding-block: calc(0.5 * var(--base-size));
+    padding-inline: calc(0.5 * var(--base-size)); */
+    height: calc(40 * var(--base-size))
+}
+
+.deck-meta-data-text-container>p,
+.deck-meta-data-text-container>div {
+    margin: var(--base-size);
+}
+
+.deck-meta-data-text-container {
+    background-color: rgba(142, 181, 149, 0.9);
+    width: min(calc(40 * var(--base-size)), 100%);
+    margin-bottom: var(--base-size);
+    padding-bottom: calc(0.5 * var(--base-size));
+}
+
+.deck-meta-data-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    top: 0;
+    z-index: var(--deck-title-background-elevation);
+    /* opacity: 0.75; */
+    /* mix-blend-mode: exclusion; */
+}

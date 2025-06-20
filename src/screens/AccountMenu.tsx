@@ -34,5 +34,4 @@ export const AccountMenu = () => {
     }
 
     return <LoadingWheel className="right-nav" />
-
 }

@@ -1,9 +1,10 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
 import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord } from "../../utilities/general"
-import { CartArtWindow } from "./CartArtWindow"
+import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
+import { CardArtWindow } from "./CardArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
+import { IconButton } from "../../components/IconButton"
 
 type Props = {
     deckCards: DeckCards
@@ -20,18 +21,28 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     const updateSelectedCardsRef = React.useRef<() => void>(null)
 
-    const moveSelectedCardsToBoard = (board: Board) => {
+    const moveSelectedCardsToBoard = (board: Board, moveMode: 'all' | 'one') => {
         const newDeckCards = { ...deckCards }
+        const newSelectedCards = { ...selectedCards }
 
         Object.keys(selectedCards).forEach((cardName) => {
             const currentBoard = selectedCards[cardName]
-            const quantity = newDeckCards[cardName].boards[currentBoard]
-            delete newDeckCards[cardName].boards[currentBoard]
-            newDeckCards[cardName].boards[board] = (newDeckCards[cardName].boards[board] ?? 0) + (quantity ?? 0)
+            const quantity = (newDeckCards[cardName].boards[currentBoard] ?? 0)
+            // If quantityToMove is non-zero, that many copies are moved, otherwise all copies are moved
+            const quantityBeingMoved = moveMode === 'all' ? quantity : 1
+            const newQuantity = quantity - quantityBeingMoved
+            if (newQuantity === 0) {
+                delete newDeckCards[cardName].boards[currentBoard]
+                delete newSelectedCards[cardName]
+            } else {
+                newDeckCards[cardName].boards[currentBoard] = newQuantity
+            }
+            newDeckCards[cardName].boards[board] = (newDeckCards[cardName].boards[board] ?? 0) + quantityBeingMoved
         })
 
         setDeckCards(newDeckCards)
-        setSelectedCards({})
+        // If move all copies to board, deselect cards
+        setSelectedCards(moveMode === 'all' ? {} : newSelectedCards)
     }
 
     const updateSelectedCards = () => {
@@ -61,8 +72,7 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
                     newDeckCards[cardName].categories = []
                 }
                 // if (categoryUpdateOperation === 'add') {
-                const uniqueCategories = new Set([...newDeckCards[cardName].categories, category])
-                newDeckCards[cardName].categories = Array.from(uniqueCategories)
+                newDeckCards[cardName].categories = toUniqueArray([...newDeckCards[cardName].categories, category])
                 // }
                 // else {
                 //     newDeckCards[cardName].categories = categories
@@ -141,26 +151,31 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
     }, [updateSelectedCards])
 
 
-    return <div style={{
-        position: 'sticky',
-        bottom: 0,
-        zIndex: 2,
-        backgroundColor: 'white',
-        flexDirection: 'row',
-        display: 'flex',
-        gap: '2em',
-        padding: '0.5em'
-    }}>
-        <TextInput label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
-        <TextInput label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
-        <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button>
-        <button onClick={removeSelectedCardsCategories}>Remove categories</button>
-        <button onClick={removeSelectedCards}>Remove cards</button>
-        <button onClick={showCardArtWindow} disabled={Object.keys(selectedCards).length > 150}>Change card art</button>
-        <button onClick={() => moveSelectedCardsToBoard('mainboard')}>Move to mainboard</button>
-        <button onClick={() => moveSelectedCardsToBoard('sideboard')}>Move to sideboard</button>
-        <button onClick={() => moveSelectedCardsToBoard('considering')}>Move to considering</button>
-        <button onClick={deselectAllCards}>Deselect cards</button>
-        {cardArtWindowVisible && <CartArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
+    return <div className="flex-row flex-gap flex-wrap align-end base-padding-vertical multi-select-bar">
+        {/* <div className="flex-row flex-gap align-end"> */}
+        <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+        <TextInput type={'search'} label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
+        {/* <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button> */}
+        <IconButton iconName={"check"} onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</IconButton>
+        <IconButton iconName={"reset_shutter_speed"} onClick={removeSelectedCardsCategories}>Remove categories</IconButton>
+        <IconButton iconName={"delete"} onClick={removeSelectedCards}>Remove cards</IconButton>
+        <IconButton iconName={"brush"} onClick={showCardArtWindow} disabled={Object.keys(selectedCards).length > 150}>Change card art</IconButton>
+        {/* </div> */}
+        {/* <div className="flex-row flex-gap"> */}
+        <div className="flex-row">
+            <IconButton iconName={"move_up"} onClick={() => moveSelectedCardsToBoard('mainboard', 'all')}>Move all copies to Main Deck</IconButton>
+            <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('mainboard', 'one')}>Move 1 copy to Main Deck</IconButton>
+        </div>
+        <div className="flex-row">
+            <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard', 'all')}>Move to Sideboard</IconButton>
+            <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('sideboard', 'one')}>Move 1 copy to Sideboard</IconButton>
+        </div>
+        <div className="flex-row">
+            <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering', 'all')}>Move to Considering</IconButton>
+            <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('considering', 'one')}>Move 1 copy to Considering</IconButton>
+        </div>
+        <IconButton iconName={"close"} onClick={deselectAllCards}>Deselect cards</IconButton>
+        {/* </div> */}
+        {cardArtWindowVisible && <CardArtWindow back={hideCardArtWindow} save={saveArtChanges} selectedCards={selectedCards} deckCards={deckCards} />}
     </div>
 }

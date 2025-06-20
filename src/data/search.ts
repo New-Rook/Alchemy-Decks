@@ -1,8 +1,8 @@
-import { Color, ColorData, ColorSearchType, Format, GroupBy, GroupByColorMode, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
+import { Color, SymbolData, ColorSearchType, Format, GroupBy, GroupByColorMode, GroupByTypeMode, LabelledValue, SearchFilterOperation, SortType, StatFilterOperation, StatFilterStat, ViewType } from "../types";
 
 export const searchRegex = /\w+|"[\w ]+"/g
 
-export const COLOR_DATA: Record<Color, ColorData> = {
+export const COLOR_DATA: Record<Color, SymbolData> = {
     W: {
         "name": "White",
         "symbol": "{W}",
@@ -35,7 +35,7 @@ export const COLOR_DATA: Record<Color, ColorData> = {
     }
 }
 
-export const COLORLESS_DATA: ColorData & { key: string } = {
+export const COLORLESS_DATA: SymbolData & { key: string } = {
     key: 'C',
     "name": "Colorless",
     "symbol": "{C}",
@@ -74,41 +74,81 @@ export const COLORLESS_ORDER_PRIORITY = NUMBER_OF_COLORS + NUMBER_OF_COLOR_COMBI
 export const LAND_ORDER_PRIORITY = COLORLESS_ORDER_PRIORITY + 1
 
 export const ALL_COLOR_KEYS: Color[] = Object.keys(COLOR_DATA) as Color[]
-export const ALL_COLORS: ColorData[] = Object.values(COLOR_DATA) as ColorData[]
+export const ALL_COLORS: SymbolData[] = Object.values(COLOR_DATA) as SymbolData[]
 
-export const FORMATS: Format[] = [
-    "standard",
-    // "future",
-    // "historic",
-    // "timeless",
-    // "gladiator",
-    "pioneer",
-    // "explorer",
-    "modern",
-    "legacy",
-    "pauper",
-    "vintage",
-    // "penny",
-    "commander",
-    // "oathbreaker",
-    // "standardbrawl",
-    // "brawl",
-    // "alchemy",
-    // "paupercommander",
-    // "duel",
-    // "oldschool",
-    // "premodern",
-    // "predh"
+export const FORMATS: LabelledValue<Format>[] = [
+    { label: 'Standard', value: 'standard' },
+    { label: 'Pioneer', value: 'pioneer' },
+    { label: 'Modern', value: 'modern' },
+    { label: 'Legacy', value: 'legacy' },
+    { label: 'Pauper', value: 'pauper' },
+    { label: 'Vintage', value: 'vintage' },
+    { label: 'Commander', value: 'commander' },
 ]
 
-export const SORT_TYPES: SortType[] = ['name', 'mana-value', 'color', 'type', 'price-eur']
-export const GROUP_TYPES: GroupBy[] = ['mana-value', 'type', 'sub-type', 'color', 'category', 'none']
-export const GROUP_BY_COLOR_MODES: GroupByColorMode[] = ['multicolored-in-one', 'multicolored-expanded', 'all-monocolored']
-export const VIEW_TYPES: ViewType[] = ['text', 'grid', 'stacked', 'grid-stacked']
-export const COLOR_SEARCH_TYPES: ColorSearchType[] = ['exact', 'at-most', 'at-least']
+export const SORT_TYPES: LabelledValue<SortType>[] = [
+    { label: 'Name', value: 'name' },
+    { label: 'Mana value', value: 'mana-value' },
+    { label: 'Color', value: 'color' },
+    { label: 'Type', value: 'type' },
+    { label: 'Price', value: 'price-eur' },
+    { label: 'Price', value: 'price-usd' }
+]
+export const GUEST_SORT_TYPES: LabelledValue<SortType>[] = [
+    { label: 'Name', value: 'name' },
+    { label: 'Mana value', value: 'mana-value' },
+    { label: 'Color', value: 'color' },
+    { label: 'Type', value: 'type' },
+    { label: 'Price EUR', value: 'price-eur' },
+    { label: 'Price USD', value: 'price-usd' }
+]
+export const VIEW_TYPES: LabelledValue<ViewType>[] = [
+    { label: 'Text', value: 'text' },
+    { label: 'Grid', value: 'grid' },
+    { label: 'Stacked', value: 'stacked' },
+    { label: 'Grid-stacked', value: 'grid-stacked' }
+]
+export const GROUP_TYPES: LabelledValue<GroupBy>[] = [
+    { label: 'Mana value', value: 'mana-value' },
+    { label: 'Type', value: 'type' },
+    { label: 'Subtype', value: 'sub-type' },
+    { label: 'Color', value: 'color' },
+    { label: 'Category', value: 'category' },
+    { label: 'None', value: 'none' }
+]
+export const GROUP_BY_COLOR_MODES: LabelledValue<GroupByColorMode>[] = [
+    { label: 'Multicolored combined', value: 'multicolored-in-one' },
+    { label: 'Multicolored expanded', value: 'multicolored-expanded' },
+    { label: 'All monocolored', value: 'all-monocolored' }
+]
+export const GROUP_BY_TYPE_MODES: LabelledValue<GroupByTypeMode>[] = [
+    { label: 'All types', value: 'all-types' },
+    { label: 'Only last type', value: 'only-last-type' },
+]
+export const COLOR_SEARCH_TYPES: LabelledValue<ColorSearchType>[] = [
+    { label: 'Exact', value: 'exact' },
+    { label: 'At most', value: 'at-most' },
+    { label: 'At least', value: 'at-least' }
+]
 
-export const STAT_FILTER_STATS: StatFilterStat[] = ['mana-value', 'power', 'toughness']
-export const STAT_FILTER_OPERATIONS: StatFilterOperation[] = ['equal', 'not-equal', 'greater-than', 'greater-than-or-equal', 'less-than', 'less-than-or-equal']
+export const STAT_FILTER_STATS: LabelledValue<StatFilterStat>[] = [
+    { label: 'Mana value', value: 'mana-value' },
+    { label: 'Power', value: 'power' },
+    { label: 'Toughness', value: 'toughness' }
+]
+export const STAT_FILTER_OPERATIONS: LabelledValue<StatFilterOperation>[] = [
+    { label: '=', value: 'equal' },
+    { label: '≠', value: 'not-equal' },
+    { label: '>', value: 'greater-than' },
+    { label: '>=', value: 'greater-than-or-equal' },
+    { label: '<', value: 'less-than' },
+    { label: '<=', value: 'less-than-or-equal' }
+]
+export const SEARCH_FILTER_OPERATION_DATA: Record<SearchFilterOperation, { label: string }> = {
+    and: { label: 'And' },
+    or: { label: 'Or' }
+}
+
 
 export const COLOR_COMBINATIONS_MAP: Record<string, string> = {
     "WU": "WU",

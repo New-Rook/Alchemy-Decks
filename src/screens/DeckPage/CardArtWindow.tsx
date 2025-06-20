@@ -12,7 +12,7 @@ type Props = {
     selectedCards: Record<string, Board>
 }
 
-export const CartArtWindow = ({ back, save, deckCards, selectedCards }: Props) => {
+export const CardArtWindow = ({ back, save, deckCards, selectedCards }: Props) => {
     const { cardDictionary } = useContext(AppContext)
 
     const [setName, setSetName] = React.useState('')
@@ -89,6 +89,7 @@ export const CartArtWindow = ({ back, save, deckCards, selectedCards }: Props) =
     return (
         <div className='card-search-window'>
             <TextInput
+                type={'search'}
                 label={'Set name'}
                 value={setName}
                 onChangeText={setSetName}

@@ -79,3 +79,5 @@ export const checkOracleTextSearchTermFilter = (card: CardData, filter: SearchTe
     const cardOracleTexts = getCardAllOracleText(card).toLocaleLowerCase()
     return invertBoolean(regexes.every(regex => regex.test(cardOracleTexts)), filter.invert)
 }
+
+export const STICKERS_ATTRACTIONS_REGEX = /Sticker|Attraction/

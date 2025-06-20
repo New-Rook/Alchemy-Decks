@@ -32,7 +32,7 @@ export const RegisterPage = () => {
                 label="Password"
                 value={password}
                 onChangeText={setPassword}
-                password
+                type={'password'}
                 minLength={8}
             />
             <button onClick={handleRegister}>Register</button>

@@ -1,14 +1,14 @@
 import { Label } from "./Label"
 
-interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
+interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     containerProps?: React.HTMLAttributes<HTMLDivElement>
     label?: string
     onChangeText: (text: string) => void
     validator?: (text: string) => boolean
 }
 
-export const TextInput = ({ containerProps, label, onChangeText, validator, type = 'text', ...props }: Props) => {
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+export const TextArea = ({ containerProps, label, onChangeText, validator, ...props }: Props) => {
+    const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const text = e.target.value
 
         if (validator && !validator(text)) {
@@ -20,10 +20,8 @@ export const TextInput = ({ containerProps, label, onChangeText, validator, type
 
     return <div {...containerProps} className={`flex-column ${containerProps?.className ?? ''}`}>
         <Label>{label}</Label>
-        <input
+        <textarea
             {...props}
-            type={type}
-            size={10}
             onChange={onChange}
         />
     </div>

@@ -1,24 +1,37 @@
 .nav-bar {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    height: 5vh;
-    background-color: rgb(78, 207, 78);
-    padding: 0 2em;
-    gap: 2em;
+    /* align-items: center; */
+    height: 5rem;
+    background-color: var(--theme-color);
+    padding: 0 var(--base-size);
+    border-radius: 8px;
+    /* gap: 2em; */
+    /* gap: calc(2 * var(--base-size)); */
+}
+
+.nav-bar-button {
+    width: calc(15 * var(--base-size));
+    font-size: calc(1.5 * var(--base-size));
+    border-radius: 0;
+    background-color: rgb(57, 118, 71);
+}
+
+.left-nav {
+    margin-right: var(--base-size);
 }
 
 .right-nav {
     margin-left: auto;
 }
 
-.account-select {
-    border: 0;
-    border-radius: 8px;
-    background: none;
-    padding: 0;
+.logo {
+    /* width: 100%; */
+    height: 100%;
+    object-fit: contain;
 }
 
-select::after {
-    content: "hahahaha" /"faf";
+.content {
+    padding-inline: var(--base-size);
+    min-height: 90vh;
 }

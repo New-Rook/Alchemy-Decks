@@ -1,7 +1,7 @@
 import { NO_CATEGORY_NAME } from "../data/editor";
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_DATA, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
-import { CardDictionary, CardGroupData, Color, DeckCards, GroupByColorMode } from "../types";
-import { getCardSubTypes, getCardTypes, getLastCardType } from "./card";
+import { CardDictionary, CardGroupData, Color, DeckCards, GroupByColorMode, GroupByTypeMode } from "../types";
+import { getCardColors, getCardSubTypes, getCardTypes, getLastCardType } from "./card";
 
 const convertGroupRecordToGroupData = (groups: Record<string, string[]>) => {
     const groupData = Object.keys(groups).map<CardGroupData>(groupName => ({ name: groupName, cards: groups[groupName] }))
@@ -65,11 +65,11 @@ export const groupCardsByManaValue = (boardCards: string[], cardDictionary: Card
 }
 
 // Alternative for this grouper is excluding creatures from artifacts and enchantments if the card has multiple types
-export const groupCardsByType = (boardCards: string[], cardDictionary: CardDictionary, lastCardTypeOnly: boolean) => {
+export const groupCardsByType = (boardCards: string[], cardDictionary: CardDictionary, mode: GroupByTypeMode) => {
     const groups: Record<string, string[]> = {}
 
     boardCards.forEach(cardName => {
-        if (lastCardTypeOnly) {
+        if (mode === 'only-last-type') {
             const lastCardType = getLastCardType(cardDictionary[cardName])
             if (!groups[lastCardType]) {
                 groups[lastCardType] = []
@@ -118,7 +118,9 @@ export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDict
     const groups: Record<string, string[]> = {}
 
     boardCards.forEach(cardName => {
-        if (!cardDictionary[cardName].colors) {
+        const cardColors = getCardColors(cardDictionary[cardName])
+
+        if (!cardColors) {
             if (!groups[COLOR_MISSING_GROUP_NAME]) {
                 groups[COLOR_MISSING_GROUP_NAME] = []
             }
@@ -126,7 +128,7 @@ export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDict
             return
         }
 
-        if (cardDictionary[cardName].colors.length === 0) {
+        if (cardColors.length === 0) {
             if (getLastCardType(cardDictionary[cardName]) === 'Land') {
                 if (!groups[LAND_GROUP_NAME]) {
                     groups[LAND_GROUP_NAME] = []
@@ -141,16 +143,16 @@ export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDict
             return
         }
 
-        if (cardDictionary[cardName].colors.length === 1) {
-            if (!groups[cardDictionary[cardName].colors[0]]) {
-                groups[cardDictionary[cardName].colors[0]] = []
+        if (cardColors.length === 1) {
+            if (!groups[cardColors[0]]) {
+                groups[cardColors[0]] = []
             }
-            groups[cardDictionary[cardName].colors[0]].push(cardName)
+            groups[cardColors[0]].push(cardName)
             return
         }
 
         if (mode === 'all-monocolored') {
-            cardDictionary[cardName].colors.forEach(color => {
+            cardColors.forEach(color => {
                 if (!groups[color]) {
                     groups[color] = []
                 }
@@ -158,7 +160,7 @@ export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDict
             })
         }
         else if (mode === 'multicolored-expanded') {
-            const draftColorCombination = cardDictionary[cardName].colors.join('')
+            const draftColorCombination = cardColors.join('')
             const colorCombination = COLOR_COMBINATIONS_MAP[draftColorCombination]
             if (!groups[colorCombination]) {
                 groups[colorCombination] = []
