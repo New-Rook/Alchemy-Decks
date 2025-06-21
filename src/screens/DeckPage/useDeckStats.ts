@@ -1,13 +1,31 @@
 import React, { useContext } from "react"
 import { basicLandRegex, NUMBER_NAME_MAP } from "../../data/general"
 import { BoardCards, DeckCards, DeckMetaData, DeckStats, GroupByColorMode, GroupByTypeMode } from "../../types"
-import { getCardAllOracleText } from "../../utilities/card"
+import { getCardAllOracleText, getCardColorIdentityCombination } from "../../utilities/card"
 import { numberToDecimalPoints } from "../../utilities/general"
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from "../../utilities/groupers"
 import { AppContext } from "../../context/AppContext"
 
+type Props = {
+    deckMetaData: DeckMetaData,
+    deckCards: DeckCards,
+    mainboard: BoardCards,
+    sideboard: BoardCards,
+    commanderColorIdentity: string | null,
+    groupByColorMode: GroupByColorMode,
+    groupByTypeMode: GroupByTypeMode
+}
+
 // export const useDeckStats = (deckMetaData: DeckMetaData, deckCards: DeckCards, mainboard: BoardCards, sideboard: BoardCards, groupByColorMode: GroupByColorMode, groupByTypeLastCardTypeOnly: boolean) => {
-export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, groupByColorMode, groupByTypeMode }: { deckMetaData: DeckMetaData, deckCards: DeckCards, mainboard: BoardCards, sideboard: BoardCards, groupByColorMode: GroupByColorMode, groupByTypeMode: GroupByTypeMode }) => {
+export const useDeckStats = ({
+    deckMetaData,
+    deckCards,
+    mainboard,
+    sideboard,
+    commanderColorIdentity,
+    groupByColorMode,
+    groupByTypeMode
+}: Props) => {
     const { cardDictionary } = useContext(AppContext)
 
     const deckStats = React.useMemo<DeckStats>(() => {
@@ -29,36 +47,30 @@ export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, gr
 
             const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
 
-            const isBasicLand = basicLandRegex.test(cardDictionary[cardName].type_line)
             const alternateQuantityMatch = getCardAllOracleText(cardDictionary[cardName]).match(/(?<=A deck can have up to )\w+/)
             const alternateQuantity = alternateQuantityMatch ? NUMBER_NAME_MAP[alternateQuantityMatch[0]] : undefined
             const infiniteQuantity = /A deck can have any number/.test(cardDictionary[cardName].oracle_text)
 
             const legality = cardDictionary[cardName].legalities[deckMetaData.format]
-            if (legality === 'legal' && (
-                infiniteQuantity
-                || (alternateQuantity && cardQuantity <= alternateQuantity)
-                || (deckMetaData.format === 'commander' && cardQuantity <= 1)
-                || cardQuantity <= 4
-                || isBasicLand
-            )) {
-                return
+
+            if (legality === 'not_legal') {
+                legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}.`
             }
-            else if (legality === 'restricted' && cardQuantity <= 1) {
-                return
+            else if (legality === 'banned') {
+                legalityWarnings[cardName] = `This card is banned in ${deckMetaData.format}.`
             }
-            else {
-                legal = false
-                if (legality === 'not_legal') {
-                    legalityWarnings[cardName] = `This card is not legal in ${deckMetaData.format}.`
-                }
-                else if (legality === 'banned') {
-                    legalityWarnings[cardName] = `This card is banned in ${deckMetaData.format}.`
-                }
-                else {
-                    // Quantity higher than limit
-                    legalityWarnings[cardName] = `The number of copies of this card exceeds the limit for ${deckMetaData.format}.`
-                }
+            else if (commanderColorIdentity !== null && !commanderColorIdentity.includes(getCardColorIdentityCombination(cardDictionary[cardName]))) {
+                legalityWarnings[cardName] = `This card's color identity is not within your commander's color identity.`
+            }
+            else if (
+                !infiniteQuantity && (
+                    (alternateQuantity && cardQuantity > alternateQuantity)
+                    || (deckMetaData.format === 'commander' && cardQuantity > 1)
+                    || (legality === 'restricted' && cardQuantity > 1)
+                    || cardQuantity > 4
+                )
+            ) {
+                legalityWarnings[cardName] = `The number of copies of this card exceeds the limit for ${deckMetaData.format}.`
             }
         })
 
@@ -90,7 +102,7 @@ export const useDeckStats = ({ deckMetaData, deckCards, mainboard, sideboard, gr
             legal,
             legalityWarnings
         }
-    }, [deckCards, mainboard, sideboard, cardDictionary, deckMetaData])
+    }, [deckCards, mainboard, sideboard, cardDictionary, deckMetaData, commanderColorIdentity, groupByColorMode, groupByTypeMode])
 
     return deckStats
 }

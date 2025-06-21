@@ -11,7 +11,7 @@ import { CardGroup } from './CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../../utilities/groupers'
 import { Dropdown } from '../../components/Dropdown'
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, VIEW_TYPES } from '../../data/search'
-import { TEST_DECK_CARDS } from '../../data/dev'
+import { TEST_DECK_CARDS, TEST_DECK_METADATA } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
@@ -29,8 +29,7 @@ import { DeckBoard } from './DeckBoard'
 export const DeckPage = () => {
     const { cardDictionary, availableSortTypes } = useContext(AppContext)
 
-    const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
-    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>({ name: 'Riku of two reflections, big spells and big ramp)', description: 'This is a description test', format: 'standard', visibility: 'private' })
+    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>(TEST_DECK_METADATA)
 
     const {
         objectRecord: deckCards,
@@ -94,6 +93,10 @@ export const DeckPage = () => {
     } = useCommanders(deckMetaData.format, commanders, setDeckCards)
 
     const commanderColorIdentity = React.useMemo(() => {
+        if (commanders.length === 0) {
+            return null
+        }
+
         const colorCombination = commanders.reduce((colorIdentity, commander) => {
             return colorIdentity += cardDictionary[commander].color_identity.join('')
         }, '')
@@ -106,6 +109,20 @@ export const DeckPage = () => {
     }, [commanders])
 
     React.useEffect(() => {
+        if (deckMetaData.format !== 'commander' && commanders.length > 0) {
+            setDeckCards((prev) => {
+                const newDeckCards = { ...prev }
+
+                commanders.forEach(commander => {
+                    delete newDeckCards[commander]
+                })
+
+                return newDeckCards
+            })
+        }
+    }, [deckMetaData.format, commanders, setDeckCards])
+
+    React.useEffect(() => {
         if (!searchWindowVisible) {
             setCardSearchTerm('')
         }
@@ -116,6 +133,7 @@ export const DeckPage = () => {
         deckCards,
         mainboard,
         sideboard,
+        commanderColorIdentity,
         groupByColorMode,
         groupByTypeMode
     })
@@ -219,7 +237,15 @@ export const DeckPage = () => {
         const cardData = await getCardDroppedFromOutside(e)
 
         if (cardData) {
-            addDeckCardQuantity(cardData.name, 1, board)
+            if (cardDictionary[cardData.name] &&
+                (cardDictionary[cardData.name].legalities[deckMetaData.format] === 'legal'
+                    || cardDictionary[cardData.name].legalities[deckMetaData.format] === 'restricted'
+                )
+            ) {
+                addDeckCardQuantity(cardData.name, 1, board)
+            } else {
+                // Show message saying card not legal in format
+            }
         }
     }
 
@@ -304,7 +330,11 @@ export const DeckPage = () => {
         return groupName
     }, [groupBy, getGroupColorLabel])
 
-    const commanderGroupLabel = React.useMemo(() => {
+    const commanderColorIdentityLabel = React.useMemo(() => {
+        if (commanderColorIdentity === null) {
+            return ''
+        }
+
         return getGroupColorLabel(commanderColorIdentity)
     }, [commanderColorIdentity, getGroupColorLabel])
 
@@ -404,7 +434,7 @@ export const DeckPage = () => {
                                         secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
                                         removeSecondCommander={removeSecondCommander}
                                         viewType={viewType}
-                                        colorIdentityLabel={commanderGroupLabel}
+                                        colorIdentityLabel={commanderColorIdentityLabel}
                                     />
                                 }
                                 {boardGroups[board].map(group =>

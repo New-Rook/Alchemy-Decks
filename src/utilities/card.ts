@@ -158,3 +158,15 @@ export const getCardDroppedFromOutside = async (e: React.DragEvent<HTMLDivElemen
 
     return
 }
+
+export const getCardColorIdentityCombination = (cardData: CardData) => {
+    if (!cardData.color_identity) {
+        return ''
+    }
+
+    const cardColorIdentityCombination = cardData.color_identity.join('')
+
+    return COLOR_COMBINATIONS_MAP[cardColorIdentityCombination]
+        ? COLOR_COMBINATIONS_MAP[cardColorIdentityCombination]
+        : cardColorIdentityCombination
+}
