@@ -100,6 +100,18 @@ export const DeckMetaDataDisplay = ({
                 {isEditMode && <IconButton iconName="check" onClick={saveChanges}>Save</IconButton>}
                 <IconButton iconName="content_copy" onClick={copyDeckListToClipboard}>Copy deck list</IconButton>
             </div>
+
+            <div className="deck-meta-data-text-container base-offset-top expandable-textarea">
+                <span className="base-offset-left text-medium">Deck Warnings</span>
+                {deckStats.deckLegalityWarnings.map((warning) =>
+                    <p className="text-danger">{warning}</p>
+                )}
+                {Object.keys(deckStats.legalityWarnings).map((cardName) =>
+                    <p key={cardName}>
+                        {cardName}: <span className="text-danger">{deckStats.legalityWarnings[cardName]}</span>
+                    </p>
+                )}
+            </div>
         </div>
     )
 }

@@ -133,6 +133,7 @@ export const DeckPage = () => {
         deckCards,
         mainboard,
         sideboard,
+        commanders,
         commanderColorIdentity,
         groupByColorMode,
         groupByTypeMode

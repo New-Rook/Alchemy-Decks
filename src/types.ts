@@ -48,6 +48,7 @@ export type DeckStats = {
   sideboard: BoardStats
   legal: boolean;
   legalityWarnings: Record<string, string>;
+  deckLegalityWarnings: string[];
 }
 
 export type DeckCard = {

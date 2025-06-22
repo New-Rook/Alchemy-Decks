@@ -11,6 +11,7 @@ type Props = {
     deckCards: DeckCards,
     mainboard: BoardCards,
     sideboard: BoardCards,
+    commanders: string[]
     commanderColorIdentity: string | null,
     groupByColorMode: GroupByColorMode,
     groupByTypeMode: GroupByTypeMode
@@ -22,6 +23,7 @@ export const useDeckStats = ({
     deckCards,
     mainboard,
     sideboard,
+    commanders,
     commanderColorIdentity,
     groupByColorMode,
     groupByTypeMode
@@ -35,6 +37,7 @@ export const useDeckStats = ({
         let sideboardPrice = 0
         let legal = true
         const legalityWarnings: Record<string, string> = {}
+        const deckLegalityWarnings: string[] = []
 
         Object.keys(deckCards).forEach((cardName) => {
             const mainboardCardQuantity = deckCards[cardName].boards.mainboard ?? 0
@@ -89,20 +92,30 @@ export const useDeckStats = ({
         const mainboardCardStats = getCardBoardTypes(mainboard)
         const sideboardCardStats = getCardBoardTypes(sideboard)
 
-        // const formats = Object.keys(legalities)
-        // formats.forEach((format) => {
-        //     if (!legalities[format]) {
-        //         delete legalities[format]
-        //     }
-        // })
+        if (deckMetaData.format === 'commander') {
+            if (commanders.length === 0) {
+                deckLegalityWarnings.push('The deck must contain a commander.')
+            }
+            if (numberOfMainboardCards !== 100) {
+                deckLegalityWarnings.push('The deck must contain exactly 100 cards, including the commander.')
+            }
+        } else {
+            if (numberOfMainboardCards < 60) {
+                deckLegalityWarnings.push('The Main Deck must contain at least 60 cards.')
+            }
+            if (numberOfSideboardCards > 15) {
+                deckLegalityWarnings.push('The Sideboard cannot contain more than 15 cards.')
+            }
+        }
 
         return {
             mainboard: { numberOfCards: numberOfMainboardCards, price: numberToDecimalPoints(mainboardPrice, 2), cardStats: mainboardCardStats },
             sideboard: { numberOfCards: numberOfSideboardCards, price: numberToDecimalPoints(sideboardPrice, 2), cardStats: sideboardCardStats },
             legal,
-            legalityWarnings
+            legalityWarnings,
+            deckLegalityWarnings
         }
-    }, [deckCards, mainboard, sideboard, cardDictionary, deckMetaData, commanderColorIdentity, groupByColorMode, groupByTypeMode])
+    }, [deckCards, mainboard, sideboard, cardDictionary, deckMetaData, commanders, commanderColorIdentity, groupByColorMode, groupByTypeMode])
 
     return deckStats
 }

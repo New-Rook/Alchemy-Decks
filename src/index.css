@@ -620,6 +620,10 @@ textarea {
   margin-bottom: var(--base-size);
 }
 
+.base-offset-top {
+  margin-top: var(--base-size);
+}
+
 .group-elevated {
   z-index: var(--card-group-elevation);
 }
