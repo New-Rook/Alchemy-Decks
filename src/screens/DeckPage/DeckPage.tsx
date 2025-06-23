@@ -391,7 +391,7 @@ export const DeckPage = () => {
                 setPinned={setTopBarPinned}
             />
             <div className='flex-row flex-gap flex-end align-center flex-wrap base-offset-bottom deck-top-bar-elevated'>
-                {deckMetaData.format === 'commander' && <Checkbox containerProps={{ className: 'flex-item-left' }} label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
+                {deckMetaData.format === 'commander' && commanders.length > 0 && <Checkbox containerProps={{ className: 'flex-item-left' }} label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
                 <Dropdown label={'View'} options={VIEW_TYPES} value={viewType} onSelect={setViewType} />
                 <Dropdown label={'Group by'} options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
                 {groupBy === 'color' && <Dropdown label={'Group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} size={'large'} />}
