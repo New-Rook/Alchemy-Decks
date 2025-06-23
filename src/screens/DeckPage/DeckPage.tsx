@@ -278,7 +278,7 @@ export const DeckPage = () => {
             case 'none':
                 groups = [{
                     name: NO_GROUP_NAME,
-                    cards: Object.keys(boardCards)
+                    cards: boardCards
                 }]
                 break;
         }
