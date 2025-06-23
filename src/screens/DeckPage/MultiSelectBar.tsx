@@ -167,11 +167,11 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
             <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('mainboard', 'one')}>Move 1 copy to Main Deck</IconButton>
         </div>
         <div className="flex-row">
-            <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard', 'all')}>Move to Sideboard</IconButton>
+            <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard', 'all')}>Move all copies to Sideboard</IconButton>
             <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('sideboard', 'one')}>Move 1 copy to Sideboard</IconButton>
         </div>
         <div className="flex-row">
-            <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering', 'all')}>Move to Considering</IconButton>
+            <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering', 'all')}>Move all copies to Considering</IconButton>
             <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('considering', 'one')}>Move 1 copy to Considering</IconButton>
         </div>
         <IconButton iconName={"close"} onClick={deselectAllCards}>Deselect cards</IconButton>
