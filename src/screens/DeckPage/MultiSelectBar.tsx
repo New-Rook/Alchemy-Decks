@@ -1,7 +1,7 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
 import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
+import { combineTextInputValidators, lengthLimitTextInputValidator, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
 import { CardArtWindow } from "./CardArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
 import { IconButton } from "../../components/IconButton"
@@ -153,7 +153,7 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     return <div className="flex-row flex-gap flex-wrap align-end base-padding-vertical multi-select-bar">
         {/* <div className="flex-row flex-gap align-end"> */}
-        <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
+        <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} validator={lengthLimitTextInputValidator(30)} />
         <TextInput type={'search'} label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
         {/* <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button> */}
         <IconButton iconName={"check"} onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</IconButton>
