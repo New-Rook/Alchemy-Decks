@@ -418,9 +418,9 @@ export const DeckPage = () => {
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
-                    {typedKeys(boardGroups).filter(board => boardGroups[board].length > 0).map(board =>
-                        <DeckBoard board={board} defaultExpanded={true} titleChildren={BOARD_DATA[board].name} titleProps={{ className: 'button-no-hover' }}>
-                            <div key={board} ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
+                    {typedKeys(boardGroups).filter(board => boardGroups[board].length > 0 || (deckMetaData.format === 'commander' && board === 'mainboard')).map(board =>
+                        <DeckBoard key={board} board={board} defaultExpanded={true} titleChildren={BOARD_DATA[board].name} titleProps={{ className: 'button-no-hover' }}>
+                            <div ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
                                 {board === 'mainboard' && deckMetaData.format === 'commander' &&
                                     <CommanderCardGroup
                                         commanders={commanders}
