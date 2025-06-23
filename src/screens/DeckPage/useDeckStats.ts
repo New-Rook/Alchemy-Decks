@@ -5,6 +5,7 @@ import { getCardAllOracleText, getCardColorIdentityCombination } from "../../uti
 import { numberToDecimalPoints } from "../../utilities/general"
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from "../../utilities/groupers"
 import { AppContext } from "../../context/AppContext"
+import { LEGALITY_WARNING_NUMBER_OF_COPIES } from "../../data/editor"
 
 type Props = {
     deckMetaData: DeckMetaData,
@@ -73,7 +74,7 @@ export const useDeckStats = ({
                     || cardQuantity > 4
                 )
             ) {
-                legalityWarnings[cardName] = `The number of copies of this card exceeds the limit for ${deckMetaData.format}.`
+                legalityWarnings[cardName] = `${LEGALITY_WARNING_NUMBER_OF_COPIES} ${deckMetaData.format}.`
             }
         })
 

@@ -2,7 +2,7 @@ import { Board, CategoryUpdateOperation, DeckCard, Format, ViewType } from "../.
 import { AppContext } from "../../context/AppContext"
 import { getCardFrontImage } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
-import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_NAME } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
 import './Card.css'
 import React from "react"
@@ -127,14 +127,22 @@ export const Card = ({
         return deckCard.print?.uris[0] ?? getCardFrontImage(cardDictionary[cardName]).normal
     }, [cardDictionary, cardName, flipped, deckCard])
 
+    const showLegalityWarning = React.useMemo(() => {
+        if (board === 'considering' && LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX.test(legalityWarning)) {
+            return false
+        }
+
+        return !!legalityWarning
+    }, [board, legalityWarning])
+
     const cardClassName = React.useMemo(() => {
         return `deck-card 
             ${isDragging || isHoveringImage ? 'card-elevated' : ''} 
-            ${selected ? 'deck-card-selected' : legalityWarning
+            ${selected ? 'deck-card-selected' : showLegalityWarning
                 ? 'deck-card-warning' : ''
             } 
             preserve-3d`
-    }, [isDragging, isHoveringImage, legalityWarning, selected])
+    }, [isDragging, isHoveringImage, showLegalityWarning, selected])
 
     const expandedCardClassName = React.useMemo(() => {
         if (!isHoveringImage || isDragging) {
@@ -209,9 +217,9 @@ export const Card = ({
 
             {/* Expanded card */}
             <div className={`flex-column expanded-card ${viewType === 'text' ? 'view-text-expanded-card' : ''} ${expandedCardClassName}`}>
-                {isHoveringImage && !isDragging && (deckCard.categories || legalityWarning) && <div className={`deck-card-categories base-padding flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`}>
+                {isHoveringImage && !isDragging && (deckCard.categories || showLegalityWarning) && <div className={`deck-card-categories base-padding flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`}>
                     {deckCard.categories && <div className="flex-row flex-gap flex-wrap">{deckCard.categories.map(category => <span key={category}>{category}</span>)}</div>}
-                    <div className="text-danger">{legalityWarning}</div>
+                    {showLegalityWarning && <div className="text-danger">{legalityWarning}</div>}
                 </div>}
                 <img src={imageSource} className={`deck-card-image`} draggable={false} />
             </div>

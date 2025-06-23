@@ -179,3 +179,6 @@ export const MANA_VALUE_SYMBOLS: Record<string, SymbolData> = {
         "english": "twenty generic mana",
     }
 }
+
+export const LEGALITY_WARNING_NUMBER_OF_COPIES = 'The number of copies of this card exceeds the limit for'
+export const LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX = new RegExp(LEGALITY_WARNING_NUMBER_OF_COPIES)
