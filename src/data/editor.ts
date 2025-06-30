@@ -1,8 +1,13 @@
 import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue, BoardData, BoardMoveOperation } from "../types"
 import { typedKeys } from "../utilities/general"
 
+export const CARD_TYPE_LAND = 'Land'
+export const CARD_TYPE_CREATURE = 'Creature'
+
 export const NO_GROUP_NAME = 'All cards'
-export const NO_CATEGORY_NAME = 'No category'
+// export const NO_CATEGORY_NAME = 'No category'
+export const NO_CATEGORY_TERM = 'Uncategorised'
+export const NO_CATEGORY_REGEX = new RegExp(NO_CATEGORY_TERM)
 
 export const DRAG_AND_DROP_ID_DELIMITER = '&'
 export const DRAG_AND_DROP_ADD_OPERATION_NAME: CategoryUpdateOperation = 'add'
@@ -40,6 +45,9 @@ export const ALL_BOARDS: Board[] = typedKeys(BOARD_DATA)
 
 export const COMMANDER_GROUP_NAME = 'Commander'
 export const MULTI_COMMANDER_GROUP_NAME = 'Commanders'
+
+export const NO_CATEGORY_LAND_GROUP_NAME = `${NO_CATEGORY_TERM} ${CARD_TYPE_LAND}`
+export const NO_CATEGORY_CREATURE_GROUP_NAME = `${NO_CATEGORY_TERM} ${CARD_TYPE_CREATURE}`
 
 export const COMMANDER_PARTNER_REGEX = /Partner(?! with)/
 export const COMMANDER_PARTNER_WITH_REGEX = /Partner with/

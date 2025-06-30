@@ -2,7 +2,7 @@ import { Board, CategoryUpdateOperation, DeckCard, Format, ViewType } from "../.
 import { AppContext } from "../../context/AppContext"
 import { getCardFrontImage } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
-import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_REGEX } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
 import './Card.css'
 import React from "react"
@@ -161,7 +161,7 @@ export const Card = ({
 
         if (over && over.data.current) {
             const overCategoryName = over.data.current.groupName
-            const overCategoryOperation = groupName === NO_CATEGORY_NAME ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : over.data.current.operation
+            const overCategoryOperation = NO_CATEGORY_REGEX.test(groupName) ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : over.data.current.operation
             const overBoard = over.data.current.board
 
             if (overBoard === board && overCategoryName !== groupName) {
@@ -205,7 +205,7 @@ export const Card = ({
                 {isDragging && <div className={`deck-card-categories ${deckCard.categories || dragData?.category ? 'base-padding' : ''} font-size-1-5 flex-row flex-gap flex-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
                     <span key={category} className={`${dragData?.operation === 'overwrite' && category !== dragData.category ? 'text-danger' : ''}`}>{category}</span>
                 )}
-                    {(dragData?.operation === 'add' || !dragData?.containsCategory) && dragData?.category !== NO_CATEGORY_NAME && dragData?.category && <span className="deck-card-category-add">{dragData.category}</span>}
+                    {(dragData?.operation === 'add' || !dragData?.containsCategory) && !NO_CATEGORY_REGEX.test(dragData?.category) && dragData?.category && <span className="deck-card-category-add">{dragData.category}</span>}
                 </div>}
                 {viewType === 'text'
                     ? <label className="view-text-deck-card-name">{cardName}</label>

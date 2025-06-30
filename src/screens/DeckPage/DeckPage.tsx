@@ -15,7 +15,7 @@ import { TEST_DECK_CARDS, TEST_DECK_METADATA } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { BOARD_DATA, COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_MOVE_ALL_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_MOVE_ONE_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
+import { BOARD_DATA, COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_MOVE_ALL_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_MOVE_ONE_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_REGEX, NO_GROUP_NAME } from '../../data/editor'
 import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
@@ -261,7 +261,7 @@ export const DeckPage = () => {
 
         switch (groupBy) {
             case 'category':
-                groups = groupCardsByCategory(deckCards, boardCards)
+                groups = groupCardsByCategory(deckCards, boardCards, cardDictionary)
                 break;
             case 'color':
                 groups = groupCardsByColor(boardCards, cardDictionary, groupByColorMode)
@@ -376,7 +376,7 @@ export const DeckPage = () => {
             }
             // Category move
             if (droppedCategoryName && droppedBoard === cardCurrentBoard && cardCurrentCategory !== droppedCategoryName) {
-                if (droppedCategoryName === NO_CATEGORY_NAME) {
+                if (NO_CATEGORY_REGEX.test(droppedCategoryName)) {
                     deleteDeckCardProperty(cardName, 'categories')
                 }
                 else if (droppedOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
@@ -386,22 +386,6 @@ export const DeckPage = () => {
                     updateDeckCard(cardName, 'categories', [droppedCategoryName])
                 }
             }
-
-            // if (cardCurrentCategory === droppedCategoryName)
-
-            //     if (cardName && cardCurrentCategory !== droppedCategoryName) {
-            //         console.log('category update', droppedOperation, [cardName, droppedCategoryName])
-            //         if (droppedCategoryName === NO_CATEGORY_NAME) {
-            //             deleteDeckCardProperty(cardName, 'categories')
-            //         }
-            //         else if (droppedOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
-            //             updateDeckCard(cardName, 'categories', [...(deckCards[cardName].categories ?? []), droppedCategoryName])
-            //         }
-            //         else if (droppedOperation === DRAG_AND_DROP_OVERWRITE_OPERATION_NAME) {
-            //             updateDeckCard(cardName, 'categories', [droppedCategoryName])
-            //         }
-            //     }
-            // console.log([event.active.id, event.over?.id])
         }
     }
 
@@ -509,7 +493,7 @@ export const DeckPage = () => {
                                     cardNames={group.cards}
                                     deckCards={deckCards}
                                     addDeckCardQuantity={addDeckCardQuantity}
-                                    enableDragAndDrop={groupBy === 'category'}
+                                    enableDragAndDrop={groupBy === 'category' && !NO_CATEGORY_REGEX.test(group.name)}
                                     selectedCards={selectedCards}
                                     selectCard={selectCard}
                                     board={board}

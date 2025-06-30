@@ -81,7 +81,7 @@ export const useDeckStats = ({
         const getCardBoardTypes = (board: Record<string, number>) => {
             const mainboardCards = Object.keys(board)
 
-            const categories = groupCardsByCategory(deckCards, mainboardCards)
+            const categories = groupCardsByCategory(deckCards, mainboardCards, cardDictionary)
             const colors = groupCardsByColor(mainboardCards, cardDictionary, groupByColorMode)
             const manaValues = groupCardsByManaValue(mainboardCards, cardDictionary)
             const subTypes = groupCardsBySubType(mainboardCards, cardDictionary)

@@ -3,7 +3,7 @@ import { Board, CategoryUpdateOperation, DeckCards, Format, ViewType } from "../
 import { Card } from "./Card"
 import { useDroppable } from "@dnd-kit/core"
 import './CardGroup.css'
-import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_REGEX } from "../../data/editor"
 import { cardGroupStyleMap, getCardGroupViewStyle } from "../../styling/editor"
 import { Icon } from "../../components/Icon"
 
@@ -102,7 +102,7 @@ export const CardGroup = ({
     }
 
     const dropSections = React.useMemo(() => {
-        if (groupName === NO_CATEGORY_NAME || draggedCard.hasThisGroupCategory) {
+        if (NO_CATEGORY_REGEX.test(groupName) || draggedCard.hasThisGroupCategory) {
             return DRAG_AND_DROP_OVERWRITE_OPERATION_NAME
         }
 

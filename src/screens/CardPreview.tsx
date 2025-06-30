@@ -1,8 +1,6 @@
-import { Board, CategoryUpdateOperation, DeckCard } from "../types"
+import { Board, DeckCard } from "../types"
 import { AppContext } from "../context/AppContext"
 import { getCardFrontImage } from "../utilities/card"
-import { useDraggable } from "@dnd-kit/core"
-import { DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../data/editor"
 import './DeckPage/Card.css'
 import React from "react"
 import { IconButton } from "../components/IconButton"
