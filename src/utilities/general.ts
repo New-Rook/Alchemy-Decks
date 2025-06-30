@@ -107,7 +107,12 @@ export const numbersOnlyTextInputValidator = (text: string) => {
 export const numbersLimitTextInputValidator = (limit: number) => {
     return (text: string) => {
         const number = parseInt(text)
-        return !Number.isInteger(number) || number <= limit
+        if (Number.isInteger(number)) {
+            return number <= limit
+        }
+        else {
+            return text.length === 0
+        }
     }
 }
 
