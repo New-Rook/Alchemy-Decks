@@ -3,9 +3,26 @@ import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_P
 import { CardDictionary, CardGroupData, Color, DeckCards, GroupByColorMode, GroupByTypeMode } from "../types";
 import { getCardColors, getCardSubTypes, getCardTypes, getLastCardType } from "./card";
 
+export const LAND_GROUP_NAME = 'Land'
+const COLOR_MISSING_GROUP_NAME = '---'
+const MULTICOLOR_GROUP_NAME = 'Multicolored'
+
 const convertGroupRecordToGroupData = (groups: Record<string, string[]>) => {
     const groupData = Object.keys(groups).map<CardGroupData>(groupName => ({ name: groupName, cards: groups[groupName] }))
     return groupData
+}
+
+const sorterLandGroupAtEnd = (sorter: (groupA: CardGroupData, groupB: CardGroupData) => number) => {
+    return (groupA: CardGroupData, groupB: CardGroupData) => {
+        if (groupA.name === LAND_GROUP_NAME) {
+            return 1
+        }
+        if (groupB.name === LAND_GROUP_NAME) {
+            return - 1
+        }
+
+        return sorter(groupA, groupB)
+    }
 }
 
 export const groupCardsByCategory = (deckCards: DeckCards, boardCards: string[]) => {
@@ -41,8 +58,6 @@ export const groupCardsByCategory = (deckCards: DeckCards, boardCards: string[])
     })
 }
 
-export const LAND_GROUP_NAME = 'Land'
-
 export const groupCardsByManaValue = (boardCards: string[], cardDictionary: CardDictionary) => {
     const groups: Record<string, string[]> = {}
 
@@ -61,7 +76,7 @@ export const groupCardsByManaValue = (boardCards: string[], cardDictionary: Card
         groups[cardDictionary[cardName].cmc].push(cardName)
     })
 
-    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => parseInt(groupA.name) - parseInt(groupB.name))
+    return convertGroupRecordToGroupData(groups).sort(sorterLandGroupAtEnd((groupA, groupB) => parseInt(groupA.name) - parseInt(groupB.name)))
 }
 
 // Alternative for this grouper is excluding creatures from artifacts and enchantments if the card has multiple types
@@ -91,7 +106,7 @@ export const groupCardsByType = (boardCards: string[], cardDictionary: CardDicti
 
     })
 
-    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
+    return convertGroupRecordToGroupData(groups).sort(sorterLandGroupAtEnd((groupA, groupB) => groupA.name.localeCompare(groupB.name)))
 }
 
 export const groupCardsBySubType = (boardCards: string[], cardDictionary: CardDictionary) => {
@@ -107,11 +122,8 @@ export const groupCardsBySubType = (boardCards: string[], cardDictionary: CardDi
         })
     })
 
-    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => groupA.name.localeCompare(groupB.name))
+    return convertGroupRecordToGroupData(groups).sort(sorterLandGroupAtEnd((groupA, groupB) => groupA.name.localeCompare(groupB.name)))
 }
-
-const COLOR_MISSING_GROUP_NAME = '---'
-const MULTICOLOR_GROUP_NAME = 'Multicolored'
 
 // Alternative for this grouper is grouping by color combinations for multicolored cards
 export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDictionary, mode: GroupByColorMode) => {
@@ -175,7 +187,7 @@ export const groupCardsByColor = (boardCards: string[], cardDictionary: CardDict
         }
     })
 
-    return convertGroupRecordToGroupData(groups).sort((groupA, groupB) => getGroupColorPriority(groupA) - getGroupColorPriority(groupB))
+    return convertGroupRecordToGroupData(groups).sort(sorterLandGroupAtEnd((groupA, groupB) => getGroupColorPriority(groupA) - getGroupColorPriority(groupB)))
 }
 
 const getGroupColorPriority = (group: CardGroupData) => {
