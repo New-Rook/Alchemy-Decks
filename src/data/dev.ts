@@ -3,7 +3,7 @@ import { DeckCards, DeckMetaData } from "../types";
 export const TEST_DECK_METADATA: DeckMetaData = {
     name: 'Riku of two reflections, big spells and big ramp)',
     description: 'This is a description test',
-    format: 'commander',
+    format: 'standard',
     visibility: 'private'
 }
 

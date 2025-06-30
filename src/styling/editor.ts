@@ -18,3 +18,10 @@ export const getCardGroupViewStyle = (viewType: ViewType, numberOfUniqueCards: n
 
     return {}
 }
+
+export const boardStyleMap: Record<ViewType, string> = {
+    text: 'board-view-stacked',
+    grid: 'board-view-grid',
+    stacked: 'board-view-stacked',
+    'grid-stacked': 'board-view-grid'
+}

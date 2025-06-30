@@ -1,4 +1,4 @@
-import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue, BoardData } from "../types"
+import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue, BoardData, BoardMoveOperation } from "../types"
 import { typedKeys } from "../utilities/general"
 
 export const NO_GROUP_NAME = 'All cards'
@@ -7,6 +7,8 @@ export const NO_CATEGORY_NAME = 'No category'
 export const DRAG_AND_DROP_ID_DELIMITER = '&'
 export const DRAG_AND_DROP_ADD_OPERATION_NAME: CategoryUpdateOperation = 'add'
 export const DRAG_AND_DROP_OVERWRITE_OPERATION_NAME: CategoryUpdateOperation = 'overwrite'
+export const DRAG_AND_DROP_MOVE_ALL_TO_BOARD_OPERATION_NAME: BoardMoveOperation = 'all'
+export const DRAG_AND_DROP_MOVE_ONE_TO_BOARD_OPERATION_NAME: BoardMoveOperation = 'one'
 
 export const CATEGORY_UPDATE_OPERATIONS: CategoryUpdateOperation[] = ['add', 'overwrite']
 
@@ -19,15 +21,18 @@ export const VISIBILITY_TYPES: LabelledValue<DeckVisibility>[] = [
 export const BOARD_DATA: Record<Board, BoardData> = {
     mainboard: {
         name: "Main Deck",
-        icon: "splitscreen_top"
+        icon: "splitscreen_top",
+        dropIcon: "move_up",
     },
     sideboard: {
         name: "Sideboard",
-        icon: "splitscreen_bottom"
+        icon: "splitscreen_bottom",
+        dropIcon: "move_down",
     },
     considering: {
         name: "Considering",
-        icon: "indeterminate_question_box"
+        icon: "indeterminate_question_box",
+        dropIcon: "indeterminate_question_box",
     }
 }
 

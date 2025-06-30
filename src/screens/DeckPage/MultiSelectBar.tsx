@@ -1,6 +1,6 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
-import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
+import { Board, BoardMoveOperation, CardArtData, DeckCards, DeckStats } from "../../types"
 import { combineTextInputValidators, lengthLimitTextInputValidator, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
 import { CardArtWindow } from "./CardArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
@@ -21,14 +21,13 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     const updateSelectedCardsRef = React.useRef<() => void>(null)
 
-    const moveSelectedCardsToBoard = (board: Board, moveMode: 'all' | 'one') => {
+    const moveSelectedCardsToBoard = (board: Board, moveMode: BoardMoveOperation) => {
         const newDeckCards = { ...deckCards }
         const newSelectedCards = { ...selectedCards }
 
         Object.keys(selectedCards).forEach((cardName) => {
             const currentBoard = selectedCards[cardName]
             const quantity = (newDeckCards[cardName].boards[currentBoard] ?? 0)
-            // If quantityToMove is non-zero, that many copies are moved, otherwise all copies are moved
             const quantityBeingMoved = moveMode === 'all' ? quantity : 1
             const newQuantity = quantity - quantityBeingMoved
             if (newQuantity === 0) {

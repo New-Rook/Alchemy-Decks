@@ -73,7 +73,9 @@ export const Card = ({
     const { cardDictionary } = React.useContext(AppContext)
 
     const { attributes, listeners, setNodeRef, transform, isDragging, node, over } = useDraggable({
-        id: `${cardName}${DRAG_AND_DROP_ID_DELIMITER}${groupName}`, disabled: !enableDragAndDrop
+        id: `${board}${DRAG_AND_DROP_ID_DELIMITER}${groupName}${DRAG_AND_DROP_ID_DELIMITER}${cardName}`,
+        // disabled: !enableDragAndDrop,
+        data: { board, groupName, cardName }
     });
 
     const [flipped, setFlipped] = React.useState(false)
@@ -84,7 +86,7 @@ export const Card = ({
 
     const numberOfCopies = deckCard.boards[board]
 
-    const isCommanderAndSingleCopy = React.useMemo(() => {
+    const isCommanderFormatAndSingleCopy = React.useMemo(() => {
         return format === 'commander' && numberOfCopies === 1
     }, [format, numberOfCopies])
 
@@ -157,11 +159,12 @@ export const Card = ({
             return null
         }
 
-        if (over) {
-            const categoryDropIDSplit = over.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
-            const overCategoryName = categoryDropIDSplit[0]
-            const overCategoryOperation = groupName === NO_CATEGORY_NAME ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : categoryDropIDSplit[1]
-            if (overCategoryName !== groupName) {
+        if (over && over.data.current) {
+            const overCategoryName = over.data.current.groupName
+            const overCategoryOperation = groupName === NO_CATEGORY_NAME ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : over.data.current.operation
+            const overBoard = over.data.current.board
+
+            if (overBoard === board && overCategoryName !== groupName) {
                 return {
                     category: overCategoryName,
                     operation: overCategoryOperation as CategoryUpdateOperation,
@@ -171,17 +174,17 @@ export const Card = ({
         }
 
         return null
-    }, [isDragging, over])
+    }, [isDragging, over, board, groupName, deckCard])
 
     const onHover = React.useCallback((isEntering: boolean) => {
         if ((viewType === 'stacked' || viewType === 'grid-stacked')) {
             showFullCard(isEntering ? cardName : '')
         }
-        if (isCommanderAndSingleCopy) {
+        if (isCommanderFormatAndSingleCopy) {
             setIsHoveringCard(isEntering)
         }
         setIsPendingHoveringState(isEntering)
-    }, [viewType, cardName, showFullCard, isCommanderAndSingleCopy])
+    }, [viewType, cardName, showFullCard, isCommanderFormatAndSingleCopy])
 
     return (
         <div onClick={() => selectCard(cardName, board)}
@@ -225,7 +228,7 @@ export const Card = ({
             </div>
 
             {/* Top right */}
-            {((!isCommanderAndSingleCopy || isHoveringCard) && !isCommander) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+            {((!isCommanderFormatAndSingleCopy || isHoveringCard) && !isCommander) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>{numberOfCopies}</div>
                 <div className='flex-row'>
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} />
