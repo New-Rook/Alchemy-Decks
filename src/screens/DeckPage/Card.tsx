@@ -232,7 +232,7 @@ export const Card = ({
                 <div className='card-count'>{numberOfCopies}</div>
                 <div className='flex-row'>
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} />
-                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, board)} iconName={"add"} />
+                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, board)} iconName={"add"} disabled={numberOfCopies === 99} />
                 </div>
             </div>}
         </div >
