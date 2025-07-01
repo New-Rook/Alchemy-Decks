@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../context/AppContext'
 import { Board, CardData, CardTypeFilter, Color, ColorSearchType, DeckCards, Format, SearchFilterOperation, SearchTermFilter, SortType, StatFilter, StatFilterOperation, StatFilterStat } from '../types'
-import { ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, SEARCH_FILTER_OPERATION_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
+import { ALL_CARD_TYPES, ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, SEARCH_FILTER_OPERATION_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
 import { getCardAllCardName, getCardAllOracleText, getCardColorsForSearch, getCardFrontImage } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
 import { invertBoolean, numbersOnlyTextInputValidator, splitArray, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
@@ -418,7 +418,7 @@ export const SearchWindow = ({
                             <TextInputWithSuggestions
                                 value={filter.cardType}
                                 onChangeText={(text) => setCardTypeFilterType(index, text)}
-                                suggestions={['Creature', 'Enchantment', 'Artifact']}
+                                suggestions={ALL_CARD_TYPES}
                             />
                             {index === cardTypeFilters.length - 1
                                 // ? <button onClick={addCardTypeFilter}>+</button>
@@ -515,5 +515,3 @@ export const SearchWindow = ({
         </div>
     )
 }
-
-

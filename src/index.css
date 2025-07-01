@@ -105,6 +105,10 @@ input[type='search'].input-medium {
   width: calc(12 * var(--base-size))
 }
 
+input[type='search'].input-large {
+  width: calc(20 * var(--base-size))
+}
+
 .input-small {
   width: calc(8 * var(--base-size))
 }
@@ -807,6 +811,10 @@ textarea {
   text-align: start;
   border-radius: 0;
   /* align-self: stretch; */
+}
+
+.dropdown-option-with-image {
+  height: calc(5 * var(--base-size));
 }
 
 .dropdown-content> :last-child {

@@ -6,6 +6,8 @@ import { Icon } from "../../components/Icon"
 import { IconButton } from "../../components/IconButton"
 import { UserContext } from "../../context/UserContext"
 import { addCurrencyToText } from "../../utilities/general"
+import { AppContext } from "../../context/AppContext"
+import { TextInputWithSuggestions } from "../../components/TextInputWithSuggestions"
 
 type Props = {
     cardSearchTerm: string
@@ -31,16 +33,23 @@ export const DeckPageTopBar = ({
     setPinned
 }: Props) => {
     const { userData } = useContext(UserContext)
+    const { cardDictionary } = useContext(AppContext)
 
     return (
         <div className={`deck-top-bar ${pinned ? 'top-bar-sticky' : ''}`}>
             <div className='menu-bar align-end'>
-                <div className='flex-row'>
-                    <TextInput
+                <div className='flex-column'>
+                    Quick Search
+                    <TextInputWithSuggestions
                         type={'search'}
-                        label="Quick search"
+                        className="input-large"
                         value={cardSearchTerm}
                         onChangeText={setCardSearchTerm}
+                        onSelectOption={(cardName) => addFromQuickSearch(cardDictionary[cardName])}
+                        suggestions={cardSearchResults.slice(0, NUMBER_OF_CARD_SEARCH_RESULTS_TO_SHOW).map(card => card.name)}
+                        suggestionElementMap={(cardName) => <img src={getCardFrontImage(cardDictionary[cardName])?.art_crop} className='card-search-result-image' />}
+                        disableSuggestionFiltering
+                        refocusOnSelectSuggestion
                     />
                 </div>
                 <IconButton iconName="search" onClick={showSearchWindow}>Full search</IconButton>
@@ -69,7 +78,7 @@ export const DeckPageTopBar = ({
                     </div>
                 </div>
             </div>
-            <div className="card-search-results">
+            {/* <div className="card-search-results">
                 {cardSearchResults.slice(0, NUMBER_OF_CARD_SEARCH_RESULTS_TO_SHOW).map((cardData, index) =>
                     <button key={cardData.name}
                         className={`card-search-result 
@@ -77,11 +86,11 @@ export const DeckPageTopBar = ({
                                 ? 'border-rounded-bottom'
                                 : 'dropdown-option'
                             }`}
-                        onClick={() => addFromQuickSearch(cardData)}>
+                        onClick={() => selectOption(cardData)}>
                         <img src={getCardFrontImage(cardData)?.art_crop} className='card-search-result-image' /><p>{cardData.name}</p>
                     </button>
                 )}
-            </div>
+            </div> */}
         </div>
     )
 }
