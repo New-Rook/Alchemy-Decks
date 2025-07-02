@@ -16,7 +16,7 @@ import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { BOARD_DATA, COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_MOVE_ALL_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_MOVE_ONE_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_REGEX, NO_GROUP_NAME } from '../../data/editor'
-import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
+import { omitFromPartialRecord, omitFromRecord, removeAccentsFromString, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
 import { MultiSelectBar } from './MultiSelectBar'
@@ -196,17 +196,17 @@ export const DeckPage = () => {
         //     console.log('error: no results')
         // }
 
-        const searchTerms = cardSearchTerm.match(searchRegex)
+        const searchTerms = removeAccentsFromString(cardSearchTerm).match(searchRegex)
 
         if (!searchTerms) {
             return
         }
 
         const searchResults = legalCards.filter(card => {
-            const cardNames = getCardAllCardName(card).toLocaleLowerCase()
             return searchTerms.every(text => {
-                const regex = new RegExp(stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase())
-                return regex.test(cardNames)
+                const term = stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase()
+                const regex = new RegExp(term)
+                return regex.test(card.utility.searchName)
             })
         })
 

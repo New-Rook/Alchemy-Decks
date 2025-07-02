@@ -120,6 +120,12 @@ export interface CardData extends BaseCardData {
   released_at: string
   set: string
   set_name: string
+  utility: UtilityCardData
+}
+
+export type UtilityCardData = {
+  searchName: string // Name with accents removed for searching
+  searchOracleText: string // Oracle text with accents removed
 }
 
 type Legality = 'legal' | 'restricted' | 'not_legal' | 'banned'

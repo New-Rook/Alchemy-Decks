@@ -5,7 +5,7 @@ import { Board, CardData, CardTypeFilter, Color, ColorSearchType, DeckCards, For
 import { ALL_CARD_TYPES, ALL_COLOR_KEYS, COLOR_DATA, COLOR_SEARCH_TYPES, COLORLESS_DATA, SEARCH_FILTER_OPERATION_DATA, searchRegex, STAT_FILTER_OPERATIONS, STAT_FILTER_STATS } from '../data/search'
 import { getCardAllCardName, getCardAllOracleText, getCardColorsForSearch, getCardFrontImage } from '../utilities/card'
 import { TextInput } from '../components/TextInput'
-import { invertBoolean, numbersOnlyTextInputValidator, splitArray, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
+import { invertBoolean, numbersOnlyTextInputValidator, removeAccentsFromString, splitArray, stringLowerCaseIncludes, stringStartsAndEndsWith } from '../utilities/general'
 import { useAdvancedState } from '../hooks/useAdvancedState'
 import { CARD_SORTERS } from '../utilities/sorters'
 import { Checkbox } from '../components/Checkbox'
@@ -156,15 +156,15 @@ export const SearchWindow = ({
     }, [format, showBannedCards, showStickersAndAttractions])
 
     const searchTermNameFilteredCards = React.useMemo(() => {
-        const searchTerms = nameSearchTerm.match(searchRegex)
+        const searchTerms = removeAccentsFromString(nameSearchTerm).match(searchRegex)
         if (!searchTerms) {
             return legalCards
         }
         return legalCards.filter(card => {
-            const cardNames = getCardAllCardName(card).toLocaleLowerCase()
             return searchTerms.every(text => {
-                const regex = new RegExp(stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase())
-                return regex.test(cardNames)
+                const term = stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase()
+                const regex = new RegExp(term)
+                return regex.test(card.utility.searchName)
             })
         })
     }, [legalCards, nameSearchTerm])

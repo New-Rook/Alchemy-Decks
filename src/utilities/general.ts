@@ -137,3 +137,7 @@ export const addCurrencyToText = (text: string | number, currency: CurrencyType)
 
     return text
 }
+
+export const removeAccentsFromString = (text: string) => {
+    return text.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+}

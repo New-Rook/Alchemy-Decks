@@ -1,7 +1,7 @@
 import { searchRegex } from "../data/search"
 import { CardData, CardTypeFilter, SearchFilterOperation, SearchTermFilter, StatFilter } from "../types"
 import { getCardAllOracleText } from "./card"
-import { invertBoolean, stringLowerCaseIncludes, stringStartsAndEndsWith } from "./general"
+import { invertBoolean, removeAccentsFromString, stringLowerCaseIncludes, stringStartsAndEndsWith } from "./general"
 
 export const nextSearchFilterOperation = (current: SearchFilterOperation): SearchFilterOperation => {
     if (current === 'or') {
@@ -70,14 +70,14 @@ export const searchTermFilterToRegexes = (filter: SearchTermFilter) => {
     if (!searchTerms) {
         return []
     }
-    return searchTerms.map(text =>
-        new RegExp(stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase())
-    )
+    return searchTerms.map(text => {
+        const term = stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase()
+        return new RegExp(removeAccentsFromString(term))
+    })
 }
 
 export const checkOracleTextSearchTermFilter = (card: CardData, filter: SearchTermFilter, regexes: RegExp[]) => {
-    const cardOracleTexts = getCardAllOracleText(card).toLocaleLowerCase()
-    return invertBoolean(regexes.every(regex => regex.test(cardOracleTexts)), filter.invert)
+    return invertBoolean(regexes.every(regex => regex.test(card.utility.searchOracleText)), filter.invert)
 }
 
 export const STICKERS_ATTRACTIONS_REGEX = /Sticker|Attraction/
