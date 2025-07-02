@@ -145,6 +145,9 @@ export const DeckPage = () => {
         if (newQuantity === 0) {
             if (Object.keys(deckCards[cardName].boards).length === 1) {
                 deleteDeckCard(cardName)
+                if (selectedCards[cardName] === board) {
+                    setSelectedCards(omitFromRecord(selectedCards, cardName))
+                }
                 return
             }
 
@@ -153,7 +156,7 @@ export const DeckPage = () => {
         else {
             updateDeckCard(cardName, 'boards', { ...deckCards[cardName]?.boards, [board]: newQuantity })
         }
-    }, [deckCards, updateDeckCard, deleteDeckCard])
+    }, [deckCards, updateDeckCard, deleteDeckCard, selectedCards])
 
     const pickCommander = React.useCallback((cardName: string) => {
         if (commanderPickIndex === 0) {
