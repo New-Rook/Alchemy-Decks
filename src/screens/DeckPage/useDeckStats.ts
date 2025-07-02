@@ -5,7 +5,7 @@ import { getCardAllOracleText, getCardColorIdentityCombination } from "../../uti
 import { numberToDecimalPoints } from "../../utilities/general"
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from "../../utilities/groupers"
 import { AppContext } from "../../context/AppContext"
-import { LEGALITY_WARNING_NUMBER_OF_COPIES } from "../../data/editor"
+import { ALTERNATE_QUANTITY_REGEX, INFINITE_QUANTITY_REGEX, LEGALITY_WARNING_NUMBER_OF_COPIES } from "../../data/editor"
 
 type Props = {
     deckMetaData: DeckMetaData,
@@ -51,9 +51,9 @@ export const useDeckStats = ({
 
             const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
 
-            const alternateQuantityMatch = getCardAllOracleText(cardDictionary[cardName]).match(/(?<=A deck can have up to )\w+/)
+            const alternateQuantityMatch = getCardAllOracleText(cardDictionary[cardName]).match(ALTERNATE_QUANTITY_REGEX)
             const alternateQuantity = alternateQuantityMatch ? NUMBER_NAME_MAP[alternateQuantityMatch[0]] : undefined
-            const infiniteQuantity = /A deck can have any number/.test(cardDictionary[cardName].oracle_text)
+            const infiniteQuantity = INFINITE_QUANTITY_REGEX.test(cardDictionary[cardName].oracle_text)
 
             const legality = cardDictionary[cardName].legalities[deckMetaData.format]
 

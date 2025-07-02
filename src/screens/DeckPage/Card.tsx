@@ -2,7 +2,7 @@ import { Board, CategoryUpdateOperation, DeckCard, Format, ViewType } from "../.
 import { AppContext } from "../../context/AppContext"
 import { getCardFrontImage } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
-import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_REGEX } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, INFINITE_QUANTITY_REGEX, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_REGEX } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
 import './Card.css'
 import React from "react"
@@ -22,7 +22,6 @@ type Props = {
     viewType: ViewType
     index: number
     format: Format
-    isCommander?: boolean
     showFullCard: (cardName: string) => void
 }
 
@@ -67,7 +66,6 @@ export const Card = ({
     viewType,
     index,
     format,
-    isCommander,
     showFullCard
 }: Props) => {
     const { cardDictionary } = React.useContext(AppContext)
@@ -89,6 +87,10 @@ export const Card = ({
     const isCommanderFormatAndSingleCopy = React.useMemo(() => {
         return format === 'commander' && numberOfCopies === 1
     }, [format, numberOfCopies])
+
+    const isCommanderAndInfiniteQuantity = React.useMemo(() => {
+        return !!deckCard.commanderNumber && INFINITE_QUANTITY_REGEX.test(cardDictionary[cardName].oracle_text)
+    }, [deckCard, cardDictionary])
 
     React.useEffect(() => {
         if (isDragging) {
@@ -228,10 +230,10 @@ export const Card = ({
             </div>
 
             {/* Top right */}
-            {((!isCommanderFormatAndSingleCopy || isHoveringCard) && !isCommander) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+            {((!isCommanderFormatAndSingleCopy || isHoveringCard) && (!deckCard.commanderNumber || isCommanderAndInfiniteQuantity)) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>{numberOfCopies}</div>
                 <div className='flex-row'>
-                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} />
+                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} disabled={isCommanderAndInfiniteQuantity && numberOfCopies === 1} />
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, board)} iconName={"add"} disabled={numberOfCopies === 99} />
                 </div>
             </div>}

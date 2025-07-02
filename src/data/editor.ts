@@ -58,6 +58,9 @@ export const COMMANDER_FRIENDS_FOREVER_REGEX = /Friends forever/
 export const COMMANDER_TIME_LORD_DOCTOR_REGEX = /Time Lord Doctor/
 export const COMMANDER_DOCTORS_COMPANION_REGEX = /Doctor's companion/
 
+export const ALTERNATE_QUANTITY_REGEX = /(?<=A deck can have up to )\w+/
+export const INFINITE_QUANTITY_REGEX = /A deck can have any number/
+
 export const CREATURE_REGEX = /Creature/
 export const LEGENDARY_REGEX = /Legendary/
 export const CAN_BE_YOUR_COMMANDER_REGEX = /can be your commander/

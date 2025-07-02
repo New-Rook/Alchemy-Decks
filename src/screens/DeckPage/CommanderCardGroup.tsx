@@ -74,7 +74,6 @@ export const CommanderCardGroup = ({
                             index={0}
                             format={'commander'}
                             showFullCard={showFullCard}
-                            isCommander
                         />
                         : <CommanderCardPlaceholder openCommanderPickModal={() => openCommanderPickModal(0)} />
                     }
@@ -98,7 +97,6 @@ export const CommanderCardGroup = ({
                                 index={1}
                                 format={'commander'}
                                 showFullCard={showFullCard}
-                                isCommander
                             />
                             : <CommanderCardPlaceholder openCommanderPickModal={() => openCommanderPickModal(1)} />
                         }
