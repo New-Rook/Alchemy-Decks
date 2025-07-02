@@ -143,11 +143,12 @@ export const DeckPage = () => {
         const newQuantity = Math.max((deckCards[cardName]?.boards[board] ?? 0) + quantity, 0)
 
         if (newQuantity === 0) {
+            if (selectedCards[cardName] === board) {
+                setSelectedCards(omitFromRecord(selectedCards, cardName))
+            }
+
             if (Object.keys(deckCards[cardName].boards).length === 1) {
                 deleteDeckCard(cardName)
-                if (selectedCards[cardName] === board) {
-                    setSelectedCards(omitFromRecord(selectedCards, cardName))
-                }
                 return
             }
 
