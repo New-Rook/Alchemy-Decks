@@ -30,7 +30,7 @@ export const AccountMenu = () => {
     }
 
     if (authStatus === 'guest') {
-        return <NavButton to={'/login'} className="right-nav">Login</NavButton>
+        return <NavButton to={'/login'} className="nav-bar-button login-nav right-nav">Login</NavButton>
     }
 
     return <LoadingWheel className="right-nav" />

@@ -4,17 +4,17 @@
     /* align-items: center; */
     height: 5rem;
     background-color: var(--theme-color);
-    padding: 0 var(--base-size);
+    /* padding: 0 var(--base-size); */
     border-radius: 8px;
     /* gap: 2em; */
-    /* gap: calc(2 * var(--base-size)); */
+    gap: calc(0.5 * var(--base-size));
 }
 
 .nav-bar-button {
     width: calc(15 * var(--base-size));
     font-size: calc(1.5 * var(--base-size));
-    border-radius: 0;
-    background-color: rgb(57, 118, 71);
+    border-radius: 8px;
+    background-color: rgb(6, 182, 0);
 }
 
 .left-nav {
@@ -23,6 +23,10 @@
 
 .right-nav {
     margin-left: auto;
+}
+
+.login-nav {
+    width: calc(7.5 * var(--base-size));
 }
 
 .logo {

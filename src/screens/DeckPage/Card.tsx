@@ -58,7 +58,7 @@ export const Card = ({
     cardName,
     deckCard,
     addDeckCardQuantity,
-    enableDragAndDrop,
+    // enableDragAndDrop,
     selected,
     selectCard,
     board,
