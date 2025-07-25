@@ -35,7 +35,8 @@ export const getCardFrontImage = (card: CardData) => {
 }
 
 export const getCardColors = (card: CardData) => {
-    if (card.card_faces) {
+    if (isCardDoubleFaced(card) && card.card_faces) {
+        // Could use ! instead of checking card.card_faces again
         return toUniqueArray(card.card_faces.reduce<Color[]>((colors, cardFace) => [...colors, ...cardFace.colors], []))
     }
 
@@ -169,4 +170,8 @@ export const getCardColorIdentityCombination = (cardData: CardData) => {
     return COLOR_COMBINATIONS_MAP[cardColorIdentityCombination]
         ? COLOR_COMBINATIONS_MAP[cardColorIdentityCombination]
         : cardColorIdentityCombination
+}
+
+export const isCardDoubleFaced = (card: CardData) => {
+    return card.card_faces && !card.colors
 }

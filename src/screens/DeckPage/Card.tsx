@@ -1,6 +1,6 @@
 import { Board, CategoryUpdateOperation, DeckCard, Format, ViewType } from "../../types"
 import { AppContext } from "../../context/AppContext"
-import { getCardFrontImage } from "../../utilities/card"
+import { getCardFrontImage, isCardDoubleFaced } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
 import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, INFINITE_QUANTITY_REGEX, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_REGEX } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
@@ -198,9 +198,9 @@ export const Card = ({
             onMouseLeave={() => onHover(false)}
             {...listeners} {...attributes}>
             {/* Top left */}
-            <div className={`deck-card-data-elevated ${cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'}`} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
+            {isCardDoubleFaced(cardDictionary[cardName]) && <div className={`deck-card-data-elevated deck-card-top-left-container`} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
                 {cardDictionary[cardName].card_faces && <IconButton iconName="cached" className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()} />}
-            </div>
+            </div>}
 
             {/* Main image + categories */}
             <div className='flex-row deck-card-image'>

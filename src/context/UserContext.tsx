@@ -54,7 +54,6 @@ export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
     // })
 
     React.useEffect(() => {
-        console.log('hi a')
         if (authStatus !== 'authenticated') {
             return
         }

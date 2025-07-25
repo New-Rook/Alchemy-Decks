@@ -116,7 +116,7 @@ export const DeckMetaDataDisplay = ({
             <div className="deck-meta-data-text-container base-offset-top expandable-textarea">
                 <span className="base-offset-left text-medium">Deck Warnings</span>
                 {deckStats.deckLegalityWarnings.map((warning) =>
-                    <p className="text-danger">{warning}</p>
+                    <p key={warning} className="text-danger">{warning}</p>
                 )}
                 {Object.keys(deckStats.legalityWarnings).map((cardName) =>
                     <p key={cardName}>

@@ -15,6 +15,7 @@
 
   --base-size: 1rem;
   --theme-color: rgb(78, 207, 78);
+  --theme-color-reduced-alpha: rgb(78 207 78 / 50%);
   --theme-color-secondary: rgb(54, 127, 68);
   --theme-color-tertiary: rgb(87, 153, 134);
   --theme-color-hover: #5edc6f;
@@ -368,16 +369,6 @@ textarea {
 .deck-card-top-left-container {
   position: absolute;
   left: 8%;
-  top: 11%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.deck-flip-card-top-left-container {
-  position: absolute;
-  left: 12.5%;
   top: 11%;
   display: flex;
   justify-content: center;
