@@ -840,11 +840,6 @@ textarea {
   width: calc(3 * var(--base-size));
 }
 
-.base-width-4 {
-  width: calc(4 * var(--base-size));
-}
-
-
 /* -- Base tags -- */
 
 select {
