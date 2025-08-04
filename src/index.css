@@ -191,6 +191,10 @@ textarea {
   flex-direction: column;
 } */
 
+.small-padding {
+  padding: calc(0.2 * var(--base-size));
+}
+
 .no-padding.no-padding {
   padding: 0;
 }
@@ -830,6 +834,10 @@ textarea {
 
 .background-danger {
   background-color: var(--danger-color);
+}
+
+.base-width-3 {
+  width: calc(3 * var(--base-size));
 }
 
 .base-width-4 {
