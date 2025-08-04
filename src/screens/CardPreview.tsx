@@ -43,7 +43,7 @@ export const CardPreview = ({ cardName, deckCard, addDeckCardQuantity, isCommand
     return (
         <div className={`deck-card ${isHovering ? 'card-elevated' : ''}`} style={style}
             key={cardName}
-            onClick={isCommander ? () => addDeckCardQuantity(cardName, 1, 'mainboard') : undefined}>
+            onClick={() => addDeckCardQuantity(cardName, 1, 'mainboard')}>
             {/* Top left */}
             <div className={cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'}>
                 {cardDictionary[cardName].card_faces && <IconButton iconName="cached" className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()} />}
@@ -60,8 +60,8 @@ export const CardPreview = ({ cardName, deckCard, addDeckCardQuantity, isCommand
             </div>
 
             {/* Top right */}
-            {!isCommander && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-                {deckCard && <div className='card-count'>{deckCard.boards.mainboard}</div>}
+            {!isCommander && deckCard?.boards.mainboard && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                <div className='card-count'>{deckCard.boards.mainboard}</div>
                 <div className='flex-row'>
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, 'mainboard')} iconName={"remove"} />
                     <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, 'mainboard')} iconName={"add"} />

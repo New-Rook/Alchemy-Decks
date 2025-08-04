@@ -396,44 +396,49 @@ export const SearchWindow = ({
                 <div className='flex-column flex-gap-small'>
                     <Label>Card text</Label>
                     {pendingOracleTextSearchTerm.map((filter, index) =>
-                        <div className='flex-row'>
-                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} />
-                            <TextInput
-                                type={'search'}
-                                value={filter.text}
-                                onChangeText={(text) => setOracleTextSearchTermText(index, text)}
-                            />
-                            {index === pendingOracleTextSearchTerm.length - 1
-                                ? <IconButton iconName={'add'} className='border-rounded-right' size={'small'} onClick={addOracleTextSearchTerm} />
-                                : <IconButton iconName={'close'} className='border-rounded-right' size={'small'} onClick={() => removeOracleTextSearchTerm(index)} />}
+                        <div className='flex-row flex-gap'>
+                            <div className='flex-row'>
+                                <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertOracleTextSearchTermText(index)} />
+                                <TextInput
+                                    type={'search'}
+                                    value={filter.text}
+                                    onChangeText={(text) => setOracleTextSearchTermText(index, text)}
+                                />
+                                <IconButton iconName={'close'} className='border-rounded-right' size={'small'} onClick={() => removeOracleTextSearchTerm(index)} disabled={pendingOracleTextSearchTerm.length === 1} />
+                            </div>
+                            {index === pendingOracleTextSearchTerm.length - 1 && <IconButton iconName={'add'} size={'small'} onClick={addOracleTextSearchTerm} disabled={pendingOracleTextSearchTerm.length === 5} />}
                         </div>
                     )}
                 </div>
 
                 <div className='flex-column flex-gap-small'>
-                    <Label>Card types</Label>
+                    <div className='flex-row align-center'>
+                        <Label>Card types</Label>
+                        <button className='flex-center base-width-3 small-padding base-offset-left' onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[cardTypeFilterOperation].label}</button>
+                    </div>
                     {cardTypeFilters.map((filter, index) =>
-                        <div className='flex-row'>
-                            <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertCardTypeFilter(index)} />
-                            <TextInputWithSuggestions
-                                value={filter.cardType}
-                                onChangeText={(text) => setCardTypeFilterType(index, text)}
-                                suggestions={ALL_CARD_TYPES}
-                            />
-                            {index === cardTypeFilters.length - 1
-                                // ? <button onClick={addCardTypeFilter}>+</button>
-                                ? <IconButton iconName={'add'} className='border-rounded-right' size={'small'} onClick={addCardTypeFilter} />
-                                : <IconButton iconName={'close'} className='border-rounded-right' size={'small'} onClick={() => removeCardTypeFilter(index)} />
-                            }
-                            {index === 0 && <button className='flex-row flex-center base-width-4 base-offset-left' onClick={() => setCardTypeFilterOperation(nextSearchFilterOperation(cardTypeFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[cardTypeFilterOperation].label}</button>}
+                        <div className='flex-row flex-gap'>
+                            <div className='flex-row'>
+                                <IconButton iconName={'remove'} className={`border-rounded-left ${filter.invert ? 'background-danger' : ''}`} size={'small'} onClick={() => invertCardTypeFilter(index)} />
+                                <TextInputWithSuggestions
+                                    value={filter.cardType}
+                                    onChangeText={(text) => setCardTypeFilterType(index, text)}
+                                    suggestions={ALL_CARD_TYPES}
+                                />
+                                <IconButton iconName={'close'} className='border-rounded-right' size={'small'} onClick={() => removeCardTypeFilter(index)} disabled={cardTypeFilters.length === 1} />
+                            </div>
+                            {index === cardTypeFilters.length - 1 && <IconButton iconName={'add'} size={'small'} onClick={addCardTypeFilter} disabled={cardTypeFilters.length === 5} />}
                         </div>
                     )}
                 </div>
 
                 <div className='flex-column flex-gap-small'>
-                    <Label>Card stats</Label>
+                    <div className='flex-row align-center'>
+                        <Label>Card stats</Label>
+                        <button className='flex-center base-width-3 small-padding base-offset-left' onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[statFilterOperation].label}</button>
+                    </div>
                     {statFilters.map((filter, index) =>
-                        <div className='flex-row flex-gap-small'>
+                        <div className='flex-row flex-gap-small align-center'>
                             <Dropdown options={STAT_FILTER_STATS} value={filter.stat} onSelect={(stat) => updateStatFilterStat(index, stat)} />
                             <Dropdown options={STAT_FILTER_OPERATIONS} value={filter.operation} onSelect={(operation) => updateStatFilterOperation(index, operation)} size={'tiny'} />
                             <TextInput
@@ -443,11 +448,8 @@ export const SearchWindow = ({
                                 onChangeText={(text) => updateStatFilterValue(index, text)}
                                 validator={numbersOnlyTextInputValidator}
                             />
-                            {index === statFilters.length - 1
-                                ? <IconButton iconName={'add'} size='small' onClick={addStatFilter} />
-                                : <IconButton iconName={'close'} size='small' onClick={() => removeStatFilter(index)} />
-                            }
-                            {index === 0 && <button className='flex-row flex-center base-width-4' onClick={() => setStatFilterOperation(nextSearchFilterOperation(statFilterOperation))}>{SEARCH_FILTER_OPERATION_DATA[statFilterOperation].label}</button>}
+                            <IconButton iconName={'close'} size='small' onClick={() => removeStatFilter(index)} disabled={statFilters.length === 1} />
+                            {index === statFilters.length - 1 && <IconButton iconName={'add'} size='small' onClick={addStatFilter} disabled={statFilters.length === 5} />}
                         </div>
                     )}
                 </div>
@@ -482,7 +484,7 @@ export const SearchWindow = ({
             </div>
             <div className='flex-row flex-center flex-gap'>
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex - 1)} disabled={searchWindowPageIndex === 0}>{'<'}</button>
-                <div>{searchWindowPageIndex + 1}</div>
+                <div>{searchWindowPageIndex + 1} / {maxPaginationIndex + 1}</div>
                 <button onClick={() => setSearchWindowPageIndex(searchWindowPageIndex + 1)} disabled={searchWindowPageIndex === maxPaginationIndex}>{'>'}</button>
             </div>
             <div className='card-search-window-results'>
