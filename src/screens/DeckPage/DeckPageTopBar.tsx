@@ -52,7 +52,7 @@ export const DeckPageTopBar = ({
                         refocusOnSelectSuggestion
                     />
                 </div>
-                <IconButton iconName="search" onClick={showSearchWindow}>Full search</IconButton>
+                <IconButton iconName="fullscreen" onClick={showSearchWindow}>Full search</IconButton>
                 <div className="flex-row flex-gap right-placed-item">
                     <div className="flex-column">
                         Deck size
