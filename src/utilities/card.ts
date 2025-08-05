@@ -1,6 +1,6 @@
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
-import { CardData, Color } from "../types";
-import { toUniqueArray } from "./general";
+import { CardData, Color, UserData } from "../types";
+import { addCurrencyToText, toUniqueArray } from "./general";
 
 export const getCardBaseData = (card: CardData) => {
     if (card.card_faces) {
@@ -92,6 +92,22 @@ export const getCardSubTypes = (cardData: CardData) => {
 
     const cardTypes = cardTypeLine.trim().split(' ')
     return cardTypes
+}
+
+export const getCardPrice = (cardData: CardData, currency: UserData['settings']['currency'] = 'usd') => {
+    if (currency === 'eur') {
+        return cardData.prices.eur || cardData.prices.eur_foil
+    }
+
+    if (currency === 'usd') {
+        return cardData.prices.usd || cardData.prices.usd_foil
+    }
+
+    return cardData.prices.usd
+}
+
+export const getCardPriceWithCurrency = (cardData: CardData, currency: UserData['settings']['currency'] = 'usd') => {
+    return addCurrencyToText(getCardPrice(cardData, currency), currency)
 }
 
 export const getCardColorPriority = (cardData: CardData) => {

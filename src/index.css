@@ -858,3 +858,7 @@ option:hover {
 .position-absolute {
   position: absolute;
 }
+
+.text-align-center {
+  text-align: center;
+}

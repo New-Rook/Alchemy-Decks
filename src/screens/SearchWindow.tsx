@@ -506,6 +506,7 @@ export const SearchWindow = ({
                         addDeckCardQuantity={addCardToDeck}
                         isCommander={isCommanderPick}
                         style={{ animation: `${0.02 * (index + 1)}s linear fade-in forwards` }}
+                        showPrice={showPrices}
                     />
                 })}
             </div>

@@ -1,11 +1,12 @@
 import React, { useContext } from "react"
 import { basicLandRegex, NUMBER_NAME_MAP } from "../../data/general"
 import { BoardCards, DeckCards, DeckMetaData, DeckStats, GroupByColorMode, GroupByTypeMode } from "../../types"
-import { getCardAllOracleText, getCardColorIdentityCombination } from "../../utilities/card"
+import { getCardAllOracleText, getCardColorIdentityCombination, getCardPrice } from "../../utilities/card"
 import { numberToDecimalPoints } from "../../utilities/general"
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from "../../utilities/groupers"
 import { AppContext } from "../../context/AppContext"
 import { ALTERNATE_QUANTITY_REGEX, INFINITE_QUANTITY_REGEX, LEGALITY_WARNING_NUMBER_OF_COPIES } from "../../data/editor"
+import { UserContext } from "../../context/UserContext"
 
 type Props = {
     deckMetaData: DeckMetaData,
@@ -29,6 +30,7 @@ export const useDeckStats = ({
     groupByColorMode,
     groupByTypeMode
 }: Props) => {
+    const { userData } = useContext(UserContext)
     const { cardDictionary } = useContext(AppContext)
 
     const deckStats = React.useMemo<DeckStats>(() => {
@@ -43,11 +45,11 @@ export const useDeckStats = ({
         Object.keys(deckCards).forEach((cardName) => {
             const mainboardCardQuantity = deckCards[cardName].boards.mainboard ?? 0
             numberOfMainboardCards += mainboardCardQuantity
-            mainboardPrice += mainboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
+            mainboardPrice += mainboardCardQuantity * parseFloat(getCardPrice(cardDictionary[cardName], userData?.settings.currency))
 
             const sideboardCardQuantity = deckCards[cardName].boards.sideboard ?? 0
             numberOfSideboardCards += sideboardCardQuantity
-            sideboardPrice += sideboardCardQuantity * parseFloat(cardDictionary[cardName].prices.eur ?? 0)
+            sideboardPrice += sideboardCardQuantity * parseFloat(getCardPrice(cardDictionary[cardName], userData?.settings.currency))
 
             const cardQuantity = mainboardCardQuantity + sideboardCardQuantity
 
