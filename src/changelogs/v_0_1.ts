@@ -1,6 +1,7 @@
 import { ChangeLog } from "./types";
 
-const version_0_1: ChangeLog = {
+export const version_0_1: ChangeLog = {
+    version: 0.1,
     title: 'Version 0.1',
     description: 'Hi, some improvements have been made to ...',
     changes: ['Added x, fixed y'],

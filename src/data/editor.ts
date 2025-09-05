@@ -1,12 +1,19 @@
-import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue, BoardData } from "../types"
+import { Board, CategoryUpdateOperation, SymbolData, DeckVisibility, LabelledValue, BoardData, BoardMoveOperation } from "../types"
 import { typedKeys } from "../utilities/general"
 
+export const CARD_TYPE_LAND = 'Land'
+export const CARD_TYPE_CREATURE = 'Creature'
+
 export const NO_GROUP_NAME = 'All cards'
-export const NO_CATEGORY_NAME = 'No category'
+// export const NO_CATEGORY_NAME = 'No category'
+export const NO_CATEGORY_TERM = 'Uncategorised'
+export const NO_CATEGORY_REGEX = new RegExp(NO_CATEGORY_TERM)
 
 export const DRAG_AND_DROP_ID_DELIMITER = '&'
 export const DRAG_AND_DROP_ADD_OPERATION_NAME: CategoryUpdateOperation = 'add'
 export const DRAG_AND_DROP_OVERWRITE_OPERATION_NAME: CategoryUpdateOperation = 'overwrite'
+export const DRAG_AND_DROP_MOVE_ALL_TO_BOARD_OPERATION_NAME: BoardMoveOperation = 'all'
+export const DRAG_AND_DROP_MOVE_ONE_TO_BOARD_OPERATION_NAME: BoardMoveOperation = 'one'
 
 export const CATEGORY_UPDATE_OPERATIONS: CategoryUpdateOperation[] = ['add', 'overwrite']
 
@@ -19,15 +26,18 @@ export const VISIBILITY_TYPES: LabelledValue<DeckVisibility>[] = [
 export const BOARD_DATA: Record<Board, BoardData> = {
     mainboard: {
         name: "Main Deck",
-        icon: "splitscreen_top"
+        icon: "splitscreen_top",
+        dropIcon: "move_up",
     },
     sideboard: {
         name: "Sideboard",
-        icon: "splitscreen_bottom"
+        icon: "splitscreen_bottom",
+        dropIcon: "move_down",
     },
     considering: {
         name: "Considering",
-        icon: "indeterminate_question_box"
+        icon: "indeterminate_question_box",
+        dropIcon: "indeterminate_question_box",
     }
 }
 
@@ -35,6 +45,9 @@ export const ALL_BOARDS: Board[] = typedKeys(BOARD_DATA)
 
 export const COMMANDER_GROUP_NAME = 'Commander'
 export const MULTI_COMMANDER_GROUP_NAME = 'Commanders'
+
+export const NO_CATEGORY_LAND_GROUP_NAME = `${NO_CATEGORY_TERM} ${CARD_TYPE_LAND}`
+export const NO_CATEGORY_CREATURE_GROUP_NAME = `${NO_CATEGORY_TERM} ${CARD_TYPE_CREATURE}`
 
 export const COMMANDER_PARTNER_REGEX = /Partner(?! with)/
 export const COMMANDER_PARTNER_WITH_REGEX = /Partner with/
@@ -44,6 +57,9 @@ export const COMMANDER_BACKGROUND_REGEX = /Background/
 export const COMMANDER_FRIENDS_FOREVER_REGEX = /Friends forever/
 export const COMMANDER_TIME_LORD_DOCTOR_REGEX = /Time Lord Doctor/
 export const COMMANDER_DOCTORS_COMPANION_REGEX = /Doctor's companion/
+
+export const ALTERNATE_QUANTITY_REGEX = /(?<=A deck can have up to )\w+/
+export const INFINITE_QUANTITY_REGEX = /A deck can have any number/
 
 export const CREATURE_REGEX = /Creature/
 export const LEGENDARY_REGEX = /Legendary/
@@ -179,3 +195,6 @@ export const MANA_VALUE_SYMBOLS: Record<string, SymbolData> = {
         "english": "twenty generic mana",
     }
 }
+
+export const LEGALITY_WARNING_NUMBER_OF_COPIES = 'The number of copies of this card exceeds the limit for'
+export const LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX = new RegExp(LEGALITY_WARNING_NUMBER_OF_COPIES)

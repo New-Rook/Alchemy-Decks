@@ -1,9 +1,9 @@
 import React from "react"
-import { Board, DeckCards, Format, ViewType } from "../../types"
+import { Board, CategoryUpdateOperation, DeckCards, Format, ViewType } from "../../types"
 import { Card } from "./Card"
 import { useDroppable } from "@dnd-kit/core"
 import './CardGroup.css'
-import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_REGEX } from "../../data/editor"
 import { cardGroupStyleMap, getCardGroupViewStyle } from "../../styling/editor"
 import { Icon } from "../../components/Icon"
 
@@ -36,8 +36,37 @@ export const CardGroup = ({
     viewType,
     format
 }: Props) => {
-    const { isOver: isOverAdd, setNodeRef: setAddNodeRef, active } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`, disabled: !enableDragAndDrop })
-    const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({ id: `${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`, disabled: !enableDragAndDrop })
+    const { active } = useDroppable({
+        id: `${board}${DRAG_AND_DROP_ID_DELIMITER}${groupName}`
+    })
+
+    const draggedCard = React.useMemo(() => {
+        if (!enableDragAndDrop || !active || !active.data.current) {
+            return { isFromThisBoard: false, isFromThisGroup: false, hasThisGroupCategory: false, hasCategory: false }
+        }
+
+        const draggedCardName = active.data.current.cardName
+        const cardCurrentCategory = active.data.current.groupName
+        const cardCurrentBoard = active.data.current.board
+
+        return {
+            isFromThisBoard: cardCurrentBoard === board,
+            isFromThisGroup: cardCurrentCategory === groupName,
+            hasThisGroupCategory: deckCards[draggedCardName].categories?.includes(groupName),
+            hasCategory: !!deckCards[draggedCardName].categories
+        }
+    }, [groupName, enableDragAndDrop, active, deckCards, board])
+
+    const { isOver: isOverAdd, setNodeRef: setAddNodeRef } = useDroppable({
+        id: `${board}${DRAG_AND_DROP_ID_DELIMITER}${groupName}${DRAG_AND_DROP_ID_DELIMITER}add`,
+        disabled: !enableDragAndDrop || !draggedCard.isFromThisBoard,
+        data: { board, groupName, operation: DRAG_AND_DROP_ADD_OPERATION_NAME }
+    })
+    const { isOver: isOverOverwrite, setNodeRef: setOverwriteNodeRef } = useDroppable({
+        id: `${board}${DRAG_AND_DROP_ID_DELIMITER}${groupName}${DRAG_AND_DROP_ID_DELIMITER}overwrite`,
+        disabled: !enableDragAndDrop || !draggedCard.isFromThisBoard,
+        data: { board, groupName, operation: DRAG_AND_DROP_OVERWRITE_OPERATION_NAME }
+    })
 
     const [isHovering, setIsHovering] = React.useState(false)
     const [fullyShownCardName, setFullyShownCardName] = React.useState('')
@@ -46,24 +75,8 @@ export const CardGroup = ({
         return cardNames.reduce((total, cardName) => total + (deckCards[cardName].boards[board] ?? 0), 0)
     }, [cardNames, deckCards])
 
-    const draggedCard = React.useMemo(() => {
-        if (!enableDragAndDrop || !active) {
-            return { isNotFromThisGroup: false, hasThisGroupCategory: false }
-        }
-
-        const cardDragIDSplit = active.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
-        const draggedCardName = cardDragIDSplit[0]
-        const cardCurrentCategory = cardDragIDSplit[1]
-
-        return {
-            isNotFromThisGroup: cardCurrentCategory !== groupName,
-            hasThisGroupCategory: deckCards[draggedCardName].categories?.includes(groupName),
-            hasCategory: !!deckCards[draggedCardName].categories
-        }
-    }, [groupName, enableDragAndDrop, active, deckCards])
-
-    const getDraggedClassName = (operation: string) => {
-        if (!draggedCard.isNotFromThisGroup) {
+    const getDraggedClassName = (operation: CategoryUpdateOperation) => {
+        if (draggedCard.isFromThisGroup) {
             return ''
         }
 
@@ -89,7 +102,7 @@ export const CardGroup = ({
     }
 
     const dropSections = React.useMemo(() => {
-        if (groupName === NO_CATEGORY_NAME || draggedCard.hasThisGroupCategory) {
+        if (NO_CATEGORY_REGEX.test(groupName) || draggedCard.hasThisGroupCategory) {
             return DRAG_AND_DROP_OVERWRITE_OPERATION_NAME
         }
 
@@ -154,13 +167,13 @@ export const CardGroup = ({
                 )}
                 {
                     <div className="flex-row category-drop-container">
-                        {(dropSections === 'add' || dropSections === 'both') && <div className={`flex-row flex-center category-drop-section ${dropSections === 'add' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName('add')}`}
+                        {(dropSections === 'add' || dropSections === 'both') && <div className={`flex-row flex-center ${dropSections === 'add' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName(DRAG_AND_DROP_ADD_OPERATION_NAME)}`}
                             ref={setAddNodeRef}>
-                            {draggedCard.isNotFromThisGroup && isOverAdd && <div className="category-drop-add-title flex-row"><Icon name={"add"} /></div>}
+                            {!draggedCard.isFromThisGroup && isOverAdd && <div className="category-drop-add-title flex-row"><Icon name={"add"} /></div>}
                         </div>}
-                        {(dropSections === 'overwrite' || dropSections === 'both') && <div className={`flex-row flex-center ${dropSections === 'overwrite' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName('overwrite')}`}
+                        {(dropSections === 'overwrite' || dropSections === 'both') && <div className={`flex-row flex-center ${dropSections === 'overwrite' ? 'category-drop-section-full-size' : 'category-drop-section'} ${getDraggedClassName(DRAG_AND_DROP_OVERWRITE_OPERATION_NAME)}`}
                             ref={setOverwriteNodeRef}>
-                            {draggedCard.isNotFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title flex-row"><Icon name={"flip"} /></div>}
+                            {!draggedCard.isFromThisGroup && isOverOverwrite && <div className="category-drop-overwrite-title flex-row"><Icon name={"flip"} /></div>}
                         </div>}
                     </div>
                 }

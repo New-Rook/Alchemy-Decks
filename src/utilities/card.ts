@@ -1,6 +1,6 @@
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_ORDER_PRIORITY, COLORLESS_ORDER_PRIORITY, LAND_ORDER_PRIORITY } from "../data/search";
-import { CardData, Color } from "../types";
-import { toUniqueArray } from "./general";
+import { CardData, Color, UserData } from "../types";
+import { addCurrencyToText, toUniqueArray } from "./general";
 
 export const getCardBaseData = (card: CardData) => {
     if (card.card_faces) {
@@ -35,7 +35,8 @@ export const getCardFrontImage = (card: CardData) => {
 }
 
 export const getCardColors = (card: CardData) => {
-    if (card.card_faces) {
+    if (isCardDoubleFaced(card) && card.card_faces) {
+        // Could use ! instead of checking card.card_faces again
         return toUniqueArray(card.card_faces.reduce<Color[]>((colors, cardFace) => [...colors, ...cardFace.colors], []))
     }
 
@@ -91,6 +92,22 @@ export const getCardSubTypes = (cardData: CardData) => {
 
     const cardTypes = cardTypeLine.trim().split(' ')
     return cardTypes
+}
+
+export const getCardPrice = (cardData: CardData, currency: UserData['settings']['currency'] = 'usd') => {
+    if (currency === 'eur') {
+        return cardData.prices.eur || cardData.prices.eur_foil
+    }
+
+    if (currency === 'usd') {
+        return cardData.prices.usd || cardData.prices.usd_foil
+    }
+
+    return cardData.prices.usd
+}
+
+export const getCardPriceWithCurrency = (cardData: CardData, currency: UserData['settings']['currency'] = 'usd') => {
+    return addCurrencyToText(getCardPrice(cardData, currency), currency)
 }
 
 export const getCardColorPriority = (cardData: CardData) => {
@@ -157,4 +174,20 @@ export const getCardDroppedFromOutside = async (e: React.DragEvent<HTMLDivElemen
     }
 
     return
+}
+
+export const getCardColorIdentityCombination = (cardData: CardData) => {
+    if (!cardData.color_identity) {
+        return ''
+    }
+
+    const cardColorIdentityCombination = cardData.color_identity.join('')
+
+    return COLOR_COMBINATIONS_MAP[cardColorIdentityCombination]
+        ? COLOR_COMBINATIONS_MAP[cardColorIdentityCombination]
+        : cardColorIdentityCombination
+}
+
+export const isCardDoubleFaced = (card: CardData) => {
+    return card.card_faces && !card.colors
 }

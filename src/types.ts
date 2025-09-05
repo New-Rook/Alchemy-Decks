@@ -48,6 +48,7 @@ export type DeckStats = {
   sideboard: BoardStats
   legal: boolean;
   legalityWarnings: Record<string, string>;
+  deckLegalityWarnings: string[];
 }
 
 export type DeckCard = {
@@ -68,7 +69,7 @@ export type DeckCard = {
 }
 
 export type Board = 'mainboard' | 'sideboard' | 'considering'
-export type BoardData = { name: string, icon: string }
+export type BoardData = { name: string, icon: string, dropIcon: string }
 export type DeckCards = Record<string, DeckCard>
 export type CardDictionary = Record<string, CardData>
 
@@ -119,6 +120,12 @@ export interface CardData extends BaseCardData {
   released_at: string
   set: string
   set_name: string
+  utility: UtilityCardData
+}
+
+export type UtilityCardData = {
+  searchName: string // Name with accents removed for searching
+  searchOracleText: string // Oracle text with accents removed
 }
 
 type Legality = 'legal' | 'restricted' | 'not_legal' | 'banned'
@@ -189,6 +196,7 @@ export type GroupByTypeMode = 'all-types' | 'only-last-type'
 export type ViewType = 'text' | 'grid' | 'stacked' | 'grid-stacked'
 
 export type CategoryUpdateOperation = 'add' | 'overwrite'
+export type BoardMoveOperation = 'all' | 'one'
 
 export type BoardCards = Record<string, number>
 

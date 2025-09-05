@@ -149,6 +149,7 @@ export const SEARCH_FILTER_OPERATION_DATA: Record<SearchFilterOperation, { label
     or: { label: 'Or' }
 }
 
+export const ALL_CARD_TYPES = ['Creature', 'Enchantment', 'Artifact']
 
 export const COLOR_COMBINATIONS_MAP: Record<string, string> = {
     "WU": "WU",

@@ -1,7 +1,7 @@
 import React from "react"
 import { TextInput } from "../../components/TextInput"
-import { Board, CardArtData, DeckCards, DeckStats } from "../../types"
-import { combineTextInputValidators, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
+import { Board, BoardMoveOperation, CardArtData, DeckCards, DeckStats } from "../../types"
+import { combineTextInputValidators, lengthLimitTextInputValidator, numbersLimitTextInputValidator, numbersOnlyTextInputValidator, omitFromPartialRecord, toUniqueArray } from "../../utilities/general"
 import { CardArtWindow } from "./CardArtWindow"
 import { useBooleanState } from "../../hooks/useBooleanState"
 import { IconButton } from "../../components/IconButton"
@@ -21,14 +21,13 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     const updateSelectedCardsRef = React.useRef<() => void>(null)
 
-    const moveSelectedCardsToBoard = (board: Board, moveMode: 'all' | 'one') => {
+    const moveSelectedCardsToBoard = (board: Board, moveMode: BoardMoveOperation) => {
         const newDeckCards = { ...deckCards }
         const newSelectedCards = { ...selectedCards }
 
         Object.keys(selectedCards).forEach((cardName) => {
             const currentBoard = selectedCards[cardName]
             const quantity = (newDeckCards[cardName].boards[currentBoard] ?? 0)
-            // If quantityToMove is non-zero, that many copies are moved, otherwise all copies are moved
             const quantityBeingMoved = moveMode === 'all' ? quantity : 1
             const newQuantity = quantity - quantityBeingMoved
             if (newQuantity === 0) {
@@ -153,8 +152,8 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
 
     return <div className="flex-row flex-gap flex-wrap align-end base-padding-vertical multi-select-bar">
         {/* <div className="flex-row flex-gap align-end"> */}
-        <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} />
-        <TextInput type={'search'} label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={combineTextInputValidators(numbersOnlyTextInputValidator, numbersLimitTextInputValidator(99))} />
+        <TextInput type={'search'} label={'Add category'} value={categoryUpdateText} onChangeText={setCategoryUpdateText} validator={lengthLimitTextInputValidator(30)} />
+        <TextInput type={'search'} label={'Quantity'} value={quantityUpdateText} onChangeText={setQuantityUpdateText} validator={numbersLimitTextInputValidator(99)} />
         {/* <button onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</button> */}
         <IconButton iconName={"check"} onClick={updateSelectedCards} disabled={!categoryUpdateText.trim() && !quantityUpdateText}>Update cards</IconButton>
         <IconButton iconName={"reset_shutter_speed"} onClick={removeSelectedCardsCategories}>Remove categories</IconButton>
@@ -167,11 +166,11 @@ export const MultiSelectBar = ({ deckCards, setDeckCards, selectedCards, setSele
             <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('mainboard', 'one')}>Move 1 copy to Main Deck</IconButton>
         </div>
         <div className="flex-row">
-            <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard', 'all')}>Move to Sideboard</IconButton>
+            <IconButton iconName={"move_down"} onClick={() => moveSelectedCardsToBoard('sideboard', 'all')}>Move all copies to Sideboard</IconButton>
             <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('sideboard', 'one')}>Move 1 copy to Sideboard</IconButton>
         </div>
         <div className="flex-row">
-            <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering', 'all')}>Move to Considering</IconButton>
+            <IconButton iconName={"indeterminate_question_box"} onClick={() => moveSelectedCardsToBoard('considering', 'all')}>Move all copies to Considering</IconButton>
             <IconButton iconName={"exposure_plus_1"} onClick={() => moveSelectedCardsToBoard('considering', 'one')}>Move 1 copy to Considering</IconButton>
         </div>
         <IconButton iconName={"close"} onClick={deselectAllCards}>Deselect cards</IconButton>

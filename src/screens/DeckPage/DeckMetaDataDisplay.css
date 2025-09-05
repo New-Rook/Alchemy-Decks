@@ -7,7 +7,7 @@
     position: relative;
     /* padding-block: calc(0.5 * var(--base-size));
     padding-inline: calc(0.5 * var(--base-size)); */
-    height: calc(40 * var(--base-size))
+    height: calc(45 * var(--base-size));
 }
 
 .deck-meta-data-text-container>p,
@@ -20,6 +20,7 @@
     width: min(calc(40 * var(--base-size)), 100%);
     margin-bottom: var(--base-size);
     padding-bottom: calc(0.5 * var(--base-size));
+    border-radius: var(--base-border-radius);
 }
 
 .deck-meta-data-background {

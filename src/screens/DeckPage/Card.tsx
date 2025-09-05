@@ -1,8 +1,8 @@
 import { Board, CategoryUpdateOperation, DeckCard, Format, ViewType } from "../../types"
 import { AppContext } from "../../context/AppContext"
-import { getCardFrontImage } from "../../utilities/card"
+import { getCardFrontImage, isCardDoubleFaced } from "../../utilities/card"
 import { useDraggable } from "@dnd-kit/core"
-import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, NO_CATEGORY_NAME } from "../../data/editor"
+import { CARD_GROUP_STACKED_OFFSET_STYLE, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, INFINITE_QUANTITY_REGEX, LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX, NO_CATEGORY_REGEX } from "../../data/editor"
 // import { CSS } from "@dnd-kit/utilities"
 import './Card.css'
 import React from "react"
@@ -22,7 +22,6 @@ type Props = {
     viewType: ViewType
     index: number
     format: Format
-    isCommander?: boolean
     showFullCard: (cardName: string) => void
 }
 
@@ -59,7 +58,7 @@ export const Card = ({
     cardName,
     deckCard,
     addDeckCardQuantity,
-    enableDragAndDrop,
+    // enableDragAndDrop,
     selected,
     selectCard,
     board,
@@ -67,13 +66,14 @@ export const Card = ({
     viewType,
     index,
     format,
-    isCommander,
     showFullCard
 }: Props) => {
     const { cardDictionary } = React.useContext(AppContext)
 
     const { attributes, listeners, setNodeRef, transform, isDragging, node, over } = useDraggable({
-        id: `${cardName}${DRAG_AND_DROP_ID_DELIMITER}${groupName}`, disabled: !enableDragAndDrop
+        id: `${board}${DRAG_AND_DROP_ID_DELIMITER}${groupName}${DRAG_AND_DROP_ID_DELIMITER}${cardName}`,
+        // disabled: !enableDragAndDrop,
+        data: { board, groupName, cardName }
     });
 
     const [flipped, setFlipped] = React.useState(false)
@@ -84,9 +84,13 @@ export const Card = ({
 
     const numberOfCopies = deckCard.boards[board]
 
-    const isCommanderAndSingleCopy = React.useMemo(() => {
+    const isCommanderFormatAndSingleCopy = React.useMemo(() => {
         return format === 'commander' && numberOfCopies === 1
     }, [format, numberOfCopies])
+
+    const isCommanderAndInfiniteQuantity = React.useMemo(() => {
+        return !!deckCard.commanderNumber && INFINITE_QUANTITY_REGEX.test(cardDictionary[cardName].oracle_text)
+    }, [deckCard, cardDictionary])
 
     React.useEffect(() => {
         if (isDragging) {
@@ -127,14 +131,22 @@ export const Card = ({
         return deckCard.print?.uris[0] ?? getCardFrontImage(cardDictionary[cardName]).normal
     }, [cardDictionary, cardName, flipped, deckCard])
 
+    const showLegalityWarning = React.useMemo(() => {
+        if (board === 'considering' && LEGALITY_WARNING_NUMBER_OF_COPIES_REGEX.test(legalityWarning)) {
+            return false
+        }
+
+        return !!legalityWarning
+    }, [board, legalityWarning])
+
     const cardClassName = React.useMemo(() => {
         return `deck-card 
             ${isDragging || isHoveringImage ? 'card-elevated' : ''} 
-            ${selected ? 'deck-card-selected' : legalityWarning
+            ${selected ? 'deck-card-selected' : showLegalityWarning
                 ? 'deck-card-warning' : ''
             } 
             preserve-3d`
-    }, [isDragging, isHoveringImage, legalityWarning, selected])
+    }, [isDragging, isHoveringImage, showLegalityWarning, selected])
 
     const expandedCardClassName = React.useMemo(() => {
         if (!isHoveringImage || isDragging) {
@@ -149,11 +161,12 @@ export const Card = ({
             return null
         }
 
-        if (over) {
-            const categoryDropIDSplit = over.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
-            const overCategoryName = categoryDropIDSplit[0]
-            const overCategoryOperation = groupName === NO_CATEGORY_NAME ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : categoryDropIDSplit[1]
-            if (overCategoryName !== groupName) {
+        if (over && over.data.current) {
+            const overCategoryName = over.data.current.groupName
+            const overCategoryOperation = NO_CATEGORY_REGEX.test(groupName) ? DRAG_AND_DROP_OVERWRITE_OPERATION_NAME : over.data.current.operation
+            const overBoard = over.data.current.board
+
+            if (overBoard === board && overCategoryName !== groupName) {
                 return {
                     category: overCategoryName,
                     operation: overCategoryOperation as CategoryUpdateOperation,
@@ -163,17 +176,17 @@ export const Card = ({
         }
 
         return null
-    }, [isDragging, over])
+    }, [isDragging, over, board, groupName, deckCard])
 
     const onHover = React.useCallback((isEntering: boolean) => {
         if ((viewType === 'stacked' || viewType === 'grid-stacked')) {
             showFullCard(isEntering ? cardName : '')
         }
-        if (isCommanderAndSingleCopy) {
+        if (isCommanderFormatAndSingleCopy) {
             setIsHoveringCard(isEntering)
         }
         setIsPendingHoveringState(isEntering)
-    }, [viewType, cardName, showFullCard, isCommanderAndSingleCopy])
+    }, [viewType, cardName, showFullCard, isCommanderFormatAndSingleCopy])
 
     return (
         <div onClick={() => selectCard(cardName, board)}
@@ -185,16 +198,16 @@ export const Card = ({
             onMouseLeave={() => onHover(false)}
             {...listeners} {...attributes}>
             {/* Top left */}
-            <div className={`deck-card-data-elevated ${cardDictionary[cardName].card_faces ? 'deck-flip-card-top-left-container' : 'deck-card-top-left-container'}`} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
+            {isCardDoubleFaced(cardDictionary[cardName]) && <div className={`deck-card-data-elevated deck-card-top-left-container`} onPointerDown={selected ? (e) => e.stopPropagation() : undefined}>
                 {cardDictionary[cardName].card_faces && <IconButton iconName="cached" className='card-flip-button' onClick={flipCard} onPointerDown={(e) => e.stopPropagation()} />}
-            </div>
+            </div>}
 
             {/* Main image + categories */}
             <div className='flex-row deck-card-image'>
                 {isDragging && <div className={`deck-card-categories ${deckCard.categories || dragData?.category ? 'base-padding' : ''} font-size-1-5 flex-row flex-gap flex-wrap ${windowHalvesPosition.right ? 'card-data-left' : 'card-data-right'}`}>{deckCard.categories?.map(category =>
                     <span key={category} className={`${dragData?.operation === 'overwrite' && category !== dragData.category ? 'text-danger' : ''}`}>{category}</span>
                 )}
-                    {(dragData?.operation === 'add' || !dragData?.containsCategory) && dragData?.category !== NO_CATEGORY_NAME && dragData?.category && <span className="deck-card-category-add">{dragData.category}</span>}
+                    {(dragData?.operation === 'add' || !dragData?.containsCategory) && !NO_CATEGORY_REGEX.test(dragData?.category) && dragData?.category && <span className="deck-card-category-add">{dragData.category}</span>}
                 </div>}
                 {viewType === 'text'
                     ? <label className="view-text-deck-card-name">{cardName}</label>
@@ -209,19 +222,19 @@ export const Card = ({
 
             {/* Expanded card */}
             <div className={`flex-column expanded-card ${viewType === 'text' ? 'view-text-expanded-card' : ''} ${expandedCardClassName}`}>
-                {isHoveringImage && !isDragging && (deckCard.categories || legalityWarning) && <div className={`deck-card-categories base-padding flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`}>
+                {isHoveringImage && !isDragging && (deckCard.categories || showLegalityWarning) && <div className={`deck-card-categories base-padding flex-column ${windowHalvesPosition.bottom ? 'card-data-top' : 'card-data-bottom'}`}>
                     {deckCard.categories && <div className="flex-row flex-gap flex-wrap">{deckCard.categories.map(category => <span key={category}>{category}</span>)}</div>}
-                    <div className="text-danger">{legalityWarning}</div>
+                    {showLegalityWarning && <div className="text-danger">{legalityWarning}</div>}
                 </div>}
                 <img src={imageSource} className={`deck-card-image`} draggable={false} />
             </div>
 
             {/* Top right */}
-            {((!isCommanderAndSingleCopy || isHoveringCard) && !isCommander) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+            {((!isCommanderFormatAndSingleCopy || isHoveringCard) && (!deckCard.commanderNumber || isCommanderAndInfiniteQuantity)) && <div className='deck-card-data-elevated card-count-container flex-column' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                 <div className='card-count'>{numberOfCopies}</div>
                 <div className='flex-row'>
-                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} />
-                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, board)} iconName={"add"} />
+                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, -1, board)} iconName={"remove"} disabled={isCommanderAndInfiniteQuantity && numberOfCopies === 1} />
+                    <IconButton size={'tiny'} onClick={() => addDeckCardQuantity(cardName, 1, board)} iconName={"add"} disabled={numberOfCopies === 99} />
                 </div>
             </div>}
         </div >

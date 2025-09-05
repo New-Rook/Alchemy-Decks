@@ -2,6 +2,7 @@ import React, { useContext } from "react"
 import { AppContext } from "../../context/AppContext"
 import { COMMANDER_PARTNER_REGEX, COMMANDER_PARTNER_WITH_REGEX, COMMANDER_CHOOSE_A_BACKGROUND_REGEX, COMMANDER_FRIENDS_FOREVER_REGEX, COMMANDER_DOCTORS_COMPANION_REGEX, COMMANDER_BACKGROUND_REGEX, COMMANDER_TIME_LORD_DOCTOR_REGEX, LEGENDARY_REGEX, CREATURE_REGEX, CAN_BE_YOUR_COMMANDER_REGEX } from "../../data/editor"
 import { DeckCard, Format } from "../../types"
+import { removeFromArray } from "../../utilities/general"
 
 export const useCommanders = (format: Format, commanders: string[], setDeckCards: React.Dispatch<React.SetStateAction<Record<string, DeckCard>>>) => {
     const { cardDictionary } = useContext(AppContext)
@@ -53,6 +54,10 @@ export const useCommanders = (format: Format, commanders: string[], setDeckCards
                 partnerCommanders = Object.keys(cardDictionary).filter(cardName =>
                     COMMANDER_DOCTORS_COMPANION_REGEX.test(cardDictionary[cardName].oracle_text)
                 )
+            }
+
+            if (partnerCommanders) {
+                removeFromArray(partnerCommanders, firstCommanderName)
             }
         }
 

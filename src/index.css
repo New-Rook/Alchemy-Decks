@@ -15,6 +15,7 @@
 
   --base-size: 1rem;
   --theme-color: rgb(78, 207, 78);
+  --theme-color-reduced-alpha: rgb(78 207 78 / 50%);
   --theme-color-secondary: rgb(54, 127, 68);
   --theme-color-tertiary: rgb(87, 153, 134);
   --theme-color-hover: #5edc6f;
@@ -35,7 +36,8 @@
   /* z-index */
   --deck-title-background-elevation: -1;
   --card-group-elevation: 100;
-  --deck-top-bar-elevation: calc(var(--card-group-elevation) + 1);
+  --board-drop-elevation: calc(var(--card-group-elevation) + 1);
+  --deck-top-bar-elevation: calc(var(--board-drop-elevation) + 1);
   --sticky-elevation: calc(var(--deck-top-bar-elevation) + 1);
   --deck-card-hover-elevation: 1;
   --deck-card-data-elevation: 1;
@@ -102,6 +104,10 @@ input[type='search'].input-small {
 
 input[type='search'].input-medium {
   width: calc(12 * var(--base-size))
+}
+
+input[type='search'].input-large {
+  width: calc(20 * var(--base-size))
 }
 
 .input-small {
@@ -184,6 +190,10 @@ textarea {
   display: flex;
   flex-direction: column;
 } */
+
+.small-padding {
+  padding: calc(0.2 * var(--base-size));
+}
 
 .no-padding.no-padding {
   padding: 0;
@@ -281,6 +291,10 @@ textarea {
   flex-wrap: wrap;
 }
 
+.board {
+  position: relative;
+}
+
 .board-view-grid {
   display: flex;
   flex-direction: row;
@@ -359,16 +373,6 @@ textarea {
 .deck-card-top-left-container {
   position: absolute;
   left: 8%;
-  top: 11%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.deck-flip-card-top-left-container {
-  position: absolute;
-  left: 12.5%;
   top: 11%;
   display: flex;
   justify-content: center;
@@ -558,7 +562,7 @@ textarea {
 
 .full-size {
   width: 100%;
-  height: 100%;
+  height: 100vh;
 }
 
 /* - Final styles - */
@@ -618,6 +622,10 @@ textarea {
 
 .base-offset-bottom {
   margin-bottom: var(--base-size);
+}
+
+.base-offset-top {
+  margin-top: var(--base-size);
 }
 
 .group-elevated {
@@ -735,6 +743,10 @@ textarea {
   }
 }
 
+.essential-board {
+  min-height: calc(2 * var(--card-size));
+}
+
 .modal {
   position: fixed;
   z-index: var(--modal-elevation);
@@ -752,6 +764,14 @@ textarea {
 
 .pointer-events-none {
   pointer-events: none;
+}
+
+.board-drop-container.board-drop-container {
+  z-index: var(--board-drop-elevation);
+}
+
+.board-drag-container {
+  z-index: calc(var(--board-drop-elevation) + 1)
 }
 
 .dropdown {
@@ -788,6 +808,10 @@ textarea {
   /* align-self: stretch; */
 }
 
+.dropdown-option-with-image {
+  height: calc(5 * var(--base-size));
+}
+
 .dropdown-content> :last-child {
   border-radius: 0 0 var(--border-radius-small) var(--border-radius-small);
 }
@@ -812,10 +836,9 @@ textarea {
   background-color: var(--danger-color);
 }
 
-.base-width-4 {
-  width: calc(4 * var(--base-size));
+.base-width-3 {
+  width: calc(3 * var(--base-size));
 }
-
 
 /* -- Base tags -- */
 
@@ -830,4 +853,12 @@ option:hover {
 
 .position-relative {
   position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
+.text-align-center {
+  text-align: center;
 }

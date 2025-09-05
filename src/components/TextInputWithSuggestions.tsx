@@ -6,15 +6,45 @@ import './Menu.css'
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
     onChangeText: (text: string) => void
+    onSelectOption?: (text: string) => void
     validator?: (text: string) => boolean
     suggestions: string[]
+    suggestionElementMap?: (suggestion: string) => React.ReactNode
+    refocusOnSelectSuggestion?: boolean
+    disableSuggestionFiltering?: boolean
+    containerProps?: React.HTMLAttributes<HTMLDivElement>
 }
 
-export const TextInputWithSuggestions = ({ label, onChangeText, validator, suggestions, value, ...props }: Props) => {
+export const TextInputWithSuggestions = ({
+    label,
+    onChangeText,
+    onSelectOption,
+    validator,
+    suggestions,
+    suggestionElementMap,
+    refocusOnSelectSuggestion,
+    disableSuggestionFiltering,
+    containerProps,
+    ...props
+}: Props) => {
     const [currentSuggestions, setCurrentSuggestions] = React.useState<string[]>(suggestions)
     const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] = React.useState<number>()
     const [isFocused, setIsFocused] = React.useState(false)
     const focusedRef = React.useRef(false)
+    const ref = React.useRef<HTMLInputElement>(null)
+    const [height, setHeight] = React.useState(0)
+
+    React.useEffect(() => {
+        if (!ref.current) {
+            return
+        }
+
+        setHeight(ref.current.getBoundingClientRect().height)
+    }, [ref.current])
+
+    React.useEffect(() => {
+        setCurrentSuggestions(suggestions)
+    }, [suggestions])
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const text = e.target.value
@@ -24,20 +54,35 @@ export const TextInputWithSuggestions = ({ label, onChangeText, validator, sugge
         }
 
         onChangeText(text)
-        setCurrentSuggestions(suggestions.filter(suggestion => stringLowerCaseIncludes(suggestion, text)))
+        if (!disableSuggestionFiltering) {
+            setCurrentSuggestions(suggestions.filter(suggestion => stringLowerCaseIncludes(suggestion, text)))
+        }
         setHighlightedSuggestionIndex(0)
     }
 
     const selectOption = React.useCallback((option: string) => {
-        onChangeText(option)
+        if (onSelectOption) {
+            onSelectOption(option)
+        }
+        else {
+            onChangeText(option)
+        }
         setCurrentSuggestions([])
         setHighlightedSuggestionIndex(undefined)
-    }, [onChangeText])
+
+        if (refocusOnSelectSuggestion) {
+            ref.current?.focus()
+        }
+    }, [onSelectOption, onChangeText, refocusOnSelectSuggestion])
 
     React.useEffect(() => {
         const closeMenu = () => {
             if (!focusedRef.current) {
-                setTimeout(() => setIsFocused(false), 50)
+                setTimeout(() => {
+                    if (!focusedRef.current) {
+                        setIsFocused(false)
+                    }
+                }, 50)
             }
         }
 
@@ -88,7 +133,7 @@ export const TextInputWithSuggestions = ({ label, onChangeText, validator, sugge
 
     React.useEffect(() => {
         const selectSuggestion = (event: KeyboardEvent) => {
-            if (!highlightedSuggestionIndex || event.key !== 'Enter' || !focusedRef.current
+            if (highlightedSuggestionIndex === undefined || event.key !== 'Enter' || !focusedRef.current
                 || !currentSuggestions || currentSuggestions.length === 0) {
                 return
             }
@@ -109,25 +154,26 @@ export const TextInputWithSuggestions = ({ label, onChangeText, validator, sugge
         focusedRef.current = false
     }
 
-    return <div>
+    return <div {...containerProps} className={`flex-column position-relative ${containerProps?.className ?? ''}`}>
         {label}
         <input
             {...props}
+            ref={ref}
             type={'search'}
             size={10}
-            value={value}
             onChange={onChange}
             onFocus={onFocus}
             onBlur={onBlur}
         />
-        <div className="menu-content dropdown-content">
+        <div className="menu-content full-width" style={{ top: height }}>
             {isFocused && currentSuggestions.map((suggestion, index) =>
                 <button
                     key={suggestion}
                     onMouseEnter={() => setHighlightedSuggestionIndex(index)}
                     onMouseLeave={() => setHighlightedSuggestionIndex(undefined)}
-                    className={`dropdown-option button-no-hover ${index === currentSuggestions.length - 1 ? 'border-rounded-bottom' : ''} ${index === highlightedSuggestionIndex ? 'suggestion-highlighted' : ''}`}
+                    className={`dropdown-option button-no-hover ${!!suggestionElementMap ? 'flex-row flex-gap align-center dropdown-option-with-image base-padding' : ''} ${index === currentSuggestions.length - 1 ? 'border-rounded-bottom' : ''} ${index === highlightedSuggestionIndex ? 'suggestion-highlighted' : ''}`}
                     onClick={() => selectOption(suggestion)}>
+                    {suggestionElementMap && suggestionElementMap(suggestion)}
                     {suggestion}
                 </button>
             )}

@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import React from 'react'
 import { AppContext } from '../../context/AppContext'
 import { useBooleanState } from '../../hooks/useBooleanState'
-import { Board, BoardData, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, GroupByTypeMode, SortType, ViewType } from '../../types'
+import { Board, BoardData, BoardMoveOperation, CardData, CardGroupData, Color, CurrencyType, DeckCard, DeckMetaData, GroupBy, GroupByColorMode, GroupByTypeMode, SortType, ViewType } from '../../types'
 import { getCardAllCardName, getCardDroppedFromOutside } from '../../utilities/card'
 import { SearchWindow } from '../SearchWindow'
 import { DeckPageTopBar } from './DeckPageTopBar'
@@ -11,12 +11,12 @@ import { CardGroup } from './CardGroup'
 import { groupCardsByCategory, groupCardsByColor, groupCardsByManaValue, groupCardsBySubType, groupCardsByType } from '../../utilities/groupers'
 import { Dropdown } from '../../components/Dropdown'
 import { COLOR_COMBINATION_ORDER_PRIORITY, COLOR_COMBINATIONS_MAP, COLOR_DATA, COLOR_ORDER_PRIORITY, COLORLESS_DATA, GROUP_BY_COLOR_MODES, GROUP_BY_TYPE_MODES, GROUP_TYPES, searchRegex, VIEW_TYPES } from '../../data/search'
-import { TEST_DECK_CARDS } from '../../data/dev'
+import { TEST_DECK_CARDS, TEST_DECK_METADATA } from '../../data/dev'
 import { Checkbox } from '../../components/Checkbox'
 import { CARD_SORTERS } from '../../utilities/sorters'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { BOARD_DATA, COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_NAME, NO_GROUP_NAME } from '../../data/editor'
-import { omitFromPartialRecord, omitFromRecord, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
+import { BOARD_DATA, COMMANDER_GROUP_NAME, DRAG_AND_DROP_ADD_OPERATION_NAME, DRAG_AND_DROP_ID_DELIMITER, DRAG_AND_DROP_MOVE_ALL_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_MOVE_ONE_TO_BOARD_OPERATION_NAME, DRAG_AND_DROP_OVERWRITE_OPERATION_NAME, MANA_VALUE_SYMBOLS, MULTI_COMMANDER_GROUP_NAME, NO_CATEGORY_REGEX, NO_GROUP_NAME } from '../../data/editor'
+import { omitFromPartialRecord, omitFromRecord, removeAccentsFromString, removeFromArray, stringStartsAndEndsWith, toUniqueArray, typedKeys } from '../../utilities/general'
 import { useDeckScroll } from './useDeckScroll'
 import { FloatingScrollMenu } from './FloatingScrollMenu'
 import { MultiSelectBar } from './MultiSelectBar'
@@ -29,13 +29,12 @@ import { DeckBoard } from './DeckBoard'
 export const DeckPage = () => {
     const { cardDictionary, availableSortTypes } = useContext(AppContext)
 
-    const [currencyType, setCurrencyType] = React.useState<CurrencyType>('eur')
-    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>({ name: 'Riku of two reflections, big spells and big ramp)', description: 'This is a description test', format: 'standard', visibility: 'private' })
+    const [deckMetaData, setDeckMetaData] = React.useState<DeckMetaData>(TEST_DECK_METADATA)
 
     const {
         objectRecord: deckCards,
         setObjectRecord: setDeckCards,
-        // updateObject: addDeckCard,
+        // updateObject: setDeckCard,
         updateObjectProperty: updateDeckCard,
         deleteObject: deleteDeckCard,
         deleteObjectProperty: deleteDeckCardProperty
@@ -94,6 +93,10 @@ export const DeckPage = () => {
     } = useCommanders(deckMetaData.format, commanders, setDeckCards)
 
     const commanderColorIdentity = React.useMemo(() => {
+        if (commanders.length === 0) {
+            return null
+        }
+
         const colorCombination = commanders.reduce((colorIdentity, commander) => {
             return colorIdentity += cardDictionary[commander].color_identity.join('')
         }, '')
@@ -106,6 +109,20 @@ export const DeckPage = () => {
     }, [commanders])
 
     React.useEffect(() => {
+        if (deckMetaData.format !== 'commander' && commanders.length > 0) {
+            setDeckCards((prev) => {
+                const newDeckCards = { ...prev }
+
+                commanders.forEach(commander => {
+                    delete newDeckCards[commander]
+                })
+
+                return newDeckCards
+            })
+        }
+    }, [deckMetaData.format, commanders, setDeckCards])
+
+    React.useEffect(() => {
         if (!searchWindowVisible) {
             setCardSearchTerm('')
         }
@@ -116,6 +133,8 @@ export const DeckPage = () => {
         deckCards,
         mainboard,
         sideboard,
+        commanders,
+        commanderColorIdentity,
         groupByColorMode,
         groupByTypeMode
     })
@@ -124,6 +143,10 @@ export const DeckPage = () => {
         const newQuantity = Math.max((deckCards[cardName]?.boards[board] ?? 0) + quantity, 0)
 
         if (newQuantity === 0) {
+            if (selectedCards[cardName] === board) {
+                setSelectedCards(omitFromRecord(selectedCards, cardName))
+            }
+
             if (Object.keys(deckCards[cardName].boards).length === 1) {
                 deleteDeckCard(cardName)
                 return
@@ -134,7 +157,7 @@ export const DeckPage = () => {
         else {
             updateDeckCard(cardName, 'boards', { ...deckCards[cardName]?.boards, [board]: newQuantity })
         }
-    }, [deckCards, updateDeckCard, deleteDeckCard])
+    }, [deckCards, updateDeckCard, deleteDeckCard, selectedCards])
 
     const pickCommander = React.useCallback((cardName: string) => {
         if (commanderPickIndex === 0) {
@@ -177,17 +200,17 @@ export const DeckPage = () => {
         //     console.log('error: no results')
         // }
 
-        const searchTerms = cardSearchTerm.match(searchRegex)
+        const searchTerms = removeAccentsFromString(cardSearchTerm).match(searchRegex)
 
         if (!searchTerms) {
             return
         }
 
         const searchResults = legalCards.filter(card => {
-            const cardNames = getCardAllCardName(card).toLocaleLowerCase()
             return searchTerms.every(text => {
-                const regex = new RegExp(stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase())
-                return regex.test(cardNames)
+                const term = stringStartsAndEndsWith(text, '"') ? text.slice(1, -1).toLocaleLowerCase() : text.toLocaleLowerCase()
+                const regex = new RegExp(term)
+                return regex.test(card.utility.searchName)
             })
         })
 
@@ -219,7 +242,15 @@ export const DeckPage = () => {
         const cardData = await getCardDroppedFromOutside(e)
 
         if (cardData) {
-            addDeckCardQuantity(cardData.name, 1, board)
+            if (cardDictionary[cardData.name] &&
+                (cardDictionary[cardData.name].legalities[deckMetaData.format] === 'legal'
+                    || cardDictionary[cardData.name].legalities[deckMetaData.format] === 'restricted'
+                )
+            ) {
+                addDeckCardQuantity(cardData.name, 1, board)
+            } else {
+                // Show message saying card not legal in format
+            }
         }
     }
 
@@ -234,7 +265,7 @@ export const DeckPage = () => {
 
         switch (groupBy) {
             case 'category':
-                groups = groupCardsByCategory(deckCards, boardCards)
+                groups = groupCardsByCategory(deckCards, boardCards, cardDictionary)
                 break;
             case 'color':
                 groups = groupCardsByColor(boardCards, cardDictionary, groupByColorMode)
@@ -251,7 +282,7 @@ export const DeckPage = () => {
             case 'none':
                 groups = [{
                     name: NO_GROUP_NAME,
-                    cards: Object.keys(boardCards)
+                    cards: boardCards
                 }]
                 break;
         }
@@ -304,33 +335,73 @@ export const DeckPage = () => {
         return groupName
     }, [groupBy, getGroupColorLabel])
 
-    const commanderGroupLabel = React.useMemo(() => {
+    const commanderColorIdentityLabel = React.useMemo(() => {
+        if (commanderColorIdentity === null) {
+            return ''
+        }
+
         return getGroupColorLabel(commanderColorIdentity)
     }, [commanderColorIdentity, getGroupColorLabel])
 
+    const moveCardBoard = React.useCallback((cardName: string, fromBoard: Board, toBoard: Board, moveMode: BoardMoveOperation) => {
+        const newCardBoards = { ...deckCards[cardName].boards }
+
+        updateDeckCard(cardName, 'boards', newCardBoards)
+
+        const quantity = (newCardBoards[fromBoard] ?? 0)
+        const quantityBeingMoved = moveMode === 'all' ? quantity : 1
+        const newQuantity = quantity - quantityBeingMoved
+        if (newQuantity === 0) {
+            delete newCardBoards[fromBoard]
+        } else {
+            newCardBoards[fromBoard] = newQuantity
+        }
+        newCardBoards[toBoard] = (newCardBoards[toBoard] ?? 0) + (quantityBeingMoved ?? 0)
+    }, [deckCards, updateDeckCard])
+
     const handleCardDragEnd = (event: DragEndEvent) => {
-        if (groupBy === 'category' && event.active.id && event.over?.id) {
-            const cardDragIDSplit = event.active.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
-            const cardName = cardDragIDSplit[0]
-            const cardCurrentCategory = cardDragIDSplit[1]
-            const categoryDropIDSplit = event.over.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
-            const droppedCategoryName = categoryDropIDSplit[0]
-            const droppedCategoryOperation = categoryDropIDSplit[1]
-            if (cardName && cardCurrentCategory !== droppedCategoryName) {
-                console.log('category update', droppedCategoryOperation, [cardName, droppedCategoryName])
-                if (droppedCategoryName === NO_CATEGORY_NAME) {
+        if (event.active.data.current && event.over?.data.current) {
+            // const cardDragIDSplit = event.active.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
+            const cardName = event.active.data.current.cardName
+            const cardCurrentCategory = event.active.data.current.groupName
+            const cardCurrentBoard = event.active.data.current.board
+            // const categoryDropIDSplit = event.over.id.toString().split(DRAG_AND_DROP_ID_DELIMITER)
+            const droppedCategoryName = event.over.data.current.groupName
+            const droppedOperation = event.over.data.current.operation
+            const droppedBoard = event.over.data.current.board
+
+            if (!cardName) {
+                return
+            }
+
+            // Board move
+            if (!commanders.includes(cardName) && !droppedCategoryName && droppedBoard !== cardCurrentBoard) {
+                moveCardBoard(cardName, cardCurrentBoard, droppedBoard, droppedOperation)
+            }
+            // Category move
+            if (droppedCategoryName && droppedBoard === cardCurrentBoard && cardCurrentCategory !== droppedCategoryName) {
+                if (NO_CATEGORY_REGEX.test(droppedCategoryName)) {
                     deleteDeckCardProperty(cardName, 'categories')
                 }
-                else if (droppedCategoryOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
+                else if (droppedOperation === DRAG_AND_DROP_ADD_OPERATION_NAME && !deckCards[cardName].categories?.includes(droppedCategoryName)) {
                     updateDeckCard(cardName, 'categories', [...(deckCards[cardName].categories ?? []), droppedCategoryName])
                 }
-                else if (droppedCategoryOperation === DRAG_AND_DROP_OVERWRITE_OPERATION_NAME) {
+                else if (droppedOperation === DRAG_AND_DROP_OVERWRITE_OPERATION_NAME) {
                     updateDeckCard(cardName, 'categories', [droppedCategoryName])
                 }
             }
-            // console.log([event.active.id, event.over?.id])
         }
     }
+
+    // const moveCardBoard = (cardName: string, fromBoard: Board, toBoard: Board) => {
+    //     const newCardBoards = { ...deckCards[cardName].boards }
+
+    //     const quantity = newCardBoards[fromBoard]
+    //     delete newCardBoards[fromBoard]
+    //     newCardBoards[toBoard] = (newCardBoards[toBoard] ?? 0) + (quantity ?? 0)
+
+    //     updateDeckCard(cardName, 'boards', newCardBoards)
+    // }
 
     const selectCard = React.useCallback((cardName: string, board: Board) => {
         setSelectedCards((prevCards) => {
@@ -340,6 +411,10 @@ export const DeckPage = () => {
             return { ...prevCards, [cardName]: board }
         })
     }, [])
+
+    const isEssentialBoard = React.useCallback((board: Board) => {
+        return board === 'mainboard' || (board === 'sideboard' && deckMetaData.format !== 'commander')
+    }, [deckMetaData.format])
 
     return (
         <div className='layout'>
@@ -360,7 +435,7 @@ export const DeckPage = () => {
                 setPinned={setTopBarPinned}
             />
             <div className='flex-row flex-gap flex-end align-center flex-wrap base-offset-bottom deck-top-bar-elevated'>
-                {deckMetaData.format === 'commander' && <Checkbox containerProps={{ className: 'flex-item-left' }} label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
+                {deckMetaData.format === 'commander' && commanders.length > 0 && <Checkbox containerProps={{ className: 'flex-item-left' }} label={`Include ${commanders.length > 1 ? MULTI_COMMANDER_GROUP_NAME : COMMANDER_GROUP_NAME} in other groups`} checked={includeCommandersInOtherGroups} onCheck={setIncludeCommandersInOtherGroups} />}
                 <Dropdown label={'View'} options={VIEW_TYPES} value={viewType} onSelect={setViewType} />
                 <Dropdown label={'Group by'} options={GROUP_TYPES} value={groupBy} onSelect={setGroupBy} />
                 {groupBy === 'color' && <Dropdown label={'Group mode'} options={GROUP_BY_COLOR_MODES} value={groupByColorMode} onSelect={setGroupByColorMode} size={'large'} />}
@@ -387,44 +462,51 @@ export const DeckPage = () => {
 
             <DndContext sensors={dragSensors} onDragEnd={handleCardDragEnd}>
                 <div className='deck'>
-                    {typedKeys(boardGroups).filter(board => boardGroups[board].length > 0).map(board =>
-                        <DeckBoard board={board} defaultExpanded={true} titleChildren={BOARD_DATA[board].name} titleProps={{ className: 'button-no-hover' }}>
-                            <div key={board} ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}>
-                                {board === 'mainboard' && deckMetaData.format === 'commander' &&
-                                    <CommanderCardGroup
-                                        commanders={commanders}
-                                        deckCards={deckCards}
-                                        addDeckCardQuantity={addDeckCardQuantity}
-                                        enableDragAndDrop={groupBy === 'category'}
-                                        selectedCards={selectedCards}
-                                        selectCard={selectCard}
-                                        board={board}
-                                        legalityWarnings={deckStats.legalityWarnings}
-                                        openCommanderPickModal={openCommanderPickModal}
-                                        secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
-                                        removeSecondCommander={removeSecondCommander}
-                                        viewType={viewType}
-                                        colorIdentityLabel={commanderGroupLabel}
-                                    />
-                                }
-                                {boardGroups[board].map(group =>
-                                    <CardGroup
-                                        key={group.name}
-                                        groupName={group.name}
-                                        groupLabel={getGroupLabel(group.name)}
-                                        cardNames={group.cards}
-                                        deckCards={deckCards}
-                                        addDeckCardQuantity={addDeckCardQuantity}
-                                        enableDragAndDrop={groupBy === 'category'}
-                                        selectedCards={selectedCards}
-                                        selectCard={selectCard}
-                                        board={board}
-                                        legalityWarnings={deckStats.legalityWarnings}
-                                        viewType={viewType}
-                                        format={deckMetaData.format}
-                                    />
-                                )}
-                            </div>
+                    {typedKeys(boardGroups).filter(board => isEssentialBoard(board) || boardGroups[board].length > 0).map(board =>
+                        <DeckBoard
+                            key={board}
+                            board={board}
+                            isEssentialBoard={isEssentialBoard(board)}
+                            handleCardDropFromOutside={handleCardDropFromOutside}
+                            ref={boardRefs[board]}
+                            viewType={viewType}>
+                            {/* <div ref={boardRefs[board]} className={boardStyleMap[viewType]} onDrop={(e) => handleCardDropFromOutside(e, board)} onDragOver={e => e.preventDefault()}> */}
+                            {/* <div ref={boardRefs[board]} > */}
+                            {board === 'mainboard' && deckMetaData.format === 'commander' &&
+                                <CommanderCardGroup
+                                    commanders={commanders}
+                                    deckCards={deckCards}
+                                    addDeckCardQuantity={addDeckCardQuantity}
+                                    enableDragAndDrop={groupBy === 'category'}
+                                    selectedCards={selectedCards}
+                                    selectCard={selectCard}
+                                    board={board}
+                                    legalityWarnings={deckStats.legalityWarnings}
+                                    openCommanderPickModal={openCommanderPickModal}
+                                    secondCommanderPickAvailable={!!availableCommanders.partnerCommanders}
+                                    removeSecondCommander={removeSecondCommander}
+                                    viewType={viewType}
+                                    colorIdentityLabel={commanderColorIdentityLabel}
+                                />
+                            }
+                            {boardGroups[board].map(group =>
+                                <CardGroup
+                                    key={group.name}
+                                    groupName={group.name}
+                                    groupLabel={getGroupLabel(group.name)}
+                                    cardNames={group.cards}
+                                    deckCards={deckCards}
+                                    addDeckCardQuantity={addDeckCardQuantity}
+                                    enableDragAndDrop={groupBy === 'category' && !NO_CATEGORY_REGEX.test(group.name)}
+                                    selectedCards={selectedCards}
+                                    selectCard={selectCard}
+                                    board={board}
+                                    legalityWarnings={deckStats.legalityWarnings}
+                                    viewType={viewType}
+                                    format={deckMetaData.format}
+                                />
+                            )}
+                            {/* </div> */}
                         </DeckBoard>
                     )}
                 </div>
@@ -447,9 +529,3 @@ export const DeckPage = () => {
     )
 }
 
-const boardStyleMap: Record<ViewType, string> = {
-    text: 'board-view-stacked',
-    grid: 'board-view-grid',
-    stacked: 'board-view-stacked',
-    'grid-stacked': 'board-view-grid'
-}

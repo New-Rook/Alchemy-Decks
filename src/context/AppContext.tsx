@@ -2,7 +2,8 @@ import React, { createContext, useContext } from "react";
 import { CardData, CardDictionary, LabelledValue, SortType } from "../types";
 import { GUEST_SORT_TYPES, SORT_TYPES } from "../data/search";
 import { UserContext } from "./UserContext";
-import { omitFromArray } from "../utilities/general";
+import { omitFromArray, removeAccentsFromString } from "../utilities/general";
+import { getCardAllCardName, getCardAllOracleText } from "../utilities/card";
 
 type AppContextType = {
     // currentDeckID: string
@@ -36,8 +37,6 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
             const downloadRequest = await fetch(result.download_uri)
             const cardData: CardData[] = await downloadRequest.json()
 
-            console.log('Fetched cards data')
-
             const cardDict = cardData.reduce<CardDictionary>((dict, card) => {
                 if (Object.values(card.legalities).every(legality => legality === 'not_legal')) {
                     return dict
@@ -59,7 +58,13 @@ export const AppContextProvider = ({ children }: React.PropsWithChildren) => {
                 //     card.color_identity.sort((colorA, colorB) => COLOR_ORDER_PRIORITY[colorA] - COLOR_ORDER_PRIORITY[colorB])
                 // }
 
-                dict[card.name] = card
+                dict[card.name] = {
+                    ...card,
+                    utility: {
+                        searchName: removeAccentsFromString(getCardAllCardName(card)).toLocaleLowerCase(),
+                        searchOracleText: removeAccentsFromString(getCardAllOracleText(card)).toLocaleLowerCase()
+                    }
+                }
                 return dict
             }, {})
 

@@ -32,10 +32,8 @@ export const AuthContextProvider = ({ children }: React.PropsWithChildren) => {
         const unsubscribeObserver = onAuthStateChanged(auth, (userData) => {
             if (!userData) {
                 setAuthStatus('guest')
-                console.log('signed out')
             } else {
                 setAuthStatus('authenticated')
-                console.log('signed in')
             }
             setUser(userData)
         })
